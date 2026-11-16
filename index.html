@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>Test333</title>
+<style>
+  :root{color-scheme:light only}
+  html,body{margin:0;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+  body{
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:#f6f7f9;color:#1d2330;
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;
+    padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);box-sizing:border-box;text-align:center
+  }
+  .card{background:#fff;border-radius:18px;padding:32px 24px;box-shadow:0 4px 18px rgba(0,0,0,.06);max-width:360px;width:100%}
+  h1{margin:0 0 8px;font-size:24px}
+  p{margin:0 0 20px;color:#5b6475;line-height:1.5}
+  button{min-height:48px;padding:0 28px;border:0;border-radius:12px;background:#2f6fed;color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+  button:active{transform:scale(.97)}
+  #count{display:block;margin-top:16px;font-size:14px;color:#5b6475}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Test333 is live ✅</h1>
+    <p>Deployed from GitHub to Cloudflare Pages. Every push to <b>main</b> updates this page automatically.</p>
+    <button id="tap">Tap me</button>
+    <span id="count">Taps: 0</span>
+  </div>
+<script>
+  ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+  document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
+  let n=0;const c=document.getElementById('count');
+  document.getElementById('tap').addEventListener('click',()=>{c.textContent='Taps: '+(++n);});
+</script>
+</body>
+</html>
