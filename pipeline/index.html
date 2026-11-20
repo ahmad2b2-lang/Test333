@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#ffffff">
+<title>Pipeline Progress</title>
+<style>
+:root{color-scheme:light only;--bg:#F6F5F1;--card:#fff;--line:#E4E2DA;--tx:#1F1E1C;--tx2:#5F5E5A;--tx3:#888780;--acc:#0F6E56;--acc2:#1D9E75;--acc-bg:#E1F5EE;--red:#A32D2D;--red-bg:#FCEBEB;--r:12px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;min-height:100dvh}
+input,textarea,select{font:inherit;font-size:16px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+button{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px}
+header .ttl{font-weight:600;font-size:17px;flex:1;min-width:0}
+header .ttl small{display:block;font-weight:400;font-size:12px;color:var(--tx3)}
+.lnbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:36px}
+main{max-width:560px;margin:0 auto;padding:14px 14px calc(96px + env(safe-area-inset-bottom))}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.h{font-weight:600;font-size:16px}
+.sub{color:var(--tx2);font-size:13px}
+.muted{color:var(--tx3);font-size:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.mc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mc p{margin:0;font-size:12px;color:var(--tx2)}
+.mc div{font-size:20px;font-weight:600}
+.mc span{font-size:12px;color:var(--tx2);font-weight:400}
+.lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--tx2);margin:2px 0 6px}
+.lg span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block;flex:none}
+svg.ov{display:block;width:100%;height:auto}
+.btn{border:1px solid #CFCDC4;background:#fff;border-radius:10px;padding:10px 14px;min-height:44px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.btn.dng{color:var(--red);border-color:#F09595}
+.btn.full{width:100%}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.icon-btn{border:none;background:transparent;width:44px;height:44px;border-radius:10px;font-size:22px;color:var(--tx2);cursor:pointer;flex:none}
+label{display:block;font-size:13px;color:var(--tx2);margin-top:10px}
+label input,label select,label textarea{display:block;width:100%;margin-top:4px;border:1px solid #CFCDC4;border-radius:10px;padding:10px 12px;background:#fff;color:var(--tx);min-height:44px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.err{color:var(--red);font-size:13px;margin-top:6px;min-height:0}
+.rowb{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.list{margin-top:10px;border-top:1px solid var(--line)}
+.it{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px}
+.it .m{flex:1;min-width:0}
+.it .t{font-weight:600;font-size:14px}
+.it .d{font-size:12px;color:var(--tx2)}
+.it.hi{background:#FFF8E6}
+.it.fl .t{color:var(--red)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 8px;border-radius:999px;background:#F1EFE8;color:var(--tx2);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.flag{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.flag:first-of-type{border-top:none}
+.num{width:24px;height:24px;border-radius:50%;background:#FAECE7;border:1.5px solid #D85A30;color:#712B13;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.warn{background:var(--red-bg);color:var(--red);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px}
+.ok{background:var(--acc-bg);color:#085041;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--line);display:none;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs.on{display:flex}
+nav.tabs button{flex:1;border:none;background:none;padding:8px 0 10px;font-size:12px;color:var(--tx3);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px;cursor:pointer}
+nav.tabs button.on{color:var(--acc);font-weight:600}
+nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dlgw{position:fixed;inset:0;z-index:20;background:rgba(30,30,28,.35);display:none;align-items:flex-end;justify-content:center}
+.dlgw.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:560px;max-height:88dvh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 4px;font-size:18px}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1F1E1C;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30;display:none;max-width:90%}
+.toast.on{display:block}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.lnrow{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px}
+.lnrow.cur{font-weight:600;color:var(--acc)}
+.center{text-align:center}
+.save{font-size:12px;color:var(--tx3)}
+body.viewer .edit-only{display:none!important}
+body:not(.viewer) .view-only{display:none!important}
+.mode{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;min-height:36px;white-space:nowrap;cursor:pointer}
+body:not(.viewer) .mode{background:var(--acc-bg);border-color:#9FE1CB;color:#085041;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <div class="ttl">Pipeline Progress<small id="hd-sub"></small></div>
+  <button class="lnbtn" id="hd-line" data-act="lines" style="display:none"></button>
+  <button class="mode" id="hd-mode" data-act="mode"></button>
+</header>
+
+<main>
+  <section class="view" id="v-loading"><div class="card center sub">Loading…</div></section>
+
+  <section class="view" id="v-empty">
+    <div class="card">
+      <div class="h">Start your first pipeline</div>
+      <div class="sub" style="margin-top:4px">Load a sample 20 km line to try the app, or start an empty line and build the pipe book yourself.</div>
+      <div class="btns edit-only"><button class="btn pri" data-act="new-sample">Load sample 20 km line</button><button class="btn" data-act="new-empty">Start empty line</button></div>
+      <div class="ok view-only">Switch to Editor mode (top right) to create one.</div>
+    </div>
+  </section>
+
+  <section class="view" id="v-overview">
+    <div class="grid2" id="ov-metrics"></div>
+    <div class="card" style="padding:12px 10px 8px">
+      <div class="lg" id="ov-legend"></div>
+      <svg class="ov" id="ov-svg" viewBox="0 48 380 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Whole pipeline, coloured by stage"></svg>
+      <div class="muted center" style="margin-top:2px">Tap anywhere on the line to open that stretch</div>
+    </div>
+    <div id="ov-detail"></div>
+    <div class="card" id="ov-flags"></div>
+  </section>
+
+  <section class="view" id="v-update">
+    <div class="card">
+      <div class="h">Record progress</div>
+      <div class="sub">Mark a stage done for a stretch of the line. Use a KP like 8+250, or a tag like J-0412.</div>
+      <label>Stage<select id="up-stage"></select></label>
+      <div class="two"><label>From KP or tag<input id="up-from" placeholder="8+250" autocomplete="off"></label><label>To KP or tag<input id="up-to" placeholder="8+750" autocomplete="off"></label></div>
+      <div class="two"><label>Date<input id="up-date" type="date"></label><label>Report no.<input id="up-ref" placeholder="DPR-125" autocomplete="off"></label></div>
+      <label>Note<input id="up-note" placeholder="Optional" autocomplete="off"></label>
+      <div id="up-prev"></div>
+      <button class="btn pri full" style="margin-top:12px" id="up-save">Save progress</button>
+    </div>
+  </section>
+
+  <section class="view" id="v-builder">
+    <div class="card">
+      <div class="rowb"><div class="h">Pipe book</div><span class="save" id="b-save"></span></div>
+      <div class="sub" id="b-sum"></div>
+      <div class="chips" id="b-types"></div>
+      <div class="btns"><button class="btn pri" data-act="add">Add items</button><button class="btn" data-act="import">Import CSV</button><button class="btn" data-act="export">Export CSV</button></div>
+      <input type="file" id="b-file" accept=".csv,text/csv" style="display:none"><input type="file" id="r-file" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="card">
+      <div class="two" style="grid-template-columns:1fr auto;align-items:end"><label style="margin-top:0">Go to KP or tag<input id="b-find" placeholder="12+300 or J-0412" autocomplete="off"></label><button class="btn" id="b-go">Go</button></div>
+      <div class="err" id="b-err"></div>
+      <div class="list" id="b-list"></div>
+      <div class="pager"><button class="btn" id="b-prev">Previous</button><span class="sub" id="b-page"></span><button class="btn" id="b-next">Next</button></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-log">
+    <div class="card">
+      <div class="h">Progress log</div>
+      <div class="sub">Every update recorded, newest first.<span class="edit-only"> Delete an entry to undo it.</span></div>
+      <div class="list" id="log-list"></div>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview"><svg viewBox="0 0 24 24"><path d="M3 17l6-4 4 3 8-6"/><path d="M3 21h18"/></svg>Overview</button>
+  <button data-tab="update" class="edit-only"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Update</button>
+  <button data-tab="builder" class="edit-only"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Builder</button>
+  <button data-tab="log"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Log</button>
+</nav>
+
+<div class="dlgw" id="dlg"><div class="sheet" id="dlg-body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+
+/* ---------- local storage on this device ---------- */
+const DBKEY='pp_db_v1';
+let DB={pipeline_lines:[],pipeline_events:[],nid:1};
+try{const raw=localStorage.getItem(DBKEY);if(raw)DB=JSON.parse(raw)}catch(e){}
+function persist(){try{localStorage.setItem(DBKEY,JSON.stringify(DB));return null}catch(e){return{message:'This device has no room left to save. Download a backup and delete old lines.'}}}
+const clone=x=>JSON.parse(JSON.stringify(x));
+function Q(t){this.t=t;this.op='select';this.fl=[];this.ord=null;this.one=false;this.pl=null}
+Q.prototype.select=function(){return this};
+Q.prototype.insert=function(p){this.op='insert';this.pl=Array.isArray(p)?p:[p];return this};
+Q.prototype.update=function(p){this.op='update';this.pl=p;return this};
+Q.prototype.delete=function(){this.op='delete';return this};
+Q.prototype.eq=function(k,v){this.fl.push([k,v]);return this};
+Q.prototype.order=function(k,o){this.ord=[k,o&&o.ascending===false];return this};
+Q.prototype.single=function(){this.one=true;return this};
+Q.prototype.then=function(res,rej){
+  let out,error=null;const tb=DB[this.t],m=r=>this.fl.every(([k,v])=>String(r[k])===String(v));
+  if(this.op==='insert'){out=this.pl.map(p=>{const r=clone(p);if(this.t==='pipeline_lines'){r.id='L'+(DB.nid++)+'-'+rid();r.created_at=r.updated_at=new Date().toISOString();r.items=r.items||[];r.zones=r.zones||[]}else{r.id=DB.nid++;r.created_at=new Date().toISOString()}tb.push(r);return r});error=persist()}
+  else if(this.op==='update'){out=tb.filter(m);out.forEach(r=>Object.assign(r,clone(this.pl)));error=persist()}
+  else if(this.op==='delete'){out=tb.filter(m);DB[this.t]=tb.filter(r=>!m(r));if(this.t==='pipeline_lines'){const ids=out.map(l=>l.id);DB.pipeline_events=DB.pipeline_events.filter(e=>!ids.includes(e.line_id))}error=persist()}
+  else{out=tb.filter(m).map(clone);if(this.ord){const[k,d]=this.ord;out.sort((a,b)=>(a[k]>b[k]?1:a[k]<b[k]?-1:0)*(d?-1:1))}}
+  return Promise.resolve({data:this.one?(clone(out[0]||null)):clone(out),error}).then(res,rej);
+};
+const sb={from:t=>new Q(t)};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(4,'0');
+const rid=()=>Math.random().toString(36).slice(2,10);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const num=v=>{const x=parseFloat(v);return isFinite(x)?x:0};
+
+const STAGES=[
+ {k:'none',n:'Not started',c:'#F1EFE8'},
+ {k:'received',n:'Received at yard',c:'#D3D1C7'},
+ {k:'strung',n:'Strung',c:'#B4B2A9'},
+ {k:'welded',n:'Welded',c:'#9FE1CB'},
+ {k:'ndt',n:'NDT accepted',c:'#5DCAA5'},
+ {k:'coated',n:'Joint coated',c:'#1D9E75'},
+ {k:'lowered',n:'Lowered',c:'#0F6E56'},
+ {k:'backfilled',n:'Backfilled',c:'#085041'},
+ {k:'tested',n:'Hydrotested',c:'#3B6D11'}];
+const SK=Object.fromEntries(STAGES.map((s,i)=>[s.k,i]));
+const TYPES=['Joint','Cold bend','Hot bend','Spool','Valve','Flange','Tee','Insulating joint','Scraper trap'];
+
+let lines=[],line=null,items=[],zones=[],events=[];
+const C={kp:[],total:0,done:[],cur:[],flag:[],idx:{},clusters:[]};
+
+function kpf(m){m=Math.max(0,Math.round(m));return Math.floor(m/1000)+'+'+String(m%1000).padStart(3,'0')}
+function lenOf(i){return num(items[i].len)}
+
+/* ---------- core calculations ---------- */
+function compute(){
+  const n=items.length;C.kp=new Array(n);C.idx={};let t=0;
+  for(let i=0;i<n;i++){C.kp[i]=t;t+=lenOf(i);C.idx[items[i].id]=i}
+  C.total=t;C.done=new Array(n).fill(0);
+  for(const e of events){
+    const a=C.idx[e.from_id],b=C.idx[e.to_id],s=SK[e.stage];
+    e._ok=a!=null&&b!=null&&s!=null;if(!e._ok)continue;
+    const lo=Math.min(a,b),hi=Math.max(a,b);
+    e._n=hi-lo+1;e._from=C.kp[lo];e._to=C.kp[hi]+lenOf(hi);
+    for(let i=lo;i<=hi;i++)C.done[i]|=1<<s;
+  }
+  C.cur=new Array(n);C.flag=new Array(n).fill(null);
+  for(let i=0;i<n;i++){const r=stateOf(C.done[i]);C.cur[i]=r.cur;C.flag[i]=r.flag}
+  C.clusters=[];let cl=null;
+  for(let i=0;i<n;i++){
+    const f=C.flag[i];if(!f)continue;
+    const a=C.kp[i],b=a+lenOf(i);
+    if(cl&&a-cl.to<=300){cl.to=b;cl.n++}else{cl={from:a,to:b,n:1,f};C.clusters.push(cl)}
+  }
+}
+function stateOf(d){
+  let cur=0;for(let s=8;s>0;s--)if(d&(1<<s)){cur=s;break}
+  let flag=null;
+  if(cur>=4){for(let s=3;s<cur;s++)if(!(d&(1<<s))){let rec=s+1;while(rec<=cur&&!(d&(1<<rec)))rec++;flag={rec,miss:s};break}}
+  return{cur,flag};
+}
+function flagText(f){const m=STAGES[f.miss].n;return STAGES[f.rec].n+' before '+(/^[A-Z][a-z]/.test(m)?m[0].toLowerCase()+m.slice(1):m)}
+
+/* resolve "8+250", "8250", "8.25" or a tag */
+function refOf(s){
+  s=String(s||'').trim();if(!s)return null;
+  let m=s.match(/^(\d+)\s*\+\s*(\d+(?:\.\d+)?)$/);if(m)return{m:+m[1]*1000+ +m[2]};
+  if(/^\d+\.\d+$/.test(s))return{m:parseFloat(s)*1000};
+  if(/^\d+$/.test(s))return{m:+s};
+  const low=s.toLowerCase();const i=items.findIndex(it=>String(it.tag).toLowerCase()===low);
+  if(i>=0)return{i};
+  return{bad:s};
+}
+function rangeOf(fs,ts){
+  const f=refOf(fs),t=refOf(ts);
+  if(!f)return{err:'Enter where the stretch starts.'};
+  if(f.bad)return{err:'No KP or tag matches "'+f.bad+'".'};
+  if(t&&t.bad)return{err:'No KP or tag matches "'+t.bad+'".'};
+  let tt=t;
+  if(!tt){if(f.i!=null)tt={i:f.i};else return{err:'Enter where the stretch ends.'}}
+  const toM=(r,side)=>r.i!=null?(side==='from'?C.kp[r.i]:C.kp[r.i]+lenOf(r.i)):r.m;
+  let a=toM(f,'from'),b=toM(tt,'to');if(a>b)[a,b]=[b,a];
+  let lo=-1,hi=-1;
+  for(let i=0;i<items.length;i++){const mid=C.kp[i]+lenOf(i)/2;if(mid>=a&&mid<=b){if(lo<0)lo=i;hi=i}}
+  if(lo<0)return{err:'No items between KP '+kpf(a)+' and '+kpf(b)+'.'};
+  return{lo,hi};
+}
+
+/* ---------- sample 20 km line ---------- */
+function rng(seed){return()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function genSample(){
+  const R=rng(42),T=20000,its=[];let pos=0,w=0,jn=0,heat=71200,hc=0;
+  const heavy=[[3080,3340],[8520,8880],[13960,14240],[16000,17200]];
+  const wtAt=m=>heavy.some(([a,b])=>m>=a&&m<b)?15.9:12.7;
+  const add=(type,tag,len,ex)=>{its.push(Object.assign({id:rid(),type,tag,pipe:'',heat:'',wt:wtAt(pos),grade:'X65 PSL2',len:Math.round(len*100)/100,w:its.length?++w:null},ex||{}));pos+=Math.round(len*100)/100};
+  add('Scraper trap','LR-01',6,{wt:15.9});
+  add('Insulating joint','IJ-01',2.5,{wt:15.9});
+  const sp=[[5100,()=>add('Hot bend','HB-01',3.8)],[10000,()=>{add('Spool','SP-01',2.4);add('Valve','BV-01',1.6);add('Spool','SP-02',2.4)}],[11600,()=>add('Hot bend','HB-02',3.8)],[18300,()=>add('Hot bend','HB-03',3.8)]];
+  let k=0;const endAt=T-8.5;
+  while(endAt-pos>12.2){
+    if(k<sp.length&&pos>=sp[k][0]){sp[k][1]();k++;continue}
+    jn++;if(++hc>24){hc=0;heat+=1+Math.floor(R()*7)}
+    add(R()<0.03?'Cold bend':'Joint','J-'+pad(jn),11.9+R()*0.3,{pipe:'P-'+(23000+jn),heat:'H'+heat});
+  }
+  if(endAt-pos>0.05)add('Spool','SP-03',endAt-pos);
+  add('Insulating joint','IJ-02',2.5,{wt:15.9});
+  add('Scraper trap','RR-01',6,{wt:15.9});
+  const zs=[{type:'crossing',sub:'road',name:'Road RD-01',from:3180,to:3240},{type:'crossing',sub:'wadi',name:'Wadi WD-01',from:8620,to:8780},{type:'crossing',sub:'road',name:'Highway HW-01',from:14060,to:14140}];
+  const ev=[['received',0,14000,'2026-10-20','MRR-014'],['strung',0,12500,'2026-11-02','DPR-112'],['welded',0,8600,'2026-11-10','DPR-118'],['ndt',0,8600,'2026-11-12','RT-0412'],['coated',0,7600,'2026-11-14','FJC-077'],['lowered',0,6000,'2026-11-15','DPR-121'],['ndt',8800,9400,'2026-11-16','RT-0431'],['welded',8800,10600,'2026-11-17','DPR-124'],['backfilled',0,4000,'2026-11-17','DPR-123'],['lowered',9500,9800,'2026-11-18','DPR-125'],['tested',0,2000,'2026-11-19','HT-01']];
+  return{items:its,zones:zs,ev};
+}
+function idsForRange(its,a,b){
+  let p=0,lo=null,hi=null;
+  for(const it of its){const mid=p+num(it.len)/2;if(mid>=a&&mid<=b){if(!lo)lo=it.id;hi=it.id}p+=num(it.len)}
+  return lo?{from_id:lo,to_id:hi}:null;
+}
+
+/* ---------- UI helpers ---------- */
+function show(v){
+  if(document.body.classList.contains('viewer')&&(v==='update'||v==='builder'))v='overview';
+  curView=v;
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  const inApp=['overview','update','builder','log'].includes(v);
+  $('#tabs').classList.toggle('on',inApp);
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===v));
+  $('#hd-line').style.display=line&&inApp?'block':'none';
+  if(v==='overview')renderOverview();
+  if(v==='update')renderUpdate();
+  if(v==='builder')renderBuilder();
+  if(v==='log')renderLog();
+  window.scrollTo(0,0);
+}
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+function openDlg(html){$('#dlg-body').innerHTML=html;$('#dlg').classList.add('on');$('#dlg-body').scrollTop=0}
+function closeDlg(){$('#dlg').classList.remove('on')}
+$('#dlg').addEventListener('click',e=>{if(e.target.id==='dlg')closeDlg()});
+function ask(title,msg,ok,danger){return new Promise(res=>{
+  openDlg(`<h3>${esc(title)}</h3><div class="sub">${esc(msg)}</div><div class="btns"><button class="btn ${danger?'dng':'pri'}" id="q-ok">${esc(ok)}</button><button class="btn" id="q-no">Cancel</button></div>`);
+  $('#q-ok').onclick=()=>{closeDlg();res(true)};$('#q-no').onclick=()=>{closeDlg();res(false)};
+})}
+function setHeader(){$('#hd-line').textContent=line?line.name:'';$('#hd-sub').textContent=line?(C.total/1000).toFixed(2)+' km · '+items.length.toLocaleString()+' items':''}
+
+/* ---------- data ---------- */
+let seeded=false;
+async function loadLines(){
+  show('loading');
+  const{data,error}=await sb.from('pipeline_lines').select('id,name,length_m,updated_at').order('updated_at',{ascending:false});
+  if(error){toast('Could not load: '+error.message);show('empty');return}
+  lines=data||[];
+  if(!lines.length&&!seeded){seeded=true;const sm=genSample();return createLine('Sample trunkline 20 km',sm.items,sm.zones,sm.ev)}
+  if(!lines.length){line=null;setHeader();show('empty');return}
+  let id=null;try{id=localStorage.getItem('pp_line')}catch(e){}
+  if(!lines.some(l=>l.id===id))id=lines[0].id;
+  await openLine(id);
+}
+async function openLine(id){
+  show('loading');
+  const[a,b]=await Promise.all([sb.from('pipeline_lines').select('*').eq('id',id).single(),sb.from('pipeline_events').select('*').eq('line_id',id).order('id')]);
+  if(a.error||b.error){toast('Could not load the line');show('empty');return}
+  line=a.data;items=line.items||[];zones=line.zones||[];events=b.data||[];
+  try{localStorage.setItem('pp_line',id)}catch(e){}
+  compute();setHeader();detailRange=null;show('overview');
+}
+let saveT=null;
+function queueSave(){$('#b-save').textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(saveNow,700)}
+async function saveNow(){
+  const{error}=await sb.from('pipeline_lines').update({items,zones,length_m:Math.round(C.total*100)/100,updated_at:new Date().toISOString()}).eq('id',line.id);
+  $('#b-save').textContent=error?'Not saved':'Saved';if(error)toast('Could not save: '+error.message);
+}
+function changed(){compute();setHeader();queueSave()}
+
+async function createLine(name,its,zs,ev){
+  show('loading');
+  let len=0;its.forEach(x=>len+=num(x.len));
+  const{data,error}=await sb.from('pipeline_lines').insert({name,items:its,zones:zs,length_m:Math.round(len*100)/100}).select('id').single();
+  if(error){toast('Could not create: '+error.message);return loadLines()}
+  if(ev&&ev.length){
+    const rows=ev.map(([stage,a,b,date,ref])=>{const r=idsForRange(its,a,b);return r?Object.assign({line_id:data.id,stage,done_on:date,ref},r):null}).filter(Boolean);
+    const e2=await sb.from('pipeline_events').insert(rows);if(e2.error)toast('Progress not saved: '+e2.error.message);
+  }
+  try{localStorage.setItem('pp_line',data.id)}catch(e){}
+  await loadLines();
+}
+
+/* ---------- overview ---------- */
+const G={u:[0.866,-0.5],w:[0.866,0.5],n:[0.5,0.866],A:[6,250],L:380,W:40,R:6};
+const ad=(a,b,s)=>[a[0]+b[0]*s,a[1]+b[1]*s];
+const bk=f=>ad(G.A,G.u,f*G.L);
+const gp=(f,t)=>ad(bk(f),G.w,t);
+const dn=(p,s)=>[p[0],p[1]+s];
+const ce=f=>dn(gp(f,20),-G.R);
+const of=(p,s)=>ad(p,G.n,s);
+const P=a=>a.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+let detailRange=null;
+
+function renderOverview(){
+  const T=C.total,n=items.length;
+  let wM=0,lM=0,tM=0,back=0;
+  for(let i=0;i<n;i++){const L=lenOf(i),c=C.cur[i],d=C.done[i];if(c>=3)wM+=L;if(c>=6)lM+=L;if(c>=8)tM+=L;if(d&(1<<3)&&!(d&(1<<4)))back++}
+  const pc=x=>T?Math.round(x/T*100)+'%':'';
+  $('#ov-metrics').innerHTML=`<div class="mc"><p>Welded</p><div>${(wM/1000).toFixed(1)} km <span>${pc(wM)}</span></div></div><div class="mc"><p>Lowered</p><div>${(lM/1000).toFixed(1)} km <span>${pc(lM)}</span></div></div><div class="mc"><p>Hydrotested</p><div>${(tM/1000).toFixed(1)} km <span>${pc(tM)}</span></div></div><div class="mc"><p>Waiting for NDT</p><div>${back} <span>welds</span></div></div>`;
+  $('#ov-legend').innerHTML=STAGES.map((s,i)=>`<span><b class="sw" style="background:${s.c};${i?'':'border:1px dashed #888780'}"></b>${s.n}</span>`).join('')+'<span><b class="sw" style="background:#D85A30"></b>Red flag</span>';
+  $('#ov-svg').innerHTML=n&&T?svgOverview():`<text x="190" y="170" text-anchor="middle" font-size="13" fill="#888780">Add items in the Builder to draw the line</text>`;
+  const cl=C.clusters;
+  $('#ov-flags').innerHTML=`<div class="h">Red flags</div>`+(cl.length?cl.map((c,i)=>`<div class="flag" data-act="detail" data-a="${c.from}" data-b="${c.to}"><span class="num">${i+1}</span><div><div style="font-weight:600;color:var(--red)">${esc(flagText(c.f))}</div><div class="sub">KP ${kpf(c.from)} to ${kpf(c.to)} · ${c.n} item${c.n>1?'s':''}</div></div></div>`).join(''):`<div class="sub" style="margin-top:4px">No out-of-sequence work recorded.</div>`);
+  renderDetail();
+}
+function svgOverview(){
+  const T=C.total,R=G.R,W=G.W,n=items.length;let s='';
+  s+=`<polygon points="${P([G.A,dn(G.A,8),dn(gp(0,W),8),gp(0,W)])}" fill="#E4D8BE"/>`;
+  s+=`<polygon points="${P([gp(0,W),gp(1,W),dn(gp(1,W),8),dn(gp(0,W),8)])}" fill="#D8C9A8"/>`;
+  s+=`<polygon points="${P([G.A,bk(1),gp(1,W),gp(0,W)])}" fill="#EFE6D2"/>`;
+  items.forEach((it,i)=>{
+    if(it.type!=='Valve'&&it.type!=='Scraper trap')return;
+    const sz=10,f=Math.min(C.kp[i]/T,1-sz/G.L),on=C.cur[i]>=3,G0=gp(f,2),up=p=>dn(p,-sz);
+    const a=G0,b=ad(G0,G.u,sz),c=ad(b,G.w,sz),d=ad(G0,G.w,sz);
+    const st=on?'':' stroke="#B4B2A9" stroke-width="0.6" stroke-dasharray="2 2"';
+    s+=`<g data-a="${C.kp[i]-100}" data-b="${C.kp[i]+100}" style="cursor:pointer"><polygon points="${P([a,d,up(d),up(a)])}" fill="${on?'#5DCAA5':'#E4E2DA'}"${st}/><polygon points="${P([d,c,up(c),up(d)])}" fill="${on?'#1D9E75':'#D3D1C7'}"${st}/><polygon points="${P([up(a),up(b),up(c),up(d)])}" fill="${on?'#9FE1CB':'#F1EFE8'}"${st}/></g>`;
+  });
+  s+=`<polygon points="${P([of(dn(ce(0),R),-5),of(dn(ce(1),R),-5),of(dn(ce(1),R),5),of(dn(ce(0),R),5)])}" fill="#000" fill-opacity="0.08"/>`;
+  const NB=380,mins=new Array(NB).fill(99);
+  for(let i=0;i<n;i++){
+    const a=C.kp[i]/T*NB,b=(C.kp[i]+lenOf(i))/T*NB;
+    const b0=Math.min(NB-1,Math.floor(a)),b1=Math.min(NB-1,Math.max(b0,Math.ceil(b)-1));
+    for(let k=b0;k<=b1;k++)if(C.cur[i]<mins[k])mins[k]=C.cur[i];
+  }
+  let a0=0;
+  for(let k=1;k<=NB;k++){if(k===NB||mins[k]!==mins[a0]){s+=tube(a0/NB,k/NB,mins[a0]===99?0:mins[a0]);a0=k}}
+  const c0=ce(0),first=mins[0]===99?0:mins[0];
+  s+=`<ellipse cx="${c0[0]}" cy="${c0[1]}" rx="${R}" ry="${R*0.45}" fill="${first?STAGES[first].c:'#F1EFE8'}" stroke="#5F5E5A" stroke-opacity="0.35" stroke-width="0.6" transform="rotate(60 ${c0[0]} ${c0[1]})"/>`;
+  s+=`<ellipse cx="${c0[0]}" cy="${c0[1]}" rx="${R*0.62}" ry="${R*0.28}" fill="#444441" fill-opacity="0.55" transform="rotate(60 ${c0[0]} ${c0[1]})"/>`;
+  for(const z of zones){
+    if(z.type!=='crossing')continue;
+    const fa=z.from/T,fb=z.to/T,fm=(fa+fb)/2,hw=Math.max(5,(fb-fa)*G.L/2)/G.L;
+    const p=[ad(bk(fm-hw),G.w,-6),ad(bk(fm+hw),G.w,-6),ad(bk(fm+hw),G.w,W+6),ad(bk(fm-hw),G.w,W+6)];
+    const lp=ad(bk(fm),G.w,-6),q=ad(bk(fm),G.w,W+6);
+    s+=`<g data-a="${z.from-150}" data-b="${z.to+150}" style="cursor:pointer"><polygon points="${P(p)}" fill="${z.sub==='wadi'?'#B5D4F4':'#B4B2A9'}"/>`;
+    if(z.sub!=='wadi')s+=`<line x1="${lp[0]}" y1="${lp[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#fff" stroke-width="0.8" stroke-dasharray="3 3"/>`;
+    s+=`<text x="${lp[0]}" y="${lp[1]-5}" text-anchor="middle" font-size="11" fill="#5F5E5A">${esc(String(z.name||'').split(' ')[0])}</text></g>`;
+  }
+  C.clusters.forEach((c,i)=>{
+    const p=ce((c.from+c.to)/2/T),b=[p[0],p[1]-R],tp=[p[0],p[1]-R-20];
+    s+=`<g data-a="${c.from}" data-b="${c.to}" style="cursor:pointer"><line x1="${b[0]}" y1="${b[1]}" x2="${tp[0]}" y2="${tp[1]}" stroke="#D85A30" stroke-width="1.2"/><circle cx="${tp[0]}" cy="${tp[1]}" r="8" fill="#FAECE7" stroke="#D85A30" stroke-width="1.2"/><text x="${tp[0]}" y="${tp[1]+4}" text-anchor="middle" font-size="11" font-weight="600" fill="#712B13">${i+1}</text></g>`;
+  });
+  const step=[500,1000,2000,5000,10000,20000,50000,100000].find(x=>T/x<=6)||100000;
+  for(let m=0;m<=T+0.1;m+=step){
+    const p=gp(m/T,W);
+    s+=`<line x1="${p[0]}" y1="${p[1]}" x2="${p[0]}" y2="${p[1]+8}" stroke="#B4B2A9" stroke-width="0.6"/>`;
+    const lab=step<1000?kpf(m):(m===0?'KP 0':String(m/1000));
+    s+=`<text x="${p[0]}" y="${p[1]+21}" text-anchor="middle" font-size="11" fill="#5F5E5A">${lab}</text>`;
+  }
+  if(detailRange){
+    const fa=Math.max(0,detailRange[0])/T,fb=Math.min(T,detailRange[1])/T;
+    s+=`<polygon points="${P([of(ce(fa),-R-3),of(ce(fb),-R-3),of(ce(fb),R+3),of(ce(fa),R+3)])}" fill="none" stroke="#1F1E1C" stroke-width="1.2" pointer-events="none"/>`;
+  }
+  return s;
+}
+function tube(f0,f1,st){
+  const R=G.R,c0=ce(f0),c1=ce(f1),col=STAGES[st].c;
+  let s=`<polygon points="${P([of(c0,-R),of(c1,-R),of(c1,R),of(c0,R)])}" fill="${col}" stroke="${st?'#5F5E5A':'#888780'}" stroke-opacity="${st?0.3:0.7}" stroke-width="0.5"${st?'':' stroke-dasharray="3 2"'}/>`;
+  if(st){
+    s+=`<polygon points="${P([of(c0,-R),of(c1,-R),of(c1,-R*0.3),of(c0,-R*0.3)])}" fill="#fff" fill-opacity="0.3" pointer-events="none"/>`;
+    s+=`<polygon points="${P([of(c0,R*0.45),of(c1,R*0.45),of(c1,R),of(c0,R)])}" fill="#000" fill-opacity="0.12" pointer-events="none"/>`;
+  }
+  return s;
+}
+$('#ov-svg').addEventListener('click',e=>{
+  if(!C.total)return;
+  const g=e.target.closest('[data-a]');
+  if(g){openDetail(+g.dataset.a,+g.dataset.b);return}
+  const svg=$('#ov-svg'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+  const q=pt.matrixTransform(svg.getScreenCTM().inverse()),O=ce(0);
+  let f=((q.x-O[0])*G.u[0]+(q.y-O[1])*G.u[1])/G.L;f=Math.max(0,Math.min(1,f));
+  const m=f*C.total;openDetail(m-250,m+250);
+});
+function openDetail(a,b){
+  const T=C.total;a=Math.max(0,a);b=Math.min(T,b);
+  if(b-a<50){const m=(a+b)/2;a=Math.max(0,m-25);b=Math.min(T,m+25)}
+  detailRange=[a,b];renderOverview();
+  setTimeout(()=>$('#ov-detail').scrollIntoView({behavior:'smooth',block:'start'}),30);
+}
+function renderDetail(){
+  const box=$('#ov-detail');
+  if(!detailRange||!C.total){box.innerHTML='';return}
+  const[a,b]=detailRange,idx=[];
+  for(let i=0;i<items.length;i++){const s=C.kp[i],e=s+lenOf(i);if(s<b&&e>a)idx.push(i)}
+  const cnt={};idx.forEach(i=>cnt[C.cur[i]]=(cnt[C.cur[i]]||0)+1);
+  const chips=Object.keys(cnt).sort((x,y)=>y-x).map(k=>`<span class="chip"><b class="sw" style="background:${STAGES[k].c}"></b>${STAGES[k].n} · ${cnt[k]}</span>`).join('');
+  const cap=150,rows=idx.slice(0,cap).map(i=>rowHtml(i,'detail-row')).join('');
+  box.innerHTML=`<div class="card"><div class="rowb"><div><div class="h">KP ${kpf(a)} to ${kpf(b)}</div><div class="sub">${idx.length} item${idx.length===1?'':'s'} · ${Math.round(b-a)} m</div></div><button class="icon-btn" data-act="close-detail" aria-label="Close">×</button></div><div class="chips">${chips}</div><button class="btn pri full edit-only" style="margin-top:12px" data-act="upd-range">Record progress for this stretch</button><div class="list">${rows}</div>${idx.length>cap?`<div class="muted" style="margin-top:8px">Showing the first ${cap}. Tap a shorter stretch to see the rest.</div>`:''}</div>`;
+}
+function rowHtml(i,act){
+  const it=items[i],st=C.cur[i],f=C.flag[i];
+  return `<div class="it${f?' fl':''}" data-act="${act}" data-i="${i}"><b class="sw" style="width:12px;height:12px;background:${STAGES[st].c};${st?'':'border:1px dashed #888780'}"></b><div class="m"><div class="t">${esc(it.tag)} <span style="font-weight:400;color:var(--tx2)">· ${esc(it.type)}</span></div><div class="d">KP ${kpf(C.kp[i])} · ${lenOf(i).toFixed(2)} m · WT ${esc(it.wt)}${it.w?' · W-'+pad(it.w):''}</div>${f?`<div class="d" style="color:var(--red)">${esc(flagText(f))}</div>`:`<div class="d">${STAGES[st].n}</div>`}</div></div>`;
+}
+function openItemInfo(i){
+  const it=items[i],d=C.done[i];
+  const done=STAGES.slice(1).map((s,k)=>`<span class="chip" style="${d&(1<<(k+1))?'background:#E1F5EE;color:#085041':''}">${d&(1<<(k+1))?'✓ ':''}${s.n}</span>`).join('');
+  openDlg(`<h3>${esc(it.tag)}</h3><div class="sub">${esc(it.type)} · KP ${kpf(C.kp[i])} to ${kpf(C.kp[i]+lenOf(i))}</div>
+  <div class="chips">${done}</div>
+  ${C.flag[i]?`<div class="warn">${esc(flagText(C.flag[i]))}</div>`:''}
+  <div class="list"><div class="it" style="cursor:default"><div class="m"><div class="d">Pipe no.</div><div class="t">${esc(it.pipe||'—')}</div></div><div class="m"><div class="d">Heat no.</div><div class="t">${esc(it.heat||'—')}</div></div></div>
+  <div class="it" style="cursor:default"><div class="m"><div class="d">Wall thickness</div><div class="t">${esc(it.wt)} mm</div></div><div class="m"><div class="d">Grade</div><div class="t">${esc(it.grade||'—')}</div></div></div>
+  <div class="it" style="cursor:default"><div class="m"><div class="d">Length</div><div class="t">${lenOf(i).toFixed(2)} m</div></div><div class="m"><div class="d">Upstream weld</div><div class="t">${it.w?'W-'+pad(it.w):'—'}</div></div></div></div>
+  <div class="btns"><button class="btn pri edit-only" id="ii-upd">Record progress</button><button class="btn" id="ii-close">Close</button></div>`);
+  $('#ii-close').onclick=closeDlg;
+  $('#ii-upd').onclick=()=>{closeDlg();prefill=[it.tag,''];show('update')};
+}
+
+/* ---------- update ---------- */
+let prefill=null;
+function renderUpdate(){
+  const sel=$('#up-stage');
+  if(!sel.options.length)sel.innerHTML=STAGES.slice(1).map(s=>`<option value="${s.k}">${s.n}</option>`).join('');
+  if(!$('#up-date').value)$('#up-date').value=today();
+  if(prefill){$('#up-from').value=prefill[0];$('#up-to').value=prefill[1];prefill=null}
+  previewUpdate();
+}
+function previewUpdate(){
+  const box=$('#up-prev');
+  if(!$('#up-from').value.trim()&&!$('#up-to').value.trim()){box.innerHTML='';return null}
+  const r=rangeOf($('#up-from').value,$('#up-to').value);
+  if(r.err){box.innerHTML=`<div class="err">${esc(r.err)}</div>`;return null}
+  const s=SK[$('#up-stage').value];let bad=0,ff=null,already=0;
+  for(let i=r.lo;i<=r.hi;i++){if(C.done[i]&(1<<s))already++;const st=stateOf(C.done[i]|(1<<s));if(st.flag){bad++;ff=ff||st.flag}}
+  const n=r.hi-r.lo+1,a=C.kp[r.lo],b=C.kp[r.hi]+lenOf(r.hi);
+  box.innerHTML=`<div class="ok">${n} item${n>1?'s':''} (${esc(items[r.lo].tag)} to ${esc(items[r.hi].tag)}, KP ${kpf(a)} to ${kpf(b)}, ${Math.round(b-a)} m) will be marked <b>${STAGES[s].n}</b>.${already?` ${already} already are.`:''}</div>`+(bad?`<div class="warn">${bad} item${bad>1?'s':''} would be out of sequence: ${esc(flagText(ff))}. You can still save; it will show as a red flag.</div>`:'');
+  return r;
+}
+['#up-from','#up-to','#up-stage'].forEach(s=>$(s).addEventListener('input',previewUpdate));
+$('#up-save').onclick=async()=>{
+  const r=previewUpdate();
+  if(!r){if(!$('#up-prev').innerHTML)$('#up-prev').innerHTML='<div class="err">Enter where the stretch starts and ends.</div>';return}
+  const btn=$('#up-save');btn.disabled=true;btn.textContent='Saving…';
+  const row={line_id:line.id,stage:$('#up-stage').value,from_id:items[r.lo].id,to_id:items[r.hi].id,done_on:$('#up-date').value||null,ref:$('#up-ref').value.trim()||null,note:$('#up-note').value.trim()||null};
+  const{data,error}=await sb.from('pipeline_events').insert(row).select().single();
+  btn.disabled=false;btn.textContent='Save progress';
+  if(error){toast('Could not save: '+error.message);return}
+  events.push(data);compute();
+  ['#up-from','#up-to','#up-ref','#up-note'].forEach(s=>$(s).value='');$('#up-prev').innerHTML='';
+  toast('Saved');
+};
+
+/* ---------- log ---------- */
+function renderLog(){
+  const ev=events.slice().sort((x,y)=>String(y.done_on||'').localeCompare(String(x.done_on||''))||y.id-x.id);
+  $('#log-list').innerHTML=ev.length?ev.map(e=>{
+    const s=STAGES[SK[e.stage]]||{n:e.stage,c:'#ccc'};
+    return `<div class="it" style="cursor:default"><b class="sw" style="width:12px;height:12px;background:${s.c}"></b><div class="m"><div class="t">${esc(s.n)}</div><div class="d">${e._ok?`KP ${kpf(e._from)} to ${kpf(e._to)} · ${e._n.toLocaleString()} item${e._n>1?'s':''}`:'<span style="color:var(--red)">Start or end item no longer in the pipe book</span>'}</div><div class="d">${esc(e.done_on||'')}${e.ref?' · '+esc(e.ref):''}${e.note?' · '+esc(e.note):''}</div></div><button class="icon-btn edit-only" data-act="del-ev" data-id="${e.id}" aria-label="Delete entry">×</button></div>`;
+  }).join(''):`<div class="sub" style="padding:12px 0">Nothing recorded yet. Use Update to record progress.</div>`;
+}
+
+/* ---------- builder ---------- */
+let bPage=0,bHi=-1;const PS=50;
+function renderBuilder(){
+  const n=items.length,cnt={};let welds=0;
+  items.forEach(it=>{cnt[it.type]=(cnt[it.type]||0)+1;if(it.w)welds++});
+  $('#b-sum').textContent=`${(C.total/1000).toFixed(3)} km · ${n.toLocaleString()} items · ${welds.toLocaleString()} welds`;
+  $('#b-types').innerHTML=TYPES.filter(t=>cnt[t]).map(t=>`<span class="chip">${t} · ${cnt[t].toLocaleString()}</span>`).join('');
+  const pages=Math.max(1,Math.ceil(n/PS));bPage=Math.min(bPage,pages-1);
+  const s=bPage*PS,e=Math.min(n,s+PS);let h='';
+  for(let i=s;i<e;i++){const it=items[i];h+=`<div class="it${i===bHi?' hi':''}" data-act="edit" data-i="${i}"><div class="muted" style="width:38px;text-align:right">${i+1}</div><div class="m"><div class="t">${esc(it.tag)} <span style="font-weight:400;color:var(--tx2)">· ${esc(it.type)}</span></div><div class="d">KP ${kpf(C.kp[i])} · ${lenOf(i).toFixed(2)} m · WT ${esc(it.wt)}${it.heat?' · '+esc(it.heat):''}</div></div></div>`}
+  $('#b-list').innerHTML=h||`<div class="sub" style="padding:12px 0">No items yet. Use Add items to build the line.</div>`;
+  $('#b-page').textContent=n?`${s+1}–${e} of ${n.toLocaleString()}`:'';
+  $('#b-prev').disabled=bPage===0;$('#b-next').disabled=bPage>=pages-1;
+}
+$('#b-prev').onclick=()=>{if(bPage>0){bPage--;renderBuilder();$('#b-list').scrollIntoView({block:'start'})}};
+$('#b-next').onclick=()=>{bPage++;renderBuilder();$('#b-list').scrollIntoView({block:'start'})};
+$('#b-find').addEventListener('input',()=>$('#b-err').textContent='');
+$('#b-go').onclick=()=>{
+  const r=refOf($('#b-find').value);$('#b-err').textContent='';
+  if(!r){$('#b-err').textContent='Enter a KP or a tag.';return}
+  if(r.bad){$('#b-err').textContent='No KP or tag matches "'+r.bad+'".';return}
+  let i=r.i;if(i==null){i=items.findIndex((it,k)=>C.kp[k]+lenOf(k)>r.m);if(i<0)i=items.length-1}
+  if(i<0)return;bHi=i;bPage=Math.floor(i/PS);renderBuilder();
+  const el=document.querySelector(`#b-list [data-i="${i}"]`);if(el)el.scrollIntoView({block:'center'});
+};
+function nextW(){let m=0;items.forEach(it=>{if(it.w>m)m=it.w});return m+1}
+function refCount(id){return events.filter(e=>e.from_id===id||e.to_id===id).length}
+function openEdit(i){
+  const it=items[i];
+  openDlg(`<h3>Edit ${esc(it.tag)}</h3><div class="sub">Item ${i+1} · KP ${kpf(C.kp[i])}${it.w?' · upstream weld W-'+pad(it.w):''}</div>
+  <label>Type<select id="e-type">${TYPES.map(t=>`<option${t===it.type?' selected':''}>${t}</option>`).join('')}</select></label>
+  <label>Tag<input id="e-tag" value="${esc(it.tag)}" autocomplete="off"></label>
+  <div class="two"><label>Pipe no.<input id="e-pipe" value="${esc(it.pipe)}" autocomplete="off"></label><label>Heat no.<input id="e-heat" value="${esc(it.heat)}" autocomplete="off"></label></div>
+  <div class="two"><label>Length (m)<input id="e-len" type="number" inputmode="decimal" step="0.01" value="${esc(it.len)}"></label><label>WT (mm)<input id="e-wt" type="number" inputmode="decimal" step="0.1" value="${esc(it.wt)}"></label></div>
+  <label>Grade<input id="e-grade" value="${esc(it.grade)}" autocomplete="off"></label>
+  <div class="err" id="e-err"></div>
+  <div class="btns"><button class="btn pri" id="e-save">Save</button><button class="btn" id="e-ins">Insert after</button><button class="btn" id="e-up">Move up</button><button class="btn" id="e-down">Move down</button><button class="btn dng" id="e-del">Delete</button><button class="btn" id="e-cancel">Cancel</button></div>`);
+  $('#e-cancel').onclick=closeDlg;
+  ['#e-tag','#e-len'].forEach(s=>$(s).addEventListener('input',()=>$('#e-err').textContent=''));
+  $('#e-save').onclick=()=>{
+    const tag=$('#e-tag').value.trim(),len=parseFloat($('#e-len').value);
+    if(!tag){$('#e-err').textContent='Enter a tag.';return}
+    if(!(len>0)){$('#e-err').textContent='Enter a length above 0.';return}
+    Object.assign(it,{type:$('#e-type').value,tag,pipe:$('#e-pipe').value.trim(),heat:$('#e-heat').value.trim(),len:Math.round(len*1000)/1000,wt:num($('#e-wt').value),grade:$('#e-grade').value.trim()});
+    closeDlg();bHi=i;changed();renderBuilder();
+  };
+  $('#e-ins').onclick=()=>openAdd(i);
+  const mv=d=>{const j=i+d;if(j<0||j>=items.length)return;[items[i],items[j]]=[items[j],items[i]];closeDlg();bHi=j;bPage=Math.floor(j/PS);changed();renderBuilder()};
+  $('#e-up').onclick=()=>mv(-1);$('#e-down').onclick=()=>mv(1);
+  $('#e-del').onclick=async()=>{
+    const rc=refCount(it.id);
+    if(rc){$('#e-err').textContent=`${rc} log entr${rc>1?'ies start or end':'y starts or ends'} at this item. Delete ${rc>1?'those':'that'} in the Log first.`;return}
+    closeDlg();
+    if(!await ask('Delete '+it.tag+'?','The line gets shorter by '+lenOf(i).toFixed(2)+' m and every KP after it moves back.','Delete',true))return;
+    items.splice(i,1);bHi=-1;changed();renderBuilder();
+  };
+}
+function openAdd(after){
+  const posTxt=after==null?'At the end of the line':'After '+esc(items[after].tag);
+  const jCount=items.filter(x=>x.type==='Joint'||x.type==='Cold bend').length;
+  openDlg(`<h3>Add items</h3><div class="sub">${posTxt}</div>
+  <div class="two"><label>Type<select id="a-type">${TYPES.map(t=>`<option>${t}</option>`).join('')}</select></label><label>How many<input id="a-count" type="number" inputmode="numeric" value="1" min="1" max="3000"></label></div>
+  <div class="two"><label>Tag prefix<input id="a-pre" value="J-" autocomplete="off"></label><label>First number<input id="a-start" type="number" inputmode="numeric" value="${jCount+1}"></label></div>
+  <div class="two"><label>Length each (m)<input id="a-len" type="number" inputmode="decimal" step="0.01" value="12"></label><label>WT (mm)<input id="a-wt" type="number" inputmode="decimal" step="0.1" value="12.7"></label></div>
+  <div class="two"><label>Grade<input id="a-grade" value="X65 PSL2" autocomplete="off"></label><label>Heat no.<input id="a-heat" placeholder="Optional" autocomplete="off"></label></div>
+  <div class="sub" id="a-prev" style="margin-top:10px"></div><div class="err" id="a-err"></div>
+  <div class="btns"><button class="btn pri" id="a-ok">Add</button><button class="btn" id="a-cancel">Cancel</button></div>`);
+  const prev=()=>{$('#a-err').textContent='';const c=parseInt($('#a-count').value)||0,st=parseInt($('#a-start').value)||1,p=$('#a-pre').value;
+    $('#a-prev').textContent=c>0?`Adds ${p}${pad(st)}${c>1?' to '+p+pad(st+c-1):''}, ${(c*num($('#a-len').value)).toFixed(1)} m in total.`:''};
+  ['#a-count','#a-start','#a-pre','#a-len'].forEach(s=>$(s).addEventListener('input',prev));prev();
+  $('#a-type').onchange=()=>{const t=$('#a-type').value,pre={'Joint':'J-','Cold bend':'J-','Hot bend':'HB-','Spool':'SP-','Valve':'BV-','Flange':'FL-','Tee':'T-','Insulating joint':'IJ-','Scraper trap':'ST-'}[t];$('#a-pre').value=pre;$('#a-start').value=items.filter(x=>String(x.tag).startsWith(pre)).length+1;if(t!=='Joint'&&t!=='Cold bend'){$('#a-len').value=t==='Hot bend'?'3.8':'2'}prev()};
+  $('#a-cancel').onclick=closeDlg;
+  $('#a-ok').onclick=()=>{
+    const c=parseInt($('#a-count').value),len=parseFloat($('#a-len').value),st=parseInt($('#a-start').value)||1;
+    if(!(c>=1&&c<=3000)){$('#a-err').textContent='Enter how many, from 1 to 3000.';return}
+    if(!(len>0)){$('#a-err').textContent='Enter a length above 0.';return}
+    let w=nextW();const add=[];
+    for(let k=0;k<c;k++)add.push({id:rid(),type:$('#a-type').value,tag:$('#a-pre').value+pad(st+k),pipe:'',heat:$('#a-heat').value.trim(),wt:num($('#a-wt').value),grade:$('#a-grade').value.trim(),len:Math.round(len*1000)/1000,w:(items.length||k)?w++:null});
+    const at=after==null?items.length:after+1;items.splice(at,0,...add);
+    closeDlg();bHi=at;bPage=Math.floor(at/PS);changed();renderBuilder();toast(c+' item'+(c>1?'s':'')+' added');
+  };
+}
+function csvCell(v){v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function exportCsv(){
+  const rows=[['tag','type','pipe','heat','wt','grade','length','weld','kp_start']];
+  items.forEach((it,i)=>rows.push([it.tag,it.type,it.pipe,it.heat,it.wt,it.grade,it.len,it.w?'W-'+pad(it.w):'',kpf(C.kp[i])]));
+  const blob=new Blob([rows.map(r=>r.map(csvCell).join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(line.name||'pipe-book').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();
+}
+function parseCsv(t){
+  const rows=[];let row=[],cell='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++}else q=false}else cell+=ch}
+    else if(ch==='"')q=true;else if(ch===','){row.push(cell);cell=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(cell);rows.push(row);row=[];cell=''}else cell+=ch}
+  if(cell||row.length){row.push(cell);rows.push(row)}
+  return rows.filter(r=>r.some(c=>c.trim()));
+}
+$('#b-file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const rows=parseCsv(await f.text());if(rows.length<2){toast('The file has no rows');return}
+  const h=rows[0].map(x=>x.trim().toLowerCase()),col=k=>h.indexOf(k);
+  if(col('tag')<0||col('length')<0){toast('The file needs at least tag and length columns');return}
+  let w=1;const get=(r,k)=>col(k)>=0?(r[col(k)]||'').trim():'';
+  const its=rows.slice(1).map((r,k)=>({id:rid(),tag:get(r,'tag'),type:TYPES.includes(get(r,'type'))?get(r,'type'):'Joint',pipe:get(r,'pipe'),heat:get(r,'heat'),wt:num(get(r,'wt')),grade:get(r,'grade'),len:num(get(r,'length')),w:k?w++:null})).filter(x=>x.tag&&x.len>0);
+  if(!its.length){toast('No rows with a tag and a length above 0');return}
+  if(!await ask('Replace the pipe book?',`This replaces all ${items.length.toLocaleString()} items with ${its.length.toLocaleString()} items from the file.${events.length?' Your '+events.length+' log entries will no longer match any items.':''}`,'Replace',true))return;
+  items=its;bPage=0;bHi=-1;changed();renderBuilder();toast('Imported '+its.length+' items');
+};
+
+$('#r-file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  let d;try{d=JSON.parse(await f.text())}catch(x){toast('That file is not a backup');return}
+  if(!d||!Array.isArray(d.pipeline_lines)||!Array.isArray(d.pipeline_events)){toast('That file is not a backup');return}
+  if(!await ask('Restore this backup?',`It has ${d.pipeline_lines.length} line${d.pipeline_lines.length===1?'':'s'} and replaces everything on this phone.`,'Restore',true))return;
+  DB=d;DB.nid=DB.nid||1e6;const er=persist();if(er){toast(er.message);return}
+  seeded=true;line=null;await loadLines();toast('Backup restored');
+};
+/* ---------- lines ---------- */
+function openLines(){
+  openDlg(`<h3>Pipelines</h3><div class="list">${lines.map(l=>`<div class="lnrow${line&&l.id===line.id?' cur':''}" data-act="pick-line" data-id="${l.id}"><div class="m" style="flex:1">${esc(l.name)}<div class="muted">${l.length_m?(l.length_m/1000).toFixed(2)+' km':''}</div></div>${line&&l.id===line.id?'✓':''}</div>`).join('')}</div>
+  <div class="btns edit-only"><button class="btn" data-act="new-sample">New sample 20 km line</button><button class="btn" data-act="new-empty">New empty line</button></div>
+  ${line?`<div class="btns edit-only"><button class="btn" data-act="rename">Rename this line</button><button class="btn dng" data-act="del-line">Delete this line</button></div>`:''}
+  <div class="btns"><button class="btn" data-act="backup">Download backup</button><button class="btn edit-only" data-act="restore">Restore backup</button><button class="btn" id="ln-close">Close</button></div><div class="muted" style="margin-top:8px">Your data is saved only on this phone, in this browser. Download a backup now and then.</div>`);
+  $('#ln-close').onclick=closeDlg;
+}
+function askName(title,val){return new Promise(res=>{
+  openDlg(`<h3>${esc(title)}</h3><label>Name<input id="nm" value="${esc(val||'')}" autocomplete="off"></label><div class="err" id="nm-err"></div><div class="btns"><button class="btn pri" id="nm-ok">Save</button><button class="btn" id="nm-no">Cancel</button></div>`);
+  $('#nm-ok').onclick=()=>{const v=$('#nm').value.trim();if(!v){$('#nm-err').textContent='Enter a name.';return}closeDlg();res(v)};
+  $('#nm-no').onclick=()=>{closeDlg();res(null)};
+})}
+
+/* ---------- global actions ---------- */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act;
+  if(a==='mode'){const ed=document.body.classList.contains('viewer');setMode(ed);toast(ed?'Editor mode: you can change the line':'View mode: read only')}
+  else if(a==='lines')openLines();
+  else if(a==='backup'){const blob=new Blob([JSON.stringify(DB)],{type:'application/json'});const x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download='pipeline-backup-'+today()+'.json';document.body.appendChild(x);x.click();x.remove()}
+  else if(a==='restore'){closeDlg();$('#r-file').click()}
+  else if(a==='new-sample'){closeDlg();const s=genSample();await createLine('Sample trunkline 20 km',s.items,s.zones,s.ev)}
+  else if(a==='new-empty'){const nm=await askName('New pipeline','');if(nm)await createLine(nm,[],[],null)}
+  else if(a==='pick-line'){closeDlg();await openLine(t.dataset.id)}
+  else if(a==='rename'){const nm=await askName('Rename',line.name);if(nm){line.name=nm;const{error}=await sb.from('pipeline_lines').update({name:nm}).eq('id',line.id);if(error)toast('Could not rename');const l=lines.find(x=>x.id===line.id);if(l)l.name=nm;setHeader()}}
+  else if(a==='del-line'){closeDlg();if(await ask('Delete '+line.name+'?','This deletes the pipe book and the whole progress log for this line. It cannot be undone.','Delete line',true)){const{error}=await sb.from('pipeline_lines').delete().eq('id',line.id);if(error)toast('Could not delete');try{localStorage.removeItem('pp_line')}catch(x){}line=null;await loadLines()}}
+  else if(a==='detail')openDetail(+t.dataset.a-50,+t.dataset.b+50);
+  else if(a==='close-detail'){detailRange=null;renderOverview()}
+  else if(a==='upd-range'&&detailRange){prefill=[kpf(detailRange[0]),kpf(detailRange[1])];show('update')}
+  else if(a==='detail-row')openItemInfo(+t.dataset.i);
+  else if(a==='edit')openEdit(+t.dataset.i);
+  else if(a==='add')openAdd(null);
+  else if(a==='import')$('#b-file').click();
+  else if(a==='export')exportCsv();
+  else if(a==='del-ev'){
+    const ev=events.find(x=>String(x.id)===t.dataset.id);if(!ev)return;
+    const s=(STAGES[SK[ev.stage]]||{}).n||ev.stage;
+    if(!await ask('Delete this entry?',`${s}${ev._ok?', KP '+kpf(ev._from)+' to '+kpf(ev._to):''}. The line goes back to how it was before this entry.`,'Delete',true))return;
+    const{error}=await sb.from('pipeline_events').delete().eq('id',ev.id);
+    if(error){toast('Could not delete');return}
+    events=events.filter(x=>x!==ev);compute();renderLog();toast('Deleted');
+  }
+});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+let curView='overview';
+function setMode(edit){
+  document.body.classList.toggle('viewer',!edit);
+  $('#hd-mode').textContent=edit?'Editor':'View';
+  try{localStorage.setItem('pp_mode',edit?'edit':'view')}catch(e){}
+  if(!edit&&(curView==='update'||curView==='builder'))show('overview');
+}
+
+/* ---------- start ---------- */
+let startMode='view';try{startMode=localStorage.getItem('pp_mode')||'view'}catch(e){}
+setMode(startMode==='edit');
+loadLines();
+</script>
+</body>
+</html>
