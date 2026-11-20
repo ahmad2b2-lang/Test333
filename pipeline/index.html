@@ -158,33 +158,25 @@ body:not(.viewer) .mode{background:var(--acc-bg);border-color:#9FE1CB;color:#085
 <div class="dlgw" id="dlg"><div class="sheet" id="dlg-body"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
 document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
 
-/* ---------- local storage on this device ---------- */
-const DBKEY='pp_db_v1';
-let DB={pipeline_lines:[],pipeline_events:[],nid:1};
-try{const raw=localStorage.getItem(DBKEY);if(raw)DB=JSON.parse(raw)}catch(e){}
-function persist(){try{localStorage.setItem(DBKEY,JSON.stringify(DB));return null}catch(e){return{message:'This device has no room left to save. Download a backup and delete old lines.'}}}
-const clone=x=>JSON.parse(JSON.stringify(x));
-function Q(t){this.t=t;this.op='select';this.fl=[];this.ord=null;this.one=false;this.pl=null}
-Q.prototype.select=function(){return this};
-Q.prototype.insert=function(p){this.op='insert';this.pl=Array.isArray(p)?p:[p];return this};
-Q.prototype.update=function(p){this.op='update';this.pl=p;return this};
-Q.prototype.delete=function(){this.op='delete';return this};
-Q.prototype.eq=function(k,v){this.fl.push([k,v]);return this};
-Q.prototype.order=function(k,o){this.ord=[k,o&&o.ascending===false];return this};
-Q.prototype.single=function(){this.one=true;return this};
-Q.prototype.then=function(res,rej){
-  let out,error=null;const tb=DB[this.t],m=r=>this.fl.every(([k,v])=>String(r[k])===String(v));
-  if(this.op==='insert'){out=this.pl.map(p=>{const r=clone(p);if(this.t==='pipeline_lines'){r.id='L'+(DB.nid++)+'-'+rid();r.created_at=r.updated_at=new Date().toISOString();r.items=r.items||[];r.zones=r.zones||[]}else{r.id=DB.nid++;r.created_at=new Date().toISOString()}tb.push(r);return r});error=persist()}
-  else if(this.op==='update'){out=tb.filter(m);out.forEach(r=>Object.assign(r,clone(this.pl)));error=persist()}
-  else if(this.op==='delete'){out=tb.filter(m);DB[this.t]=tb.filter(r=>!m(r));if(this.t==='pipeline_lines'){const ids=out.map(l=>l.id);DB.pipeline_events=DB.pipeline_events.filter(e=>!ids.includes(e.line_id))}error=persist()}
-  else{out=tb.filter(m).map(clone);if(this.ord){const[k,d]=this.ord;out.sort((a,b)=>(a[k]>b[k]?1:a[k]<b[k]?-1:0)*(d?-1:1))}}
-  return Promise.resolve({data:this.one?(clone(out[0]||null)):clone(out),error}).then(res,rej);
-};
-const sb={from:t=>new Q(t)};
+/* ---------- Supabase ---------- */
+const sb=supabase.createClient('https://bhfgwlkzkbwcwyoypwhy.supabase.co','sb_publishable_9YylflVQca-62NHsBKSTeA_GY896nj3');
+const LOCALKEY='pp_db_v1';
+function localData(){try{const d=JSON.parse(localStorage.getItem(LOCALKEY)||'null');return d&&Array.isArray(d.pipeline_lines)&&d.pipeline_lines.length?d:null}catch(e){return null}}
+async function importData(d){
+  let n=0;
+  for(const l of d.pipeline_lines){
+    const{data,error}=await sb.from('pipeline_lines').insert({name:l.name,items:l.items||[],zones:l.zones||[],length_m:l.length_m}).select('id').single();
+    if(error)throw error;n++;
+    const evs=d.pipeline_events.filter(e=>e.line_id===l.id).map(e=>({line_id:data.id,stage:e.stage,from_id:e.from_id,to_id:e.to_id,done_on:e.done_on,ref:e.ref,note:e.note}));
+    if(evs.length){const r2=await sb.from('pipeline_events').insert(evs);if(r2.error)throw r2.error}
+  }
+  return n;
+}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -643,16 +635,15 @@ $('#r-file').onchange=async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   let d;try{d=JSON.parse(await f.text())}catch(x){toast('That file is not a backup');return}
   if(!d||!Array.isArray(d.pipeline_lines)||!Array.isArray(d.pipeline_events)){toast('That file is not a backup');return}
-  if(!await ask('Restore this backup?',`It has ${d.pipeline_lines.length} line${d.pipeline_lines.length===1?'':'s'} and replaces everything on this phone.`,'Restore',true))return;
-  DB=d;DB.nid=DB.nid||1e6;const er=persist();if(er){toast(er.message);return}
-  seeded=true;line=null;await loadLines();toast('Backup restored');
+  if(!await ask('Restore this backup?',`Adds ${d.pipeline_lines.length} line${d.pipeline_lines.length===1?'':'s'} from the file alongside the lines already here.`,'Restore'))return;
+  try{const n=await importData(d);seeded=true;line=null;await loadLines();toast(n+' line'+(n===1?'':'s')+' restored')}catch(x){toast('Could not restore: '+x.message)}
 };
 /* ---------- lines ---------- */
 function openLines(){
   openDlg(`<h3>Pipelines</h3><div class="list">${lines.map(l=>`<div class="lnrow${line&&l.id===line.id?' cur':''}" data-act="pick-line" data-id="${l.id}"><div class="m" style="flex:1">${esc(l.name)}<div class="muted">${l.length_m?(l.length_m/1000).toFixed(2)+' km':''}</div></div>${line&&l.id===line.id?'✓':''}</div>`).join('')}</div>
   <div class="btns edit-only"><button class="btn" data-act="new-sample">New sample 20 km line</button><button class="btn" data-act="new-empty">New empty line</button></div>
   ${line?`<div class="btns edit-only"><button class="btn" data-act="rename">Rename this line</button><button class="btn dng" data-act="del-line">Delete this line</button></div>`:''}
-  <div class="btns"><button class="btn" data-act="backup">Download backup</button><button class="btn edit-only" data-act="restore">Restore backup</button><button class="btn" id="ln-close">Close</button></div><div class="muted" style="margin-top:8px">Your data is saved only on this phone, in this browser. Download a backup now and then.</div>`);
+  <div class="btns"><button class="btn" data-act="backup">Download backup</button><button class="btn edit-only" data-act="restore">Restore backup</button><button class="btn" id="ln-close">Close</button></div>${localData()?`<div class="btns edit-only"><button class="btn pri" data-act="upload-local">Upload data saved on this phone</button></div>`:''}<div class="muted" style="margin-top:8px">Saved online. Restore adds the lines from a backup file alongside the ones here.</div>`);
   $('#ln-close').onclick=closeDlg;
 }
 function askName(title,val){return new Promise(res=>{
@@ -667,7 +658,8 @@ document.addEventListener('click',async e=>{
   const a=t.dataset.act;
   if(a==='mode'){const ed=document.body.classList.contains('viewer');setMode(ed);toast(ed?'Editor mode: you can change the line':'View mode: read only')}
   else if(a==='lines')openLines();
-  else if(a==='backup'){const blob=new Blob([JSON.stringify(DB)],{type:'application/json'});const x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download='pipeline-backup-'+today()+'.json';document.body.appendChild(x);x.click();x.remove()}
+  else if(a==='upload-local'){closeDlg();const d=localData();if(!d)return;if(!await ask('Upload this phone\'s data?',`Adds ${d.pipeline_lines.length} line${d.pipeline_lines.length===1?'':'s'} saved on this phone to the online data.`,'Upload'))return;try{const n=await importData(d);try{localStorage.removeItem(LOCALKEY)}catch(x){}seeded=true;line=null;await loadLines();toast(n+' line'+(n===1?'':'s')+' uploaded')}catch(x){toast('Could not upload: '+x.message)}}
+  else if(a==='backup'){const[l1,e1]=await Promise.all([sb.from('pipeline_lines').select('*'),sb.from('pipeline_events').select('*')]);if(l1.error||e1.error){toast('Could not read the data');return}const blob=new Blob([JSON.stringify({pipeline_lines:l1.data,pipeline_events:e1.data})],{type:'application/json'});const x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download='pipeline-backup-'+today()+'.json';document.body.appendChild(x);x.click();x.remove()}
   else if(a==='restore'){closeDlg();$('#r-file').click()}
   else if(a==='new-sample'){closeDlg();const s=genSample();await createLine('Sample trunkline 20 km',s.items,s.zones,s.ev)}
   else if(a==='new-empty'){const nm=await askName('New pipeline','');if(nm)await createLine(nm,[],[],null)}
