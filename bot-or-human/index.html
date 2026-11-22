@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#ffffff">
+<title>Bot or Human?</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<style>
+:root{color-scheme:light only;
+  --bg:#f5f6f8;--card:#fff;--ink:#1c2230;--muted:#6b7385;--line:#e3e6ec;
+  --human:#1e8e5a;--human-bg:#e6f6ee;--bot:#6d4ce0;--bot-bg:#efeafd;
+  --ok:#1e8e5a;--bad:#d64545;--accent:#2f6fed}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;background:var(--bg)}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+  min-height:100dvh;line-height:1.45}
+input{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;font-size:16px}
+img,svg{-webkit-user-drag:none}
+button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
+.app{max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 12px)}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex}
+.note{text-align:center;font-size:12px;color:var(--muted);padding:14px 0 4px}
+.note b{color:var(--ink);font-weight:600}
+
+/* buttons */
+.btn{min-height:48px;border-radius:14px;padding:0 18px;font-weight:650;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.primary:disabled{background:#b9c6e4}
+.btn.ghost{background:#fff;border:1.5px solid var(--line)}
+.btn:active{transform:scale(.98)}
+
+/* start */
+.hero{text-align:center;padding:26px 6px 8px}
+.hero .logo{font-size:54px;line-height:1}
+.hero h1{font-size:32px;margin:10px 0 6px;letter-spacing:-.5px}
+.hero p{color:var(--muted);font-size:15px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:16px}
+.box h3{font-size:15px;margin-bottom:8px}
+.box ol{padding-left:20px;font-size:14.5px;color:#39404f}
+.box ol li{margin:3px 0}
+.levels{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lvl{min-height:58px;border-radius:12px;border:1.5px solid var(--line);background:#fff;text-align:left;padding:8px 12px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--muted);font-size:12px}
+.lvl.sel{border-color:var(--accent);background:#eef3fe}
+.best{font-size:13px;color:var(--muted);text-align:center;margin-top:10px;min-height:18px}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+
+/* thread */
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.topbar .x{width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:18px}
+.topbar .prog{flex:1}
+.topbar .prog small{color:var(--muted);font-size:12px}
+.bar{height:6px;background:#e3e6ec;border-radius:9px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.topbar .pts{font-weight:700;font-size:15px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.forumhead{background:#fff;border:1px solid var(--line);border-radius:16px 16px 0 0;padding:12px 14px;border-bottom:0}
+.chip{display:inline-block;font-size:11.5px;font-weight:650;color:var(--accent);background:#eef3fe;border-radius:20px;padding:3px 9px}
+.forumhead h2{font-size:19px;margin-top:6px;line-height:1.25}
+.posts{background:#fff;border:1px solid var(--line);border-radius:0 0 16px 16px;padding:4px 0 6px}
+.post{padding:12px 14px;border-top:1px solid var(--line);transition:background .25s}
+.post.reply{padding-left:22px;position:relative}
+.post.reply::before{content:"";position:absolute;left:12px;top:12px;bottom:12px;width:2px;background:var(--line);border-radius:2px}
+.post.op{border-top:0}
+.who{display:flex;align-items:center;gap:9px}
+.who svg{width:34px;height:34px;flex:none;border-radius:50%}
+.who .nm{font-weight:650;font-size:14px}
+.who .tm{font-size:12px;color:var(--muted)}
+.who .tag{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.5px;border-radius:7px;padding:3px 7px;display:none}
+.txt{font-size:15px;margin:8px 0 10px;color:#262c39}
+.guess{display:flex;gap:8px}
+.guess button{flex:1;min-height:44px;border-radius:11px;border:1.5px solid var(--line);background:#fafbfc;font-weight:650;font-size:15px}
+.guess button.h.sel{background:var(--human-bg);border-color:var(--human);color:var(--human)}
+.guess button.b.sel{background:var(--bot-bg);border-color:var(--bot);color:var(--bot)}
+.post.done .guess button{pointer-events:none}
+.post.done .guess button:not(.sel){opacity:.45}
+.verdict{display:none;margin-top:10px;border-radius:11px;padding:10px 12px;font-size:14px}
+.verdict b{display:block;margin-bottom:2px}
+.post.done.right{background:#f3fbf6}
+.post.done.wrong{background:#fdf3f3}
+.post.done .verdict{display:block}
+.post.done.right .verdict{background:#e3f5ea}
+.post.done.wrong .verdict{background:#fbe3e3}
+.post.done .tag{display:inline-block}
+.tag.isb{background:var(--bot-bg);color:var(--bot)}
+.tag.ish{background:var(--human-bg);color:var(--human)}
+.dock{position:sticky;bottom:0;padding:12px 0 calc(env(safe-area-inset-bottom) + 4px);background:linear-gradient(to top,var(--bg) 70%,rgba(245,246,248,0))}
+.tscore{text-align:center;font-weight:650;margin-bottom:8px;display:none}
+
+/* results */
+.big{text-align:center;padding:22px 0 6px}
+.big .num{font-size:56px;font-weight:800;letter-spacing:-1px}
+.big .of{color:var(--muted);font-weight:600}
+.big .rank{display:inline-block;margin-top:8px;font-size:18px;font-weight:750;padding:6px 14px;border-radius:30px;background:#eef3fe;color:var(--accent)}
+.big .sub{color:var(--muted);font-size:13.5px;margin-top:8px}
+.signs li{margin:5px 0}
+.save{display:flex;gap:8px}
+.save input{flex:1;min-height:48px;border-radius:12px;border:1.5px solid var(--line);padding:0 12px;font-size:16px;min-width:0}
+.save .btn{width:auto}
+.msg{font-size:13px;color:var(--muted);margin-top:8px;min-height:18px}
+
+/* leaderboard */
+.tabs{display:flex;gap:6px;margin:6px 0 12px}
+.tabs button{flex:1;min-height:44px;border-radius:11px;background:#fff;border:1.5px solid var(--line);font-weight:650;font-size:14px}
+.tabs button.sel{border-color:var(--accent);color:var(--accent);background:#eef3fe}
+.lb{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.lb .row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);font-size:15px}
+.lb .row:first-child{border-top:0}
+.lb .pos{width:28px;font-weight:800;color:var(--muted)}
+.lb .row:nth-child(1) .pos{color:#c99a06}
+.lb .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb .sc{font-weight:750}
+.lb .empty{padding:22px;text-align:center;color:var(--muted)}
+h2.title{font-size:22px;margin:4px 0}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(20px);opacity:0;
+  background:#1c2230;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;transition:.25s;pointer-events:none;z-index:9}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- START -->
+  <section class="screen on" id="s-start">
+    <div class="hero">
+      <div class="logo">🙂🤖</div>
+      <h1>Bot or Human?</h1>
+      <p>Bots now write like people. Can you still tell?</p>
+    </div>
+    <div class="box">
+      <h3>How to play</h3>
+      <ol>
+        <li>Read a forum thread.</li>
+        <li>For every post and reply, tap <b>Human</b> or <b>Bot</b>.</li>
+        <li>Press <b>Reveal</b> to see the answers and the clues.</li>
+      </ol>
+    </div>
+    <div class="box">
+      <h3>Choose a level</h3>
+      <div class="levels" id="levels"></div>
+      <div class="best" id="best"></div>
+    </div>
+    <div class="stack">
+      <button class="btn primary" id="play">Play</button>
+      <button class="btn ghost" id="openLb">🏆 Leaderboard</button>
+    </div>
+    <div class="note"><b>Simulation</b> · all accounts are fictional</div>
+  </section>
+
+  <!-- THREAD -->
+  <section class="screen" id="s-thread">
+    <div class="topbar">
+      <button class="x" id="quit" aria-label="Home">✕</button>
+      <div class="prog"><small id="progTxt">Thread 1 of 3</small><div class="bar"><i id="progBar"></i></div></div>
+      <div class="pts" id="pts">0 pts</div>
+    </div>
+    <div class="forumhead"><span class="chip" id="forum"></span><h2 id="ttitle"></h2></div>
+    <div class="posts" id="posts"></div>
+    <div class="note"><b>Simulation</b> · all accounts are fictional</div>
+    <div class="dock">
+      <div class="tscore" id="tscore"></div>
+      <button class="btn primary" id="reveal" disabled>Reveal</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="screen" id="s-results">
+    <div class="big">
+      <div><span class="num" id="rScore">0</span> <span class="of" id="rTotal">/ 0</span></div>
+      <div class="rank" id="rRank"></div>
+      <div class="sub" id="rSub"></div>
+    </div>
+    <div class="box">
+      <h3>🔎 Signs of a bot</h3>
+      <ul class="signs" id="signs" style="padding-left:20px;font-size:14.5px;color:#39404f"></ul>
+    </div>
+    <div class="box">
+      <h3>Save to the leaderboard</h3>
+      <div class="save"><input id="nm" maxlength="20" placeholder="Your name" autocomplete="off"><button class="btn primary" id="saveBtn">Save</button></div>
+      <div class="msg" id="saveMsg"></div>
+    </div>
+    <div class="stack">
+      <button class="btn ghost" id="share">📤 Share my score</button>
+      <button class="btn primary" id="again">Play again</button>
+      <button class="btn ghost" id="home">Home</button>
+    </div>
+    <div class="note"><b>Simulation</b> · all accounts are fictional</div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="screen" id="s-lb">
+    <div class="topbar">
+      <button class="x" id="lbBack" aria-label="Back">←</button>
+      <h2 class="title">🏆 Leaderboard</h2>
+    </div>
+    <div class="tabs" id="lbTabs"></div>
+    <div class="lb" id="lbList"></div>
+    <div class="note"><b>Simulation</b> · all accounts are fictional</div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="threads.js"></script>
+<script>
+// ---- mobile app feel (iPhone ignores user-scalable=no) ----
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
+
+// ---- leaderboard backend (Supabase, read + insert only) ----
+const SB_URL='https://bhfgwlkzkbwcwyoypwhy.supabase.co/rest/v1/boh_scores';
+const SB_KEY='sb_publishable_9YylflVQca-62NHsBKSTeA_GY896nj3';
+
+const LEVELS=[
+  {id:'easy',  name:'Easy',   desc:'Obvious bots'},
+  {id:'medium',name:'Medium', desc:'Smoother bots'},
+  {id:'hard',  name:'Hard',   desc:'Very human-like'},
+  {id:'all',   name:'All',    desc:'Easy → Hard'}
+];
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+let level=store.get('boh_level')||'all';
+let threads=[],ti=0,guesses=[],score=0,total=0,revealed=false,saved=false,lbLevel='all';
+
+// ---- cartoon avatars (same style for bots and humans, so the face is never a clue) ----
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function avatar(name){
+  const h=hash(name),p=(n,m)=>Math.floor(h/n)%m;
+  const bgs=['#ffd6a5','#caffbf','#9bf6ff','#bdb2ff','#ffc6ff','#fdffb6','#a0c4ff','#ffadad'];
+  const skins=['#f1c27d','#e0ac69','#c68642','#8d5524','#ffdbac','#d9a066'];
+  const hairs=['#2b1d0e','#4a3018','#000','#7a4b24','#b55239','#555'];
+  const bg=bgs[p(1,8)],sk=skins[p(8,6)],hr=hairs[p(48,6)],style=p(288,4),mouth=p(1152,3),glasses=p(3456,5)===0;
+  const hair=[`<path d="M20 38c0-14 10-22 20-22s20 8 20 22c-4-7-11-10-20-10s-16 3-20 10z" fill="${hr}"/>`,
+    `<path d="M18 42c0-18 10-26 22-26s22 8 22 26c-3-4-6-6-8-6-2-5-8-8-14-8s-12 3-14 8c-2 0-5 2-8 6z" fill="${hr}"/>`,
+    `<path d="M19 40c1-15 10-23 21-23s20 8 21 23l-3 14-2-16c-5-4-10-6-16-6s-11 2-16 6l-2 16z" fill="${hr}"/>`,
+    `<path d="M22 32c4-10 11-14 18-14s14 4 18 14c-6-3-12-4-18-4s-12 1-18 4z" fill="${hr}"/>`][style];
+  const m=['<path d="M33 52q7 6 14 0" stroke="#3b2a20" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    '<path d="M34 53h12" stroke="#3b2a20" stroke-width="2.4" stroke-linecap="round"/>',
+    '<path d="M33 51q7 8 14 0z" fill="#7a2e2e"/>'][mouth];
+  const g=glasses?'<g stroke="#333" stroke-width="1.8" fill="none"><circle cx="33" cy="42" r="5"/><circle cx="47" cy="42" r="5"/><path d="M38 42h4"/></g>':'';
+  return `<svg viewBox="0 0 80 80" aria-hidden="true"><rect width="80" height="80" fill="${bg}"/><circle cx="40" cy="44" r="21" fill="${sk}"/>${hair}<circle cx="33" cy="42" r="2.4" fill="#222"/><circle cx="47" cy="42" r="2.4" fill="#222"/>${g}${m}</svg>`;
+}
+
+// ---- screens ----
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));window.scrollTo(0,0)}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2200)}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function itemsFor(lv){return THREADS.filter(t=>lv==='all'||t.level===lv)}
+function countItems(lv){return itemsFor(lv).reduce((n,t)=>n+t.items.length,0)}
+
+function renderLevels(){
+  $('levels').innerHTML=LEVELS.map(l=>`<button class="lvl ${l.id===level?'sel':''}" data-l="${l.id}"><b>${l.name}</b><small>${l.desc}<br>${itemsFor(l.id).length} threads</small></button>`).join('');
+  const b=store.get('boh_best_'+level);
+  $('best').textContent=b?`Your best on ${LEVELS.find(x=>x.id===level).name}: ${b} / ${countItems(level)}`:'';
+}
+$('levels').onclick=e=>{const b=e.target.closest('.lvl');if(!b)return;level=b.dataset.l;store.set('boh_level',level);renderLevels()};
+
+function start(){
+  threads=itemsFor(level);ti=0;score=0;total=countItems(level);saved=false;
+  $('saveMsg').textContent='';$('saveBtn').disabled=false;
+  loadThread();show('s-thread');
+}
+function loadThread(){
+  const t=threads[ti];guesses=new Array(t.items.length).fill(null);revealed=false;
+  $('progTxt').textContent=`Thread ${ti+1} of ${threads.length} · ${t.level[0].toUpperCase()+t.level.slice(1)}`;
+  $('progBar').style.width=(ti/threads.length*100)+'%';
+  $('pts').textContent=score+' pts';
+  $('forum').textContent=t.forum;$('ttitle').textContent=t.title;
+  $('posts').innerHTML=t.items.map((it,i)=>`
+    <div class="post ${i===0?'op':'reply'}" data-i="${i}">
+      <div class="who">${avatar(it.user)}<div><div class="nm">${esc(it.user)}</div><div class="tm">${i===0?'started the thread':esc(it.after)}</div></div>
+        <span class="tag ${it.who==='b'?'isb':'ish'}">${it.who==='b'?'BOT':'HUMAN'}</span></div>
+      <div class="txt">${esc(it.text)}</div>
+      <div class="guess"><button class="h" data-g="h">🙂 Human</button><button class="b" data-g="b">🤖 Bot</button></div>
+      <div class="verdict"></div>
+    </div>`).join('');
+  $('tscore').style.display='none';
+  updateReveal();window.scrollTo(0,0);
+}
+$('posts').onclick=e=>{
+  const b=e.target.closest('.guess button');if(!b||revealed)return;
+  const p=b.closest('.post'),i=+p.dataset.i;guesses[i]=b.dataset.g;
+  p.querySelectorAll('.guess button').forEach(x=>x.classList.toggle('sel',x===b));
+  updateReveal();
+};
+function updateReveal(){
+  const n=guesses.filter(Boolean).length,btn=$('reveal');
+  if(revealed){btn.disabled=false;btn.textContent=ti<threads.length-1?'Next thread →':'See my score';return}
+  btn.disabled=n<guesses.length;
+  btn.textContent=n<guesses.length?`Reveal (${n}/${guesses.length} guessed)`:'Reveal';
+}
+$('reveal').onclick=()=>{
+  if(!revealed){
+    const t=threads[ti];let got=0;
+    document.querySelectorAll('#posts .post').forEach(p=>{
+      const i=+p.dataset.i,it=t.items[i],ok=guesses[i]===it.who;if(ok)got++;
+      p.classList.add('done',ok?'right':'wrong');
+      p.querySelector('.verdict').innerHTML=`<b>${ok?'✓ Right':'✗ Wrong'}, ${it.who==='b'?'this was a bot':'this was a human'}</b>${esc(it.why)}`;
+    });
+    score+=got;revealed=true;$('pts').textContent=score+' pts';
+    $('progBar').style.width=((ti+1)/threads.length*100)+'%';
+    const ts=$('tscore');ts.textContent=`You got ${got} of ${t.items.length} in this thread`;ts.style.display='block';
+    updateReveal();
+    const first=document.querySelector('#posts .post.wrong')||document.querySelector('#posts .post');
+    first.scrollIntoView({behavior:'smooth',block:'center'});
+  }else if(ti<threads.length-1){ti++;loadThread()}
+  else results();
+};
+$('quit').onclick=()=>{renderLevels();show('s-start')};
+
+function rankFor(pct){return pct>=90?'🏅 Bot Hunter':pct>=75?'🔍 Bot Spotter':pct>=60?'👀 Sharp Eye':pct>=40?'🪙 Coin Flipper':'🎣 Easily Fooled'}
+function results(){
+  const pct=Math.round(score/total*100);
+  $('rScore').textContent=score;$('rTotal').textContent='/ '+total;
+  $('rRank').textContent=rankFor(pct);
+  const key='boh_best_'+level,prev=+(store.get(key)||0);
+  let sub=`${pct}% correct on ${LEVELS.find(x=>x.id===level).name}.`;
+  if(score>prev){store.set(key,score);if(prev)sub+=' New personal best!'}else sub+=` Your best: ${prev}.`;
+  $('rSub').textContent=sub;
+  $('signs').innerHTML=BOT_SIGNS.map(s=>`<li>${esc(s)}</li>`).join('');
+  const last=store.get('boh_name');if(last)$('nm').value=last;
+  show('s-results');
+}
+$('again').onclick=start;
+$('home').onclick=()=>{renderLevels();show('s-start')};
+$('play').onclick=start;
+
+// ---- share ----
+$('share').onclick=async()=>{
+  const lv=LEVELS.find(x=>x.id===level).name;
+  const text=`I scored ${score}/${total} on Bot or Human? (${lv}). Can you tell bots from real people?`;
+  const url=location.href.split('#')[0];
+  if(navigator.share){try{await navigator.share({title:'Bot or Human?',text,url})}catch(e){} return}
+  try{await navigator.clipboard.writeText(text+' '+url);toast('Copied, paste it anywhere')}catch(e){toast('Could not share on this device')}
+};
+
+// ---- leaderboard ----
+$('saveBtn').onclick=async()=>{
+  const name=$('nm').value.trim().slice(0,20);
+  if(!name){$('saveMsg').textContent='Type a name first.';return}
+  if(saved){$('saveMsg').textContent='Already saved for this game.';return}
+  $('saveBtn').disabled=true;$('saveMsg').textContent='Saving…';
+  try{
+    const r=await fetch(SB_URL,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify({name,level,score,total})});
+    if(!r.ok)throw 0;
+    saved=true;store.set('boh_name',name);$('saveMsg').textContent='Saved!';
+    lbLevel=level;openLb();
+  }catch(e){$('saveBtn').disabled=false;$('saveMsg').textContent='Could not save. Check your internet and try again.'}
+};
+function renderTabs(){$('lbTabs').innerHTML=LEVELS.map(l=>`<button data-l="${l.id}" class="${l.id===lbLevel?'sel':''}">${l.name}</button>`).join('')}
+$('lbTabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;lbLevel=b.dataset.l;renderTabs();loadLb()};
+async function loadLb(){
+  const box=$('lbList');box.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    const r=await fetch(`${SB_URL}?select=name,score,total&level=eq.${lbLevel}&order=score.desc,created_at.asc&limit=20`,{headers:{apikey:SB_KEY}});
+    if(!r.ok)throw 0;const rows=await r.json();
+    if(!rows.length){box.innerHTML='<div class="empty">No scores yet. Be the first!</div>';return}
+    box.innerHTML='';rows.forEach((x,i)=>{
+      const d=document.createElement('div');d.className='row';
+      d.innerHTML=`<span class="pos">${i+1}</span><span class="nm"></span><span class="sc">${x.score} / ${x.total}</span>`;
+      d.querySelector('.nm').textContent=x.name;box.appendChild(d);
+    });
+  }catch(e){box.innerHTML='<div class="empty">Could not load. Check your internet.</div>'}
+}
+let lbFrom='s-start';
+function openLb(){lbFrom=document.querySelector('.screen.on').id;renderTabs();loadLb();show('s-lb')}
+$('openLb').onclick=()=>{lbLevel=level;openLb()};
+$('lbBack').onclick=()=>{if(lbFrom==='s-start')renderLevels();show(lbFrom)};
+
+renderLevels();
+</script>
+</body>
+</html>
