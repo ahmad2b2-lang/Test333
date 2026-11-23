@@ -19,7 +19,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 input,textarea,select{font-size:16px;font-family:inherit}
 img{-webkit-user-drag:none}
 button{font-family:inherit;font-size:16px;cursor:pointer;color:inherit}
-.top{position:sticky;top:0;z-index:5;background:var(--g);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;align-items:center;gap:10px}
+.topw{position:sticky;top:0;z-index:5}
+.top{background:var(--g);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;align-items:center;gap:10px}
 .top h1{font-size:19px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top .ib{min-width:44px;height:44px;border:0;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-weight:700;padding:0 12px}
 .wrap{max-width:720px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-bottom) + 30px)}
@@ -104,11 +105,35 @@ ul.l li{margin:4px 0}
 .q .acts button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--ln);background:#fff}
 .sw{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:2px dashed var(--g);border-radius:14px;padding:12px;margin-bottom:12px}
 .sw button{min-height:44px;border-radius:12px;border:0;padding:0 16px;font-weight:700}
+/* game */
+#gbar{display:none;background:#fff;border-bottom:1px solid var(--ln);padding:8px 14px;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+#gbar.on{display:flex}
+#gbar .gf{font-size:30px;line-height:1}
+#gbar .gt{flex:1;min-width:0}
+#gbar .gt div{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gbar .gs{font-weight:800;font-size:18px;min-width:34px;text-align:center}
+.tbar{height:8px;border-radius:6px;background:#e9ece7;overflow:hidden;margin-top:4px}
+.tbar i{display:block;height:100%;background:var(--g);transition:width .2s linear}
+.tbar i.low{background:#e0a100}.tbar i.crit{background:#d93025}
+.play{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:var(--r);padding:14px;background:linear-gradient(135deg,#2e7d32,#4caf50);color:#fff;text-align:start;margin-bottom:6px}
+.play .ic{font-size:34px}.play b{font-size:17px;display:block}.play small{opacity:.9;font-size:13px}
+.stage{background:#fff;border:1px solid var(--ln);border-radius:20px;padding:16px;text-align:center;margin-bottom:12px}
+.face{width:150px;height:150px;margin:0 auto;display:block}
+.face.shake{animation:sh .45s}
+@keyframes sh{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.face.pop{animation:pp .45s}
+@keyframes pp{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.bub{position:relative;background:#f2f6f0;border-radius:16px;padding:14px;margin:12px 0 4px;font-size:17px;font-weight:600;text-align:start}
+.bub:before{content:"";position:absolute;top:-10px;left:50%;margin-left:-10px;border:10px solid transparent;border-top:0;border-bottom-color:#f2f6f0}
+.big{font-size:40px;font-weight:800;color:var(--g);margin:4px 0}
+.cnt{color:var(--mu);font-size:14px}
+.rec{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:4;box-shadow:0 6px 18px rgba(46,125,50,.35)}
+.mute{position:absolute;top:10px;inset-inline-end:10px;border:0;background:#f2f4f1;border-radius:12px;min-width:44px;height:44px;font-size:20px}
 .off-note{background:#eef1ec;color:var(--mu);font-size:13px;text-align:center;padding:6px;border-radius:10px;margin-bottom:10px}
 </style>
 </head>
 <body>
-<div class="top"><button class="ib" id="back" style="display:none" aria-label="Back">‹</button><h1 id="ttl">Shop Helper</h1><span class="pill" id="prog"></span><button class="ib" id="lang">ع</button></div>
+<div class="topw"><div class="top"><button class="ib" id="back" style="display:none" aria-label="Back">‹</button><h1 id="ttl">Shop Helper</h1><span class="pill" id="prog"></span><button class="ib" id="lang">ع</button></div><div id="gbar"></div></div>
 <div class="wrap" id="app"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -164,7 +189,22 @@ const T={
  offline:['Offline: showing saved data','بدون إنترنت: تعرض البيانات المحفوظة'],
  photoOff:['Photo','صورة'],
  pestMsg:['Pesticides and fertilizers are not in the guide yet. Ask an experienced colleague for now.','المبيدات والأسمدة غير موجودة في الدليل بعد. اسأل زميل خبير حاليًا.'],
- ok:['OK','تمام']
+ ok:['OK','تمام'],
+ play:['Practice: Serve customers','تدريب: خدمة الزبائن'], playSub:['Game: 10 customers, 30 seconds each','لعبة: 10 زبائن، 30 ثانية لكل واحد'],
+ gIntro:['You are the new employee. Customers come with requests. Use the guide to find the right product and tap Recommend this before time runs out.','أنت الموظف الجديد. الزبائن يجون بطلبات. استخدم الدليل تلقى المنتج الصحيح واضغط رشّح هذا قبل ما يخلص الوقت.'],
+ start:['Start shift','ابدأ الدوام'], best:['Best score','أعلى نتيجة'],
+ openGuide:['Open the guide','افتح الدليل'], customer:['Customer','زبون'],
+ recommend:['Recommend this','رشّح هذا'],
+ thanks:['Thank you, this is exactly what I need!','مشكور، هذا اللي أبغاه بالضبط!'],
+ wrong:['This is not what I need!','هذا مو اللي أبغاه!'],
+ slow:['Too slow. I am leaving!','تأخرت مرة، أنا ماشي!'],
+ youPicked:['You recommended','رشّحت'], right:['Right product','المنتج الصحيح'],
+ next:['Next customer','الزبون التالي'], seeRes:['See results','شوف النتيجة'],
+ shiftOver:['Shift over!','خلص الدوام!'], happy:['happy customers','زبون راضي'],
+ points:['points','نقطة'], newBest:['New best score!','رقم قياسي جديد!'],
+ review:['Review the ones you missed','راجع اللي فاتتك'], again:['Play again','العب مرة ثانية'],
+ backGuide:['Back to the guide','رجوع للدليل'], quit:['Quit game','اخرج من اللعبة'],
+ back2:['Back to customer','رجوع للزبون'], nothing:['nothing','لا شيء']
 };
 const t=k=>L(T[k]);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -233,11 +273,12 @@ function header(title,showBack){
 
 function render(){
  const h=location.hash||'#/'; const parts=h.slice(2).split('/');
- window.scrollTo(0,0);
+ window.scrollTo(0,0); gBarDraw();
  if(parts[0]==='need')return viewNeed(parts[1]);
  if(parts[0]==='p')return viewProduct(parts[1]);
  if(parts[0]==='prob')return viewProblem(+parts[1]);
  if(parts[0]==='checker')return viewChecker();
+ if(parts[0]==='game')return viewGame();
  return viewHome();
 }
 function offNote(){return navigator.onLine?'':'<div class="off-note">'+t('offline')+'</div>';}
@@ -254,6 +295,7 @@ let searchText='';
 function viewHome(){
  header(lang==='en'?'Shop Helper':'مساعد المحل',false);
  let h=offNote()+'<div class="search">🔍<input id="q" type="search" autocomplete="off" placeholder="'+esc(t('search'))+'" value="'+esc(searchText)+'"></div><div id="res"></div><div id="home">';
+ h+='<button class="play" onclick="go(\'#/game\')"><span class="ic">🎮</span><span><b>'+t('play')+'</b><small>'+t('playSub')+'</small></span></button>';
  h+='<h2>'+t('needs')+'</h2><div class="grid">';
  NEEDS.forEach(n=>{h+='<button class="need" onclick="go(\'#/need/'+n.id+'\')"><span class="ic">'+n.icon+'</span><b>'+esc(L(n.t))+'</b><small>'+esc(L(n.sub))+'</small></button>';});
  h+='<button class="need off" id="pest"><span class="ic">🧪</span><b>'+t('pest')+'</b><small>'+t('soon')+'</small></button></div>';
@@ -342,7 +384,9 @@ function viewProduct(id){
  if(p.with.length){h+='<h2>🛒 '+t('withT')+'</h2>'; p.with.forEach(w=>h+=pcard(w));}
  if(p.mis.length){h+='<div class="card mis"><h3>🚫 '+t('mis')+'</h3><ul class="l">'+p.mis.map(w=>'<li>'+esc(L(w))+'</li>').join('')+'</ul></div>';}
  h+='<button class="btn ghost" id="ask">❓ '+t('notAns')+'</button>';
+ if(G.on&&G.phase==='serve')h+='<button class="btn rec" id="recb">🤝 '+t('recommend')+'</button>';
  app.innerHTML=h; fillImgs(app);
+ const rb=document.getElementById('recb'); if(rb)rb.onclick=()=>gPick(id);
  document.getElementById('ask').onclick=()=>askDialog(id,'');
  const tg=document.getElementById('tg'); if(tg)tg.onclick=()=>setCheck(id,!ok);
 }
@@ -411,6 +455,118 @@ function pinPad(){
  }
  if(!sb||!navigator.onLine){app.innerHTML='<p class="mu">'+t('offline')+'</p>';return;}
  draw();
+}
+
+// ---------- Customer Simulator game ----------
+const GDUR=30, GN=10;
+const G={on:false,phase:'idle',q:[],i:0,start:0,res:[],timer:null,lastMood:''};
+let muted=LS.get('sh.mute',false), actx=null;
+function beep(notes,type,len){
+ if(muted)return; try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  notes.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;
+   const t0=actx.currentTime+i*len;g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(.25,t0+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+len);
+   o.connect(g);g.connect(actx.destination);o.start(t0);o.stop(t0+len+.02);});
+ }catch(e){}
+}
+const LOOKS=[{s:'#e0ac69',c:'red',b:1},{s:'#c68642',c:'white',b:1},{s:'#f1c27d',c:'red',b:0},{s:'#8d5524',c:'white',b:1},{s:'#d29b62',c:'red',b:1},{s:'#e8b98a',c:'white',b:0}];
+function faceSVG(mood,look,cls){
+ const L2=LOOKS[look%LOOKS.length];
+ const skin=mood==='angry'?'#e07a5f':L2.s;
+ const brow={calm:'M70 84 L92 84 M108 84 L130 84',worry:'M70 86 L92 80 M108 80 L130 86',happy:'M70 82 Q81 76 92 82 M108 82 Q119 76 130 82',angry:'M70 78 L93 88 M107 88 L130 78'}[mood];
+ const mouth={calm:'M86 134 L114 134',worry:'M86 138 Q100 130 114 138',happy:'M80 128 Q100 150 120 128',angry:'M82 142 Q100 124 118 142'}[mood];
+ const eyes=mood==='happy'?'<path d="M76 100 Q82 94 88 100 M112 100 Q118 94 124 100" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>':'<circle cx="82" cy="100" r="5" fill="#222"/><circle cx="118" cy="100" r="5" fill="#222"/>';
+ const cloth=L2.c==='red'?'url(#chk)':'#fafafa';
+ return '<svg class="face '+(cls||'')+'" viewBox="0 0 200 200"><defs><pattern id="chk" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#fff"/><rect width="6" height="6" fill="#c62828"/><rect x="6" y="6" width="6" height="6" fill="#c62828"/></pattern></defs>'+
+  '<path d="M38 100 Q36 30 100 26 Q164 30 162 100 L176 186 L24 186 Z" fill="'+cloth+'" stroke="#ddd" stroke-width="1.5"/>'+
+  '<ellipse cx="100" cy="110" rx="44" ry="52" fill="'+skin+'"/>'+
+  (L2.b?'<path d="M58 118 Q60 170 100 168 Q140 170 142 118 Q132 150 100 150 Q68 150 58 118 Z" fill="#3b2a20" opacity=".85"/>':'')+
+  '<ellipse cx="100" cy="46" rx="56" ry="11" fill="none" stroke="#1d1d1d" stroke-width="8"/>'+
+  eyes+'<path d="'+brow+'" stroke="#3b2a20" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+  '<path d="'+mouth+'" stroke="#5a1f1f" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+  (mood==='happy'?'<circle cx="70" cy="122" r="7" fill="#ff8a80" opacity=".5"/><circle cx="130" cy="122" r="7" fill="#ff8a80" opacity=".5"/>':'')+
+  (mood==='angry'?'<path d="M150 40 l10 -10 M156 50 l14 -4 M146 30 l2 -14" stroke="#d93025" stroke-width="4" stroke-linecap="round"/>':'')+
+  '</svg>';
+}
+const gReq=()=>REQUESTS[G.q[G.i]];
+const gLeft=()=>Math.max(0,GDUR-(Date.now()-G.start)/1000);
+const gMood=l=>l>10?'calm':'worry';
+function gStart(){
+ try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}
+ const idx=REQUESTS.map((_,i)=>i); for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+ G.q=idx.slice(0,GN); G.i=0; G.res=[]; G.on=true; gServe();
+}
+function gServe(){
+ G.phase='serve'; G.start=Date.now(); G.lastMood='calm';
+ clearInterval(G.timer); G.timer=setInterval(gTick,200);
+ if(location.hash==='#/game')render(); else go('#/game');
+}
+function gTick(){
+ const l=gLeft();
+ const pct=(l/GDUR*100)+'%', cls=l<=5?'crit':l<=10?'low':'';
+ document.querySelectorAll('.tbar i').forEach(i=>{i.style.width=pct;i.className=cls;});
+ document.querySelectorAll('.gsec').forEach(e=>e.textContent=Math.ceil(l));
+ const m=gMood(l);
+ if(m!==G.lastMood){G.lastMood=m; const f=document.getElementById('gface'); if(f)f.outerHTML=faceSVG(m,G.q[G.i]).replace('<svg ','<svg id="gface" ');
+  const e=document.querySelector('#gbar .gf'); if(e)e.textContent=m==='calm'?'😐':'😟';}
+ if(l<=0)gFinish(null);
+}
+function gPick(id){ if(G.on&&G.phase==='serve')gFinish(id); }
+function gFinish(pick){
+ clearInterval(G.timer);
+ const r=gReq(), l=gLeft(), ok=!!pick&&r.ok.includes(pick);
+ G.res.push({r,pick,ok,pts:ok?100+Math.round(l*5):0});
+ G.phase='result';
+ ok?beep([523,659,784],'sine',.12):beep([220,160],'sawtooth',.22);
+ if(location.hash==='#/game')render(); else go('#/game');
+}
+function gNextBtn(){
+ if(G.i<G.q.length-1){G.i++;gServe();}
+ else{G.phase='end';G.on=false;
+  const sc=G.res.reduce((a,b)=>a+b.pts,0), best=LS.get('sh.best',0);
+  G.newBest=sc>best; if(G.newBest)LS.set('sh.best',sc); render();}
+}
+function gQuit(){clearInterval(G.timer);G.on=false;G.phase='idle';go('#/');}
+function gBarDraw(){
+ const b=document.getElementById('gbar'); const show=G.on&&G.phase==='serve'&&location.hash!=='#/game';
+ b.className=show?'on':'';
+ if(!show){b.innerHTML='';return;}
+ const l=gLeft();
+ b.innerHTML='<span class="gf">'+(gMood(l)==='calm'?'😐':'😟')+'</span><div class="gt"><div>'+esc(L(gReq().t))+'</div><div class="tbar"><i style="width:'+(l/GDUR*100)+'%"></i></div></div><span class="gs gsec">'+Math.ceil(l)+'</span>';
+ b.onclick=()=>go('#/game');
+}
+function viewGame(){
+ header(t('play'),true);
+ const muteBtn='<button class="mute" id="mu">'+(muted?'🔇':'🔊')+'</button>';
+ let h='';
+ if(G.phase==='serve'){
+  const r=gReq(), l=gLeft();
+  h='<div class="stage" style="position:relative">'+muteBtn+'<div class="cnt">'+t('customer')+' '+(G.i+1)+' / '+G.q.length+'</div>'+faceSVG(gMood(l),G.q[G.i]).replace('<svg ','<svg id="gface" ')+
+   '<div class="bub">'+esc(L(r.t))+'</div><div class="tbar" style="height:12px;margin-top:14px"><i style="width:'+(l/GDUR*100)+'%"></i></div><div class="cnt" style="margin-top:6px">⏱ <b class="gsec">'+Math.ceil(l)+'</b> '+(lang==='ar'?'ث':'s')+'</div></div>'+
+   '<button class="btn" onclick="go(\'#/\')">📖 '+t('openGuide')+'</button><div class="foot"><button onclick="gQuit()">'+t('quit')+'</button></div>';
+ } else if(G.phase==='result'){
+  const x=G.res[G.res.length-1];
+  const msg=x.ok?t('thanks'):(x.pick?t('wrong'):t('slow'));
+  h='<div class="stage" style="position:relative">'+muteBtn+'<div class="cnt">'+t('customer')+' '+(G.i+1)+' / '+G.q.length+'</div>'+faceSVG(x.ok?'happy':'angry',G.q[G.i],x.ok?'pop':'shake')+
+   '<div class="bub">'+esc(msg)+'</div>'+(x.ok?'<div class="big" dir="ltr">+'+x.pts+'</div>':'')+'</div>';
+  if(!x.ok){h+='<h2>'+t('youPicked')+'</h2>'+(x.pick?pcard(x.pick):'<p class="mu">'+t('nothing')+'</p>');}
+  h+='<h2>✅ '+t('right')+'</h2>'; x.r.ok.forEach(id=>h+=pcard(id));
+  h+='<div class="tip">💡 '+esc(L(x.r.why))+'</div>';
+  h+='<button class="btn" onclick="gNextBtn()">'+(G.i<G.q.length-1?t('next')+(lang==='ar'?' ←':' →'):t('seeRes'))+'</button>';
+ } else if(G.phase==='end'){
+  const sc=G.res.reduce((a,b)=>a+b.pts,0), hp=G.res.filter(x=>x.ok).length;
+  h='<div class="stage" style="position:relative">'+muteBtn+'<h3 style="margin:4px 0">'+t('shiftOver')+'</h3>'+faceSVG(hp>=7?'happy':hp>=4?'calm':'angry',hp)+
+   '<div class="big">'+sc+' '+t('points')+'</div><div style="font-size:18px;font-weight:700">😊 '+hp+' / '+G.res.length+' '+t('happy')+'</div>'+
+   '<div class="cnt" style="margin-top:6px">'+(G.newBest?'🏆 '+t('newBest'):t('best')+': '+LS.get('sh.best',0))+'</div></div>';
+  const miss=G.res.filter(x=>!x.ok);
+  if(miss.length){h+='<h2>'+t('review')+'</h2>';
+   miss.forEach(x=>{h+='<div class="card"><div style="font-weight:600;margin-bottom:6px">“'+esc(L(x.r.t))+'”</div><div class="mu">💡 '+esc(L(x.r.why))+'</div></div>'; x.r.ok.forEach(id=>h+=pcard(id));});}
+  h+='<button class="btn" onclick="gStart()">🔁 '+t('again')+'</button><button class="btn ghost" onclick="G.phase=\'idle\';go(\'#/\')">'+t('backGuide')+'</button>';
+ } else {
+  h='<div class="stage" style="position:relative">'+muteBtn+faceSVG('calm',Math.floor(Math.random()*6))+'<div class="bub">'+t('gIntro')+'</div>'+
+   '<div class="cnt" style="margin-top:8px">'+t('best')+': '+LS.get('sh.best',0)+'</div></div><button class="btn" onclick="gStart()">▶ '+t('start')+'</button>';
+ }
+ app.innerHTML=h; fillImgs(app);
+ const mu=document.getElementById('mu'); if(mu)mu.onclick=()=>{muted=!muted;LS.set('sh.mute',muted);mu.textContent=muted?'🔇':'🔊';};
 }
 
 // ---------- start ----------
