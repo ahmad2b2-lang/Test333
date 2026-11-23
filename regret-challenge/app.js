@@ -10,6 +10,7 @@
   const STAGES = [1, 3, 12];                            // months
   const PIN_MIN = 4, PIN_MAX = 8;
   const ENC = "enc:v1:";
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, storageKey: "regret-challenge-auth" }
@@ -93,6 +94,7 @@
       $("a-head").textContent = head; $("a-body").innerHTML = bodyHtml;
       $("a-yes").textContent = yes; $("a-no").textContent = no; $("a-no").hidden = !no;
       $("a-yes").className = danger ? "btn danger" : "btn";
+      $("a-yes").disabled = false;
       $("m-ask").hidden = false;
       $("a-yes").onclick = () => { $("m-ask").hidden = true; res(true); };
       $("a-no").onclick = () => { $("m-ask").hidden = true; res(false); };
@@ -122,14 +124,23 @@
     } catch { return null; }
   }
   const keyStoreName = () => `rc-key-${S.uid}`;
-  function downloadKey() {
-    const body = JSON.stringify({ app: "regret-challenge", v: 1, user: S.player.username, uid: S.uid, key: S.keyB64, made: new Date().toISOString() }, null, 1);
-    const blob = new Blob([body], { type: "application/octet-stream" });
+  // Saves the key file. iPhone: the share sheet ("Save to Files"), because a normal
+  // download can take over the page (and broke the lock on iPhone before).
+  // Other phones/PCs: a normal download. Returns true when the file was handed over.
+  async function saveKeyFile(keyB64 = S.keyB64) {
+    const body = JSON.stringify({ app: "regret-challenge", v: 1, user: S.player.username, uid: S.uid, key: keyB64, made: new Date().toISOString() }, null, 1);
+    const file = new File([body], keyFileName(), { type: "application/octet-stream" });
+    if (isIOS && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: "Regret Challenge key file" }); return true; }
+      catch (e) { if (e && e.name === "AbortError") return false; }
+    }
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(file);
     a.download = keyFileName();
+    a.target = "_blank"; a.rel = "noopener";
     document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    return true;
   }
   const keyFileName = () => `regret-challenge-${(S.player?.username || "player").replace(/[^\p{L}\p{N}_-]+/gu, "-")}.key`;
 
@@ -252,6 +263,8 @@
       }
       await loadData();
       if (player.locked && !S.key) { openKeyScreen(); return; }
+      // finish a lock that was interrupted half way (some rows still readable)
+      if (player.locked && S.key && S.decisions.some((d) => (d.raw.title && !isEnc(d.raw.title)) || (d.raw.note && !isEnc(d.raw.note)))) rewriteAll(true).catch(() => {});
       renderHome();
       show("s-home", false);
       if (fresh && !player.locked && !store.get(`rc-lock-asked-${S.uid}`)) setTimeout(offerLock, 600);
@@ -646,27 +659,68 @@
     store.set(`rc-lock-asked-${S.uid}`, "1");
     if (await ask("🔒 Keep your decisions private?", LOCK_INFO + `<div class="muted" style="margin-top:10px">Optional. You can also turn it on later in Settings.</div>`, "Yes, give me a key file", "No thanks")) turnOnLock(false);
   }
+  // Step 1: make the key and let the player save the file (nothing is locked yet).
+  // Step 2: only after "I've saved it" the lock is written, then checked on the server.
   async function turnOnLock(confirm = true) {
-    if (confirm && !(await ask("Turn on the privacy lock?", LOCK_INFO, "Turn on & download key", "Cancel"))) return;
+    if (confirm && !(await ask("Turn on the privacy lock?", LOCK_INFO, "Continue", "Cancel"))) return;
+    let keyB64;
     try {
       const k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
-      const raw = new Uint8Array(await crypto.subtle.exportKey("raw", k));
-      S.keyB64 = toB64(raw); S.key = await importKey(S.keyB64);
-      store.set(keyStoreName(), S.keyB64);
-      downloadKey();
+      keyB64 = toB64(new Uint8Array(await crypto.subtle.exportKey("raw", k)));
+    } catch { toast("This browser can't make a key. Try Safari or Chrome."); return; }
+    if (!(await keySaveStep(keyB64))) { toast("Privacy lock was not turned on"); return; }
+    const btnsOff = () => document.querySelectorAll("#set-lock button").forEach((b) => (b.disabled = true));
+    btnsOff(); toast("Locking your decisions…", 8000);
+    try {
+      S.keyB64 = keyB64; S.key = await importKey(keyB64);
+      store.set(keyStoreName(), keyB64);
       const key_check = await enc(checkText());
       const { error } = await sb.from("rc_players").update({ locked: true, key_check }).eq("user_id", S.uid);
       if (error) throw error;
       S.player.locked = true; S.player.key_check = key_check;
       await rewriteAll(true);
+      const n = await verifyLocked();
       renderSettings(); renderHome();
-      await ask("🔒 Privacy lock is on", `Your key file <b>${esc(keyFileName())}</b> was saved to this device (usually the Downloads folder).
-        <div class="ok-box">Next time you log in (on this phone or any other), the game will ask you to pick this file.</div>`, "Got it", "");
+      $("toast").hidden = true;
+      await ask("🔒 Privacy lock is on", `Checked on the server: ${n ? `your ${n} decision${n === 1 ? " is" : "s are"} now scrambled` : "new decisions will be scrambled"}. Nobody can read ${n === 1 ? "it" : "them"} without your key file.
+        <div class="ok-box">Next time you log in (on this phone or any other), the game will ask you to pick <b>${esc(keyFileName())}</b>.</div>`, "Got it", "");
     } catch (e) {
       console.error(e);
-      toast("Couldn't turn on the lock. Check your connection and try again.");
-      await loadData().catch(() => {}); renderSettings();
+      $("toast").hidden = true;
+      await ask("Lock not finished", "Something went wrong while locking (maybe the connection). Your key is kept on this phone — open Settings and try again.", "OK", "");
+      try { const { data } = await sb.from("rc_players").select("*").maybeSingle(); if (data) S.player = data; } catch {}
+      if (!S.player.locked) { store.del(keyStoreName()); S.key = null; S.keyB64 = null; }
+      renderSettings(); renderHome();
     }
+  }
+  function keySaveStep(keyB64) {
+    const p = ask("💾 Save your key file",
+      `Tap the button below and save <b>${esc(keyFileName())}</b> somewhere safe${isIOS ? ' — choose <b>Save to Files</b>' : ""}.
+       <button class="btn light" id="ks-save" style="margin-top:12px">💾 Save key file</button>
+       <div class="muted" id="ks-status" style="margin-top:8px;text-align:center">Nothing is locked until you save it.</div>`,
+      "I've saved it — lock now", "Cancel");
+    $("a-yes").disabled = true;
+    $("ks-save").onclick = async () => {
+      if (await saveKeyFile(keyB64)) {
+        $("ks-status").innerHTML = `✅ Key file handed to your phone. ${isIOS ? "Check it's in the Files app." : "Check your Downloads folder."}`;
+        $("ks-save").textContent = "💾 Save it again";
+        $("a-yes").disabled = false;
+      } else $("ks-status").textContent = "Not saved yet — tap the button and choose where to save it.";
+    };
+    return p;
+  }
+  // reads back from the server: lock flag, key check and that no decision text is left readable
+  async function verifyLocked() {
+    const [{ data: p, error: e1 }, { data: ds, error: e2 }, { data: cs, error: e3 }] = await Promise.all([
+      sb.from("rc_players").select("locked,key_check").maybeSingle(),
+      sb.from("rc_decisions").select("title,note"),
+      sb.from("rc_checkins").select("note")
+    ]);
+    if (e1 || e2 || e3) throw e1 || e2 || e3;
+    if (!p || !p.locked || (await dec(p.key_check)) !== checkText()) throw new Error("lock flag not saved");
+    const plain = ds.filter((d) => !isEnc(d.title) || (d.note && !isEnc(d.note))).length + cs.filter((c) => c.note && !isEnc(c.note)).length;
+    if (plain) throw new Error(`${plain} rows still readable`);
+    return ds.length;
   }
   async function turnOffLock() {
     if (!S.key) { openKeyScreen(); return; }
@@ -716,7 +770,7 @@
         <button class="btn light" id="lk-dl" style="margin-top:12px">⬇️ Download key file again</button>
         <button class="btn light" id="lk-forget" style="margin-top:10px">Forget the key on this device</button>
         <button class="btn light" id="lk-off" style="margin-top:10px">Turn off privacy lock</button>`;
-      $("lk-dl").onclick = downloadKey;
+      $("lk-dl").onclick = async () => { if (await saveKeyFile()) toast("Key file saved"); };
       $("lk-forget").onclick = async () => {
         if (!(await ask("Forget the key here?", "This device will need your key file again to open your decisions. Make sure you still have the file!", "Forget it", "Cancel", true))) return;
         store.del(keyStoreName()); S.key = null; S.keyB64 = null;
@@ -733,6 +787,12 @@
   // ---------- Settings ----------
   $("b-settings").onclick = () => { renderSettings(); refreshInstall(); show("s-settings"); };
   $("set-logout").onclick = async () => {
+    if (S.player?.locked && S.key) {
+      const p = ask("Log out?", `To open your decisions next time you'll need your key file <b>${esc(keyFileName())}</b>. Make sure it's saved.
+        <button class="btn light" id="lo-save" style="margin-top:12px">💾 Save key file again</button>`, "Log out", "Cancel");
+      $("lo-save").onclick = async () => { if (await saveKeyFile()) toast("Key file saved"); };
+      if (!(await p)) return;
+    }
     if (S.uid) store.del(keyStoreName());   // the next login must pick the key file again
     await sb.auth.signOut();
     Object.assign(S, { uid: null, player: null, key: null, keyB64: null, decisions: [], greeted: false, skipLookBacks: false, checkOpen: null });
@@ -790,7 +850,6 @@
   // ---------- Install ----------
   let installEvt = null;
   const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; refreshInstall(); });
   window.addEventListener("appinstalled", () => { installEvt = null; refreshInstall(); toast("Installed! Open it from your home screen."); });
   function refreshInstall() {
