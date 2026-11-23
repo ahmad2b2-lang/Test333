@@ -213,7 +213,7 @@
       }
       firstPin = null; pin = ""; renderPin();
       S.greeted = false; S.skipLookBacks = false;
-      await enterApp();
+      await enterApp(true);
     } catch {
       err.textContent = "No connection. Check your internet.";
     } finally {
@@ -222,7 +222,8 @@
   };
 
   // ---------- Loading ----------
-  async function enterApp() {
+  // fresh = the player just typed their PIN (not reopening a saved session)
+  async function enterApp(fresh = false) {
     show("s-boot", false);
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { setMode("login"); show("s-auth", false); return; }
@@ -239,6 +240,7 @@
       S.player = player;
       // key on this device?
       S.key = null; S.keyB64 = null;
+      if (fresh) store.del(keyStoreName());   // every login asks for the key file again
       const saved = store.get(keyStoreName());
       if (!player.locked && saved) store.del(keyStoreName());
       if (player.locked && saved) {
@@ -252,6 +254,7 @@
       if (player.locked && !S.key) { openKeyScreen(); return; }
       renderHome();
       show("s-home", false);
+      if (fresh && !player.locked && !store.get(`rc-lock-asked-${S.uid}`)) setTimeout(offerLock, 600);
     } catch (e) {
       console.error(e);
       show("s-auth", false);
@@ -352,6 +355,7 @@
   // runs each time the garden screen is shown
   function homeArrived() {
     if (S.screen !== "s-home" || S.planting) return;
+    if (!$("m-ask").hidden) { setTimeout(homeArrived, 1500); return; }
     buildQueue();
     if (S.queue.length && !S.skipLookBacks && !S.checkOpen) { startLookBacks(); return; }
     if (!S.greeted) {
@@ -634,12 +638,16 @@
     } catch { err.textContent = "That doesn't look like a Regret Challenge key file."; }
   };
 
-  async function turnOnLock() {
-    const ok = await ask("Turn on the privacy lock?",
-      `Your decision texts and notes will be scrambled on this phone before they are saved. Nobody — not even the app owner — can read them.
-       <div class="warn"><b>Important:</b> a key file will be downloaded now. Keep it safe (e.g. save it to Google Drive or send it to yourself). <b>If you lose it, locked decisions can never be recovered by anyone.</b></div>`,
-      "Turn on & download key", "Cancel");
-    if (!ok) return;
+  const LOCK_INFO = `Your decision texts and notes will be scrambled on this phone before they are saved. Nobody — not even the app owner — can read them.
+       <div class="ok-box">You'll get a <b>key file</b> now. Each time you log in, the game asks you to pick that file from your device to open your decisions.</div>
+       <div class="warn"><b>Keep the key file safe</b> (e.g. save it to Google Drive or send it to yourself). <b>If you lose it, locked decisions can never be recovered by anyone.</b></div>`;
+  // asked once after logging in, so every player knows the option exists
+  async function offerLock() {
+    store.set(`rc-lock-asked-${S.uid}`, "1");
+    if (await ask("🔒 Keep your decisions private?", LOCK_INFO + `<div class="muted" style="margin-top:10px">Optional. You can also turn it on later in Settings.</div>`, "Yes, give me a key file", "No thanks")) turnOnLock(false);
+  }
+  async function turnOnLock(confirm = true) {
+    if (confirm && !(await ask("Turn on the privacy lock?", LOCK_INFO, "Turn on & download key", "Cancel"))) return;
     try {
       const k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
       const raw = new Uint8Array(await crypto.subtle.exportKey("raw", k));
@@ -653,7 +661,7 @@
       await rewriteAll(true);
       renderSettings(); renderHome();
       await ask("🔒 Privacy lock is on", `Your key file <b>${esc(keyFileName())}</b> was saved to this device (usually the Downloads folder).
-        <div class="ok-box">On a new phone, or if this browser is cleared, the game will ask you to pick this file.</div>`, "Got it", "");
+        <div class="ok-box">Next time you log in (on this phone or any other), the game will ask you to pick this file.</div>`, "Got it", "");
     } catch (e) {
       console.error(e);
       toast("Couldn't turn on the lock. Check your connection and try again.");
@@ -702,9 +710,9 @@
     if (!S.player.locked) {
       box.innerHTML = `<div class="muted">Off. Most players don't need it. Turn it on if you want your decisions scrambled so that nobody, not even the app owner, can read them.</div>
         <button class="btn light" id="lk-on" style="margin-top:12px">Turn on privacy lock</button>`;
-      $("lk-on").onclick = turnOnLock;
+      $("lk-on").onclick = () => turnOnLock(true);
     } else if (S.key) {
-      box.innerHTML = `<div class="ok-box"><b>On.</b> Decisions are scrambled on this phone before they're saved.</div>
+      box.innerHTML = `<div class="ok-box"><b>On.</b> Decisions are scrambled on this phone before they're saved. The key is kept on this device only until you log out; the next login asks for your key file.</div>
         <button class="btn light" id="lk-dl" style="margin-top:12px">⬇️ Download key file again</button>
         <button class="btn light" id="lk-forget" style="margin-top:10px">Forget the key on this device</button>
         <button class="btn light" id="lk-off" style="margin-top:10px">Turn off privacy lock</button>`;
@@ -725,6 +733,7 @@
   // ---------- Settings ----------
   $("b-settings").onclick = () => { renderSettings(); refreshInstall(); show("s-settings"); };
   $("set-logout").onclick = async () => {
+    if (S.uid) store.del(keyStoreName());   // the next login must pick the key file again
     await sb.auth.signOut();
     Object.assign(S, { uid: null, player: null, key: null, keyB64: null, decisions: [], greeted: false, skipLookBacks: false, checkOpen: null });
     setMode("login"); $("f-user").value = "";
