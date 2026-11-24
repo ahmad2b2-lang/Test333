@@ -102,6 +102,47 @@ h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--m
 .stack{display:flex;flex-direction:column;gap:10px;margin-top:18px}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(20px);opacity:0;background:#1b2130;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;transition:.25s;pointer-events:none;z-index:9;max-width:90%}
 .toast.on{opacity:1;transform:translateX(-50%)}
+/* ---- Dead Internet Theory video ---- */
+.vid{position:fixed;inset:0;z-index:20;background:rgba(244,245,247,.96);display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 12px)}
+.vid.on{display:flex}
+.player{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 14px 40px rgba(27,33,48,.12)}
+.stage{position:relative;width:100%;aspect-ratio:9/12;background:linear-gradient(160deg,#f7f9ff,#eef1fb);overflow:hidden}
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .45s}
+.sc.on{opacity:1}
+.cap{min-height:74px;padding:12px 16px 6px;text-align:center;font-weight:650;font-size:16.5px;line-height:1.35}
+.vbar{height:4px;background:#e4e7ec;margin:0 16px}
+.vbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px}
+.vfoot{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 12px;font-size:12.5px;color:var(--muted)}
+.vfoot button{min-height:40px;padding:0 14px;border-radius:11px;border:1.5px solid var(--line);font-weight:650;font-size:14px;color:var(--ink)}
+/* scene 1: replies flip to bots */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:84%}
+.flip{aspect-ratio:1;perspective:400px;opacity:0;transform:scale(.4)}
+.sc1.on .flip{animation:popin .4s cubic-bezier(.3,1.6,.5,1) forwards}
+.flip .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s}
+.flip.bot .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.08)}
+.flip .f svg{width:100%;height:100%}
+.flip .b{transform:rotateY(180deg);background:var(--bot);display:grid;place-items:center;font-size:24px}
+@keyframes popin{to{opacity:1;transform:scale(1)}}
+.s1lbl{margin-top:22px;font-weight:800;font-size:20px;color:var(--bot);opacity:0;transition:opacity .4s}
+.s1lbl.on{opacity:1}
+/* scene 2: title + bubbles turning purple */
+.bubbles{position:absolute;inset:0}
+.bub{position:absolute;width:34px;height:24px;border-radius:12px 12px 12px 3px;background:#cfd8ee;animation:drift 6s ease-in-out infinite alternate}
+.sc2.on .bub{animation:drift 6s ease-in-out infinite alternate,turn .5s forwards}
+@keyframes drift{to{transform:translateY(-14px)}}
+@keyframes turn{to{background:#b9a6f5}}
+.ttl{position:relative;text-align:center;font-weight:900;letter-spacing:-.5px;line-height:1.02;font-size:42px;color:var(--ink);background:rgba(255,255,255,.86);padding:16px 18px;border-radius:20px}
+.ttl small{display:block;font-size:13px;letter-spacing:2px;font-weight:800;color:var(--bot);margin-bottom:6px}
+.sc2.on .ttl{animation:glitch 1.6s steps(1) 1}
+@keyframes glitch{0%{transform:translate(0)}10%{transform:translate(-3px,1px);text-shadow:3px 0 #6d4ce0,-3px 0 #2f6fed}20%{transform:translate(2px,-1px);text-shadow:none}30%{transform:translate(0)}}
+/* scene 3: network */
+.net{width:88%}
+.sc4 .end{text-align:center;padding:0 24px}
+.sc4 .end b{display:block;font-size:30px;line-height:1.1;letter-spacing:-.5px}
+.sc4 .end span{display:block;color:var(--muted);margin-top:10px;font-size:15px}
+.sc4 .end i{font-style:normal;display:block;font-size:46px;margin-bottom:10px}
+.dit{margin-top:12px}
 .counter{text-align:right;font-size:12px;color:var(--muted);margin-top:4px}
 .lbl{font-weight:650;font-size:14px;margin:14px 0 6px}
 </style>
@@ -187,6 +228,7 @@ h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--m
       </ul>
     </div>
     <div class="stack">
+      <button class="btn ghost" id="vReplay">▶ What is the Dead Internet Theory?</button>
       <button class="btn ghost" id="share">📤 Share this</button>
       <button class="btn primary" id="rvDone">Back to the forum</button>
     </div>
@@ -194,6 +236,21 @@ h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--m
 
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- DEAD INTERNET THEORY VIDEO (motion graphics + phone voice narration) -->
+<div class="vid" id="vid">
+  <div class="player">
+    <div class="stage">
+      <div class="sc sc1" id="sc1"><div class="grid" id="vGrid"></div><div class="s1lbl" id="s1lbl" dir="auto">10 replies · 0 humans</div></div>
+      <div class="sc sc2" id="sc2"><div class="bubbles" id="vBubs"></div><div class="ttl"><small>THE</small>DEAD<br>INTERNET<br>THEORY</div></div>
+      <div class="sc sc3" id="sc3"><svg class="net" id="vNet" viewBox="0 0 300 300"></svg></div>
+      <div class="sc sc4" id="sc4"><div class="end"><i>🧐</i><b id="vEnd" dir="auto">Next time, ask:<br>who's really talking?</b><span>Bot or Human?</span></div></div>
+    </div>
+    <div class="cap" id="vCap" dir="auto"></div>
+    <div class="vbar"><i id="vProg"></i></div>
+    <div class="vfoot"><span id="vSnd">🔊 Sound on</span><button id="vSkip">Skip ›</button></div>
+  </div>
+</div>
 
 <script>
 // ---- mobile app feel (iPhone ignores user-scalable=no) ----
@@ -344,12 +401,12 @@ function whoButton(){
   }else{
     $('threadTail').innerHTML='<button class="btn primary big whobtn" id="who">🤔 Who replied?</button>';
   }
-  $('who').onclick=()=>openReveal(current);
+  $('who').onclick=()=>goReveal(current);
 }
 $('tBack').onclick=()=>{
   const p=current;
   // the reveal is always shown: leaving an unrevealed thread opens it first
-  if(p&&p.status==='done'&&!revealedSet().has(p.id)){openReveal(p);return}
+  if(p&&p.status==='done'&&!revealedSet().has(p.id)){goReveal(p);return}
   openHome();
 };
 
@@ -375,6 +432,97 @@ $('share').onclick=async()=>{
   if(navigator.share){try{await navigator.share({title:'Bot or Human?',text,url})}catch(e){}return}
   try{await navigator.clipboard.writeText(text+' '+url);toast('Copied. Paste it anywhere')}catch(e){toast('Could not share on this device')}
 };
+
+// ---- Dead Internet Theory video ----
+// Visuals are animated in the page; narration uses the phone's own voice. Captions always show,
+// so it still works on a muted phone or one without a matching voice.
+const SCRIPT={
+  en:{lang:'en',lines:['Every reply you just read was written by AI.','The Dead Internet Theory says much of the internet may already look like this:','bots talking to people, and to each other.'],
+      lbl:n=>`${n} replies · 0 humans`,end:"Next time, ask:<br>who's really talking?"},
+  ar:{lang:'ar',lines:['كل الردود التي قرأتها كتبها الذكاء الاصطناعي.','تقول نظرية الإنترنت الميت إن جزءاً كبيراً من الإنترنت ربما صار هكذا:','بوتات تتحدث مع الناس، ومع بعضها البعض.'],
+      lbl:n=>`${n} ردود · ولا إنسان واحد`,end:'في المرة القادمة اسأل:<br>من الذي يتكلم فعلاً؟'}
+};
+const FALLBACK_MS=[3200,4600,3000]; // scene lengths when there is no voice
+let vid=null;
+function pickVoice(lang){
+  try{const vs=speechSynthesis.getVoices();if(!vs.length)return {ok:true,voice:null};
+    const m=vs.filter(v=>v.lang&&v.lang.toLowerCase().startsWith(lang));
+    if(!m.length)return {ok:false,voice:null};
+    return {ok:true,voice:m.find(v=>/google|natural|enhanced|premium|samantha|maged|tarik/i.test(v.name))||m[0]};
+  }catch(e){return {ok:false,voice:null}}
+}
+function buildVideo(p,S){
+  const reps=(p.boh_replies||[]).slice(0,10);
+  $('vGrid').innerHTML=reps.map((r,i)=>`<div class="flip" style="animation-delay:${i*90}ms"><div class="in"><div class="f">${avatar(r.username)}</div><div class="b">🤖</div></div></div>`).join('');
+  $('s1lbl').textContent=S.lbl(reps.length);$('s1lbl').classList.remove('on');
+  let b='';for(let i=0;i<34;i++){const x=hash('x'+i)%86+3,y=hash('y'+i)%84+4;b+=`<div class="bub" style="left:${x}%;top:${y}%;animation-delay:${(i%7)*.4}s,${.3+i*.06}s"></div>`}
+  $('vBubs').innerHTML=b;
+  // network: you in the middle, bots around, messages flying between them
+  const N=8,R=110,c=150,pts=[...Array(N)].map((_,i)=>{const a=i/N*Math.PI*2-Math.PI/2;return [c+R*Math.cos(a),c+R*Math.sin(a)]});
+  let s='';
+  pts.forEach(([x,y],i)=>{s+=`<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="#d6dbea" stroke-width="2"/>`;const [x2,y2]=pts[(i+3)%N];s+=`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" stroke="#e6e0fb" stroke-width="1.5"/>`});
+  pts.forEach(([x,y],i)=>{const [x2,y2]=pts[(i+3)%N];
+    s+=`<circle r="5" fill="#6d4ce0"><animateMotion dur="1.4s" begin="${(i*.18).toFixed(2)}s" repeatCount="indefinite" path="M${x},${y} L${x2},${y2}"/></circle>`;
+    s+=`<circle r="4" fill="#2f6fed"><animateMotion dur="1.2s" begin="${(.1+i*.22).toFixed(2)}s" repeatCount="indefinite" path="M${x},${y} L${c},${c}"/></circle>`});
+  pts.forEach(([x,y])=>{s+=`<circle cx="${x}" cy="${y}" r="21" fill="#6d4ce0"/><text x="${x}" y="${y+7}" font-size="20" text-anchor="middle">🤖</text>`});
+  s+=`<g transform="translate(${c-30},${c-30})"><clipPath id="vc"><circle cx="30" cy="30" r="30"/></clipPath><g clip-path="url(#vc)"><svg width="60" height="60" viewBox="0 0 80 80">${avatar(p.nickname).replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg></g><circle cx="30" cy="30" r="30" fill="none" stroke="#2f6fed" stroke-width="3"/></g>`;
+  $('vNet').innerHTML=s;
+  $('vEnd').innerHTML=S.end;
+}
+function playVideo(p,onDone){
+  const S=/[؀-ۿ]/.test(p.title+p.body)?SCRIPT.ar:SCRIPT.en;
+  buildVideo(p,S);
+  const v={done:false,timers:[],t0:Date.now(),total:11500,onDone};vid=v;
+  const scene=n=>{for(let i=1;i<=4;i++)$('sc'+i).classList.toggle('on',i===n)};
+  const step=i=>{ // i = narration line 0..2
+    if(v.done)return;
+    scene(i+1);$('vCap').textContent=S.lines[i];
+    if(i===0){v.timers.push(setTimeout(()=>{document.querySelectorAll('#vGrid .flip').forEach((f,k)=>v.timers.push(setTimeout(()=>f.classList.add('bot'),k*110)))},900));
+      v.timers.push(setTimeout(()=>$('s1lbl').classList.add('on'),2300))}
+  };
+  const finish=()=>{if(v.done)return;scene(4);$('vCap').textContent='';v.timers.push(setTimeout(()=>endVideo(),1800))};
+  $('vid').classList.add('on');$('vProg').style.width='0';
+  v.prog=setInterval(()=>{$('vProg').style.width=Math.min(100,(Date.now()-v.t0)/v.total*100)+'%'},100);
+  // narration
+  const pv=('speechSynthesis' in window)?pickVoice(S.lang):{ok:false};
+  let spoke=false;
+  if(pv.ok){
+    try{
+      speechSynthesis.cancel();
+      S.lines.forEach((line,i)=>{
+        const u=new SpeechSynthesisUtterance(line);u.lang=S.lang==='ar'?'ar-SA':'en-US';if(pv.voice)u.voice=pv.voice;u.rate=1.05;u.pitch=1;
+        u.onstart=()=>{spoke=true;step(i)};
+        if(i===2)u.onend=finish;
+        speechSynthesis.speak(u);
+      });
+      $('vSnd').textContent='🔊 Sound on';
+    }catch(e){}
+  }
+  step(0);
+  // no voice (or it never starts): run the same scenes on a timer
+  v.timers.push(setTimeout(()=>{
+    if(spoke)return;
+    try{speechSynthesis.cancel()}catch(e){}
+    $('vSnd').textContent=pv.ok?'🔇 No sound on this device':'💬 Captions only';
+    let t=FALLBACK_MS[0]-1400;
+    v.timers.push(setTimeout(()=>step(1),t));t+=FALLBACK_MS[1];
+    v.timers.push(setTimeout(()=>step(2),t));t+=FALLBACK_MS[2];
+    v.timers.push(setTimeout(finish,t));
+  },1400));
+}
+function endVideo(){
+  const v=vid;if(!v||v.done)return;v.done=true;
+  v.timers.forEach(clearTimeout);clearInterval(v.prog);try{speechSynthesis.cancel()}catch(e){}
+  $('vProg').style.width='100%';
+  setTimeout(()=>{$('vid').classList.remove('on');for(let i=1;i<=4;i++)$('sc'+i).classList.remove('on');v.onDone&&v.onDone()},250);
+}
+$('vSkip').onclick=endVideo;
+// first reveal plays the video once; afterwards it can be replayed from the reveal screen
+function goReveal(p){
+  if(store.get('bohf_dit')){openReveal(p);return}
+  store.set('bohf_dit','1');playVideo(p,()=>openReveal(p));
+}
+$('vReplay').onclick=()=>{if(current)playVideo(current,null)};
 
 // ---- start ----
 if(nick)openHome();
