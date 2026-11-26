@@ -1,5 +1,5 @@
 // Today's Targets: offline cache + reminder notifications.
-const C = 'tt-app-v2';
+const C = 'tt-app-v3';
 const API = 'https://bhfgwlkzkbwcwyoypwhy.supabase.co/functions/v1/today-targets';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'badge-96.png'];
 
