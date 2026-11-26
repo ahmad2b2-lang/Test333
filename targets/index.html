@@ -295,7 +295,9 @@ document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const tz=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone}catch{return 'Asia/Riyadh'}};
 let TOKEN=LS.get('tt_token');
-let S={day:today(),targets:[],leftovers:[],settings:null,streak:0,chat:[]};
+let S={day:today(),targets:[],leftovers:[],settings:null,streak:0,chat:[],tomorrow:[]};
+const addDay=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+const tomorrowDay=()=>addDay(S.day,1);
 let VAPID=LS.get('tt_vapid');
 
 async function api(action,data={},quiet){
@@ -381,11 +383,12 @@ async function load(){
   if(cached&&cached.day===S.day){S={...S,...cached};render();}
   await flushQueue();
   const r=await api('day',{day:S.day,tz:tz()},!!cached);
-  if(r.ok){S={...S,targets:r.targets,leftovers:r.leftovers,settings:r.settings,streak:r.streak,chat:r.chat};saveCache();}
+  if(r.ok){S={...S,targets:r.targets,leftovers:r.leftovers,settings:r.settings,streak:r.streak,chat:r.chat,tomorrow:r.tomorrow||[]};saveCache();}
   render();
-  if(!S.targets.length&&!LS.get('tt_autoplan_'+S.day)&&r.ok){LS.set('tt_autoplan_'+S.day,1);openPlanner();}
+  if(new URLSearchParams(location.search).has('wrap')){history.replaceState(null,'',location.pathname);openWrap();return;}
+  if(!S.targets.length&&!LS.get('tt_autoplan_'+S.day)&&r.ok&&new Date().getHours()<17){LS.set('tt_autoplan_'+S.day,1);openPlanner();}
 }
-function saveCache(){LS.set('tt_cache',{day:S.day,targets:S.targets,leftovers:S.leftovers,settings:S.settings,streak:S.streak,chat:S.chat});}
+function saveCache(){LS.set('tt_cache',{day:S.day,targets:S.targets,leftovers:S.leftovers,settings:S.settings,streak:S.streak,chat:S.chat,tomorrow:S.tomorrow});}
 async function flushQueue(){
   const q=LS.get('tt_queue',[]);if(!q.length||!navigator.onLine)return;
   const rest=[];
@@ -402,7 +405,7 @@ async function updateTarget(id,patch,silent){
 addEventListener('online',()=>{$('offline').classList.add('hidden');flushQueue().then(()=>TOKEN&&load());});
 addEventListener('offline',()=>$('offline').classList.remove('hidden'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&TOKEN&&!$('appView').classList.contains('hidden')){load();}});
-navigator.serviceWorker?.addEventListener('message',e=>{if(e.data==='refresh'&&TOKEN)load();});
+navigator.serviceWorker?.addEventListener('message',e=>{if(e.data==='refresh'&&TOKEN)load();if(e.data==='wrap'&&TOKEN)openWrap();});
 
 /* ---------- tabs ---------- */
 let VIEW='today';
@@ -428,29 +431,48 @@ function render(){
   if(!pushOn&&'serviceWorker' in navigator&&'PushManager' in window)
     h+='<div class="banner"><p><b>Turn on reminders</b><br>Gentle nudges through the day, even when the app is closed.</p><button class="btn small" id="pushBtn">Turn on</button></div>';
   if(!S.targets.length){
-    h+='<div class="card empty"><div class="big">🎯</div><h2>What matters today?</h2><p>Pick 3 targets. Small and clear beats big and vague.</p><button class="btn primary" id="planBtn">Set today\'s targets</button></div>';
+    const eve=new Date().getHours()>=17;
+    h+=eve
+      ?'<div class="card empty"><div class="big">🌙</div><h2>Plan tomorrow tonight</h2><p>Decide tonight, wake up with a plan. Pick 3 targets for tomorrow.</p><button class="btn primary" id="planTmrBtn" style="background:var(--purple)">Plan tomorrow</button><button class="btn light" id="planBtn" style="margin-top:10px">Or set targets for today</button></div>'
+      :'<div class="card empty"><div class="big">🎯</div><h2>No plan from last night</h2><p>That\'s OK. Pick 3 quick targets now. Small and clear beats big and vague.</p><button class="btn primary" id="planBtn">Set today\'s targets</button></div>';
+    if(!eve)h+=tomorrowCard();
     m.innerHTML=h;
-    $('planBtn').onclick=openPlanner;$('pushBtn')&&($('pushBtn').onclick=enablePush);
+    $('planBtn').onclick=()=>openPlanner();$('planTmrBtn')&&($('planTmrBtn').onclick=()=>openPlanner(tomorrowDay()));
+    $('tmrEdit')&&($('tmrEdit').onclick=()=>openPlanner(tomorrowDay()));
+    $('pushBtn')&&($('pushBtn').onclick=enablePush);
     return;
   }
   const list=counted(),done=list.filter(t=>t.status==='done').length,part=list.filter(t=>t.status==='partly').length;
   const pct=list.length?(done+part*.5)/list.length:0,C=2*Math.PI*36;
   const left=list.length-done;
-  const msg=done===list.length?'All done! Take a moment to enjoy that. 🎉':done===0&&part===0?'One target at a time. Start with the ⭐ one.':left===1?'Just one left. You\'ve got this.':`${done} done, ${left} to go. Nice momentum.`;
+  const msg=done===list.length?'All done! Take a moment to enjoy that. 🎉':done===0&&part===0?'Your plan is ready. Start with the ⭐ one.':left===1?'Just one left. You\'ve got this.':`${done} done, ${left} to go. Nice momentum.`;
   h+=`<div class="card hero"><div class="ring"><svg width="86" height="86"><circle cx="43" cy="43" r="36" fill="none" stroke="#e7e5df" stroke-width="10"/><circle cx="43" cy="43" r="36" fill="none" stroke="#2a9d8f" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" style="transition:stroke-dashoffset .6s"/></svg><b>${done}/${list.length}</b></div><div><div class="msg">${esc(msg)}</div><div class="sub muted">${left?'Tap the circle when a target is done.':'Rest, or plan something fun.'}</div></div></div>`;
   const rank=t=>active(t)?0:t.status==='done'?1:2;
   const order=[...S.targets].sort((a,b)=>(rank(a)-rank(b))||(b.is_main-a.is_main)||(a.position-b.position));
   for(const t of order)h+=cardHtml(t);
   const late=new Date().getHours()>=17;
-  h+=`<div class="bottom-btns"><button class="btn light" id="editBtn">✏️ Edit plan</button><button class="btn ${late?'primary review-glow':'light'}" id="revBtn" style="${late?'background:var(--purple)':''}">🌙 Evening review</button></div>`;
+  h+=`<div class="bottom-btns"><button class="btn light" id="editBtn">✏️ Edit today</button><button class="btn ${late?'primary review-glow':'light'}" id="revBtn" style="${late?'background:var(--purple)':''}">🌙 Evening wrap-up</button></div>`;
+  h+=tomorrowCard();
   m.innerHTML=h;
   $('pushBtn')&&($('pushBtn').onclick=enablePush);
-  $('editBtn').onclick=openPlanner;$('revBtn').onclick=openReview;
+  $('editBtn').onclick=()=>openPlanner();$('revBtn').onclick=openWrap;
+  $('tmrEdit')&&($('tmrEdit').onclick=()=>openPlanner(tomorrowDay()));
   m.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>toggleDone(b.dataset.check,b));
   m.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>openFocus(b.dataset.focus));
   m.querySelectorAll('[data-stuck]').forEach(b=>b.onclick=()=>stuck(b.dataset.stuck,b));
   m.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>moreMenu(b.dataset.more));
   m.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>toggleStep(b.dataset.step,+b.dataset.i));
+}
+function tomorrowCard(){
+  const T=S.tomorrow||[];
+  if(!T.length)return `<div class="card" style="margin-top:12px"><div class="row"><div style="flex:1"><b>🌙 Tomorrow</b><div class="muted" style="font-size:14px;margin-top:2px">Not planned yet. Best done tonight.</div></div><button class="btn small soft" id="tmrEdit">Plan</button></div></div>`;
+  return `<div class="card" style="margin-top:12px"><div class="row"><div style="flex:1"><b>🌙 Tomorrow is ready</b><div class="muted" style="font-size:14px;margin-top:2px">${T.length} target${T.length>1?'s':''} planned</div></div><button class="btn small light" id="tmrEdit">Edit</button></div>
+    <div style="margin-top:8px">${[...T].sort((a,b)=>(b.is_main-a.is_main)||(a.position-b.position)).map(t=>`<div style="padding:4px 0;font-size:15px">${t.is_main?'⭐':'•'} ${esc(t.title)}</div>`).join('')}</div></div>`;
+}
+/* Evening wrap-up: step 1 review today (if anything is open), step 2 plan tomorrow */
+function openWrap(){
+  document.querySelectorAll('.sheet-wrap').forEach(w=>w.remove());
+  if(S.targets.some(active))openReview(true);else openPlanner(tomorrowDay(),true);
 }
 function cardHtml(t){
   const snz=t.snooze_until&&new Date(t.snooze_until)>new Date()&&active(t)?`<span class="snz">⏰ ${new Date(t.snooze_until).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`:'';
@@ -528,12 +550,16 @@ function moreMenu(id){
 }
 
 /* ---------- Morning planner ---------- */
-let P=[];
-function openPlanner(){
-  P=S.targets.filter(t=>t.status!=='moved').map(t=>({...t}));
+let P=[],PDAY=null;
+function openPlanner(day,wrap){
+  PDAY=typeof day==='string'?day:S.day;
+  const isT=PDAY!==S.day;
+  P=(isT?S.tomorrow:S.targets).filter(t=>t.status!=='moved').map(t=>({...t}));
   if(!P.length)P=[{title:'',first_step:'',at_time:null,is_main:true}];
-  const w=sheet(`<div class="sheet-head"><h2>Today's targets</h2><button class="x" id="pClose">✕</button></div>
-    <p class="hint">3 is the sweet spot (max 5). Start each with a verb, and add a tiny first step you could do in 2 minutes. Tap ⭐ for the one that matters most.</p>
+  const dname=new Date(PDAY+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+  const w=sheet(`<div class="sheet-head"><h2>${isT?'Tomorrow\'s targets':'Today\'s targets'}</h2><button class="x" id="pClose">✕</button></div>
+    ${wrap?'<div class="muted" style="font-size:13px;font-weight:700;margin-bottom:4px">STEP 2 OF 2</div>':''}
+    <p class="hint">${isT?`For <b>${esc(dname)}</b>. Decide tonight, wake up with a plan. `:''}3 is the sweet spot (max 5). Start each with a verb, and add a tiny first step you could do in 2 minutes. Tap ⭐ for the one that matters most.</p>
     <div id="leftBox"></div><div id="pRows"></div><div id="pNote"></div>
     <button class="add-row" id="pAdd">＋ Add a target</button>
     <button class="btn primary" id="pSave">Let's go 🚀</button>`,true);
@@ -543,15 +569,17 @@ function openPlanner(){
   drawRows(w);
   if(!S.targets.length)setTimeout(()=>w.querySelector('.ti')?.focus(),300);
 }
+function leftSource(){return PDAY===S.day?S.leftovers:S.targets.filter(t=>active(t)&&!S.tomorrow.some(x=>x.carried_from===t.id));}
 function drawLeft(w){
   const carried=P.filter(p=>p.carried_from).length;
-  const L=S.leftovers.filter(l=>!P.some(p=>p.carried_from===l.id));
+  const src=leftSource();
+  const L=src.filter(l=>!P.some(p=>p.carried_from===l.id));
   const box=w.querySelector('#leftBox');
   if(!L.length){box.innerHTML='';return;}
-  box.innerHTML=`<div class="left-box"><h3>From yesterday</h3><p>${carried>=2?'2 carried over. That keeps today light.':'Carry over up to 2 with one tap. No pressure.'}</p>
+  box.innerHTML=`<div class="left-box"><h3>${PDAY===S.day?'From yesterday':'Still open today'}</h3><p>${carried>=2?'2 carried over. That keeps today light.':'Carry over up to 2 with one tap. No pressure.'}</p>
     ${L.map(l=>`<div class="left-item"><span>${esc(l.title)}${l.status==='partly'?' ½':''}</span><button class="btn small soft" data-carry="${l.id}" ${carried>=2||P.filter(p=>p.title.trim()).length>=5?'disabled':''}>＋ Add</button></div>`).join('')}</div>`;
   box.querySelectorAll('[data-carry]').forEach(b=>b.onclick=()=>{
-    readRows(w);const l=S.leftovers.find(x=>x.id===b.dataset.carry);
+    readRows(w);const l=src.find(x=>x.id===b.dataset.carry);
     const empty=P.findIndex(p=>!p.title.trim()&&!p.id);
     const item={title:l.title,first_step:l.first_step,at_time:null,is_main:false,carried_from:l.id};
     if(empty>=0){item.is_main=P[empty].is_main;P[empty]=item;}else if(P.length<5)P.push(item);
@@ -594,8 +622,11 @@ async function savePlan(w){
   if(!list.length){toast('Add at least one target.');return;}
   if(!list.some(p=>p.is_main))list[0].is_main=true;
   const b=w.querySelector('#pSave');b.innerHTML='<span class="spin"></span>';b.disabled=true;
-  const r=await api('save_targets',{day:S.day,targets:list.map(p=>({id:p.id,title:p.title,first_step:p.first_step,at_time:p.at_time,is_main:p.is_main,carried_from:p.carried_from}))});
+  const isT=PDAY!==S.day;
+  const r=await api('save_targets',{day:PDAY,targets:list.map(p=>({id:p.id,title:p.title,first_step:p.first_step,at_time:p.at_time,is_main:p.is_main,carried_from:p.carried_from}))});
   if(!r.ok){b.innerHTML="Let's go 🚀";b.disabled=false;toast(r.error==='offline'?'You\'re offline. Planning needs internet.':'Could not save. Try again.');return;}
+  if(isT){S.tomorrow=r.targets;saveCache();w.remove();render();celebrate(false);
+    toast('Tomorrow is ready. Rest well, the plan is waiting for you. 🌙',null,null,5000);return;}
   const first=!S.targets.length;
   S.targets=r.targets;S.leftovers=S.leftovers.filter(l=>!list.some(p=>p.carried_from===l.id));saveCache();
   w.remove();render();
@@ -604,34 +635,36 @@ async function savePlan(w){
 }
 
 /* ---------- Evening review ---------- */
-function openReview(){
+function openReview(wrap){
   const R={};
   const todo=S.targets.filter(active),wins=S.targets.filter(t=>t.status==='done');
-  const w=sheet(`<div class="sheet-head"><h2>Evening review 🌙</h2><button class="x" id="rClose">✕</button></div>
-    <p class="hint">One tap each. No judgement, just noticing.</p>
+  const w=sheet(`<div class="sheet-head"><h2>Evening wrap-up 🌙</h2><button class="x" id="rClose">✕</button></div>
+    <div class="muted" style="font-size:13px;font-weight:700;margin-bottom:4px">STEP 1 OF 2 · REVIEW TODAY</div>
+    <p class="hint">One tap each. No judgement, just noticing. Next: plan tomorrow.</p>
     ${wins.map(t=>`<div class="rv win"><span style="font-size:22px">✅</span><div class="title">${esc(t.title)}</div></div>`).join('')}
     ${todo.map(t=>`<div class="rv" data-id="${t.id}"><div class="title">${esc(t.title)}</div><div class="opts">
       <button data-r="done"><span>✓</span>Done</button><button data-r="partly"><span>½</span>Partly</button>
       <button data-r="moved"><span>→</span>Tomorrow</button><button data-r="dropped"><span>✕</span>Drop</button></div></div>`).join('')}
     ${!todo.length?'<p class="center muted" style="margin:16px 0">Everything is ticked. Lovely day. 🌟</p>':''}
     <div id="rNote"></div>
-    <button class="btn primary" id="rSave" style="margin-top:6px">${todo.length?'Finish review':'Close'}</button>`,true);
+    <button class="btn primary" id="rSave" style="margin-top:6px">Next: plan tomorrow →</button>`,true);
   w.querySelector('#rClose').onclick=()=>w.remove();
   w.querySelectorAll('.rv[data-id]').forEach(row=>row.querySelectorAll('button').forEach(b=>b.onclick=()=>{
     R[row.dataset.id]=b.dataset.r;row.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
     const mv=Object.values(R).filter(v=>v==='moved').length;
     w.querySelector('#rNote').innerHTML=mv>2?'<div class="note">Moving more than 2 can make tomorrow heavy. Maybe drop one?</div>':'';}));
   w.querySelector('#rSave').onclick=async()=>{
-    if(!todo.length){w.remove();return;}
+    if(!todo.length){w.remove();openPlanner(tomorrowDay(),true);return;}
     const results=Object.entries(R).map(([id,result])=>({id,result}));
     if(results.length<todo.length){toast('Pick one option for each target.');return;}
     const b=w.querySelector('#rSave');b.innerHTML='<span class="spin"></span>';b.disabled=true;
     const r=await api('review',{day:S.day,results});
-    if(!r.ok){b.innerHTML='Finish review';b.disabled=false;toast('Could not save. Try again.');return;}
-    S.targets=r.targets;S.streak=r.streak;saveCache();w.remove();render();
+    if(!r.ok){b.innerHTML='Next: plan tomorrow →';b.disabled=false;toast('Could not save. Try again.');return;}
+    S.targets=r.targets;S.streak=r.streak;S.tomorrow=r.tomorrow||S.tomorrow;saveCache();w.remove();render();
     const d=S.targets.filter(t=>t.status==='done').length,p=S.targets.filter(t=>t.status==='partly').length;
-    celebrate(d>0);
-    toast(d||p?`Today: ${d} done${p?`, ${p} partly`:''}. Rest well. 🌙`:'You showed up and reviewed. That matters. Rest well. 🌙',null,null,6000);
+    if(d)chime(false);
+    toast(d||p?`Today: ${d} done${p?`, ${p} partly`:''}. Well done. Now tomorrow.`:'You showed up and reviewed. That matters. Now tomorrow.',null,null,4000);
+    openPlanner(tomorrowDay(),true);
   };
 }
 
@@ -714,7 +747,7 @@ async function loadWins(){
 }
 
 /* ---------- Settings ---------- */
-const KIND={plan:'Set targets',check:'Check-in',last:'Last push',review:'Evening review'};
+const KIND={plan:'Morning plan',check:'Check-in',last:'Last push',review:'Evening wrap-up'};
 let SET=null;
 function renderSettings(){
   SET=JSON.parse(JSON.stringify(S.settings||{slots:[],quiet_start:'22:30',quiet_end:'07:00',focus_min:25,sound:true}));
@@ -726,7 +759,7 @@ function renderSettings(){
     </div>
     <div class="card set"><h3>⏰ Reminder times</h3><div id="slots"></div>
       <button class="add-row" id="sAdd" style="margin:10px 0 0">＋ Add a time</button>
-      <p class="hint" style="margin:10px 0 0">Check-ins name your next target. No reminders once everything is done. A target with its own time also gets a nudge then.</p></div>
+      <p class="hint" style="margin:10px 0 0"><b>Morning plan</b> shows the plan you made last night (or asks for a quick one). <b>Check-ins</b> name your next target. <b>Evening wrap-up</b> reviews today and plans tomorrow. No check-ins once everything is done. A target with its own time also gets a nudge then.</p></div>
     <div class="card set"><h3>🌙 Quiet hours</h3>
       <div class="srow"><label>From</label><input type="time" id="qs" value="${esc(SET.quiet_start)}"></div>
       <div class="srow"><label>Until</label><input type="time" id="qe" value="${esc(SET.quiet_end)}"></div></div>

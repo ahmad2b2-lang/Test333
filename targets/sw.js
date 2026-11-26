@@ -1,5 +1,5 @@
 // Today's Targets: offline cache + reminder notifications.
-const C = 'tt-app-v1';
+const C = 'tt-app-v2';
 const API = 'https://bhfgwlkzkbwcwyoypwhy.supabase.co/functions/v1/today-targets';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'badge-96.png'];
 
@@ -76,7 +76,7 @@ self.addEventListener('notificationclick', e => {
   }
   e.waitUntil((async () => {
     const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const c of cs) if (c.url.startsWith(scopeUrl()) && 'focus' in c) { c.postMessage('refresh'); return c.focus(); }
+    for (const c of cs) if (c.url.startsWith(scopeUrl()) && 'focus' in c) { c.postMessage((d.url || '').includes('wrap=1') ? 'wrap' : 'refresh'); return c.focus(); }
     return self.clients.openWindow(d.url || scopeUrl());
   })());
 });
