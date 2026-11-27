@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>JS Essentials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light only;--bg:#f4f6f7;--surface:#fff;--ink:#14222c;--muted:#5a6873;--line:#dde3e7;--accent:#0d5f7c;--accent-soft:#e1eef3;--ok:#1a7f37;--ok-bg:#e7f4e7;--bad:#b3261e;--bad-bg:#fbeaea;--warn-bg:#fff8e6;--warn-line:#f1dfa8;--code:13px;
+--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+input,textarea,select{font-size:16px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,p{margin:0}
+#app{height:100dvh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);position:relative}
+@media (min-width:600px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+main{flex:1;min-height:0;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 16px;display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:26px;line-height:1.15;font-weight:700}
+.sub{font-size:14px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.row{display:flex;gap:12px;align-items:center}
+.grow{flex:1;min-width:0}
+.ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tiles b{display:block;font-size:18px;line-height:1.1}
+.tiles span{font-size:12px;color:var(--muted)}
+.hero{background:var(--accent);color:#fff;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.hero .eyebrow{color:#cfe6ee}
+.hero h2{font-size:22px;line-height:1.2}
+.hero p{font-size:14px;color:#e3f0f5}
+.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:#ffffff26}
+.btn{height:48px;border-radius:12px;border:0;font-weight:700;font-size:16px;padding:0 18px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;min-width:48px}
+.btn.light{background:#fff;color:var(--accent)}
+.btn.line{background:#fff;color:var(--accent);border:1px solid var(--accent);font-weight:600}
+.btn.sm{height:44px;font-size:15px}
+.btn:disabled{background:#c9d3d9;color:#fff;cursor:default}
+.bar{height:8px;border-radius:4px;background:#e2e8eb}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+nav{flex:none;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr)}
+nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--muted);min-height:44px}
+nav button.on{color:var(--accent);font-weight:600}
+nav svg{width:22px;height:22px}
+.unit{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.unit.locked{opacity:.75}
+.uhead{display:flex;gap:12px;align-items:center;padding:12px 14px}
+.num{width:34px;height:34px;border-radius:50%;background:#eef1f3;color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.num.done{background:var(--ok);color:#fff}
+.num.cur{background:var(--accent);color:#fff}
+.les{width:100%;border:0;background:none;border-top:1px solid #eef1f3;display:flex;gap:12px;align-items:center;padding:12px 14px 12px 22px;text-align:left;min-height:48px}
+.les.cur{background:var(--accent-soft);font-weight:600}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid #b7c2c9;flex:none}
+.dot.cur{border:5px solid var(--accent)}
+.dot.done{border:0;background:var(--ok);display:flex;align-items:center;justify-content:center}
+.top{flex:none;height:calc(60px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eef1f3;background:#fff}
+.x{width:44px;height:44px;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none}
+.segs{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}
+.segs i{height:6px;border-radius:3px;background:var(--line)}
+.segs i.on{background:var(--accent)}
+.lesson{background:#fff}
+.lesson main{background:#fff}
+.foot{flex:none;padding:12px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid #eef1f3;display:flex;gap:10px;background:#fff}
+.foot .btn{flex:1}
+.foot .btn.line{flex:none}
+.lesson h2{font-size:22px;line-height:1.25;font-weight:700}
+.lesson p{font-size:15px;line-height:1.55}
+code{font-family:var(--mono);font-size:.9em;background:#eef2f4;border-radius:5px;padding:1px 5px}
+.term{border:0;background:none;padding:0;font:inherit;font-weight:700;color:#7a4d00;border-bottom:2px dotted #c98a00;min-height:0}
+.code{background:#f6f8f9;border:1px solid #e2e8eb;border-radius:12px;padding:8px 0;font-family:var(--mono);font-size:var(--code);line-height:1.9;overflow-x:auto}
+.code,.code *{-webkit-user-select:text;user-select:text}
+.ln{display:flex;width:100%;border:0;background:none;text-align:left;padding:0 12px;font:inherit;color:inherit;line-height:inherit;min-height:0;cursor:pointer;min-width:max-content}
+.ln.on{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.ln b{width:24px;flex:none;font-weight:400;color:#8a959d}
+.ln.on b{color:var(--accent);font-weight:600}
+.ln span{white-space:pre}
+.ln.plain{cursor:default}
+.c{color:#5f6b75}.s{color:#a14f00}.k{color:var(--accent);font-weight:500}.n{color:var(--ok)}
+.explain{background:#14222c;color:#fff;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.explain b{color:#9fd3e6}
+.hint{font-size:12px;color:var(--muted);text-align:center}
+.blank{font-family:var(--mono);font-size:var(--code);min-width:56px;height:30px;padding:0 6px;margin:0 2px;border-radius:6px;border:2px dashed #98a3ab;background:#fff;color:var(--ink);font-weight:500}
+.blank.f{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.blank.ok{border-color:var(--ok);background:var(--ok-bg)}
+.blank.no{border-color:var(--bad);background:var(--bad-bg)}
+.words{display:flex;gap:8px;flex-wrap:wrap}
+.words button{height:44px;padding:0 14px;border-radius:10px;border:1px solid #c9d3d9;background:#fff;font-family:var(--mono);font-size:14px;font-weight:500}
+.words button.used{opacity:.4}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;text-align:left;font-weight:600;font-size:15px}
+.opt .l{width:26px;height:26px;border-radius:8px;background:#eef1f3;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok)}.opt.ok .l{background:var(--ok);color:#fff}
+.opt.no{background:var(--bad-bg);border-color:var(--bad)}.opt.no .l{background:var(--bad);color:#fff}
+.opts{display:flex;flex-direction:column;gap:8px}
+.fb{border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.45}
+.fb.ok{background:var(--ok-bg)}.fb.no{background:var(--bad-bg)}
+.cheat{border:1px solid var(--warn-line);background:#fffbf0;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.cheat .eyebrow{color:#7a4d00;display:flex;gap:8px;align-items:center}
+.big{font-size:44px;text-align:center}
+.sheet{position:absolute;inset:0;background:#14222c8c;display:flex;align-items:flex-end;z-index:20}
+.sheet>div{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:18px 20px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sheet h2{font-size:18px}
+input.search{width:100%;height:44px;border-radius:10px;border:1px solid var(--line);padding:0 12px;background:#fff}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:#e6ebee;border-radius:12px;padding:3px;gap:3px}
+.seg button{height:42px;border:0;border-radius:9px;background:none;font-weight:500}
+.seg button.on{background:#fff;color:var(--accent);font-weight:600}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:30;max-width:90%}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- course content ---------- */
+const UNITS=[
+ {id:1,title:'Getting started',sub:'first steps, values, building text',lessons:['u1l1','u1l2','u1l3']},
+ {id:2,title:'Data',sub:'lists, records, dates',lessons:['u2l1','u2l2','u2l3']},
+ {id:3,title:'Logic',sub:'functions, decisions, working through lists',later:true},
+ {id:4,title:'The page',sub:'elements, taps, the render idea, forms',later:true},
+ {id:5,title:'Data in and out',sub:'saving, waiting, WorkShare lists, Excel',later:true},
+ {id:6,title:'App polish',sub:'charts, app feel, errors, reading AI code',later:true}
+];
+const L={
+u1l1:{title:'Where JavaScript lives',min:4,cheat:['The script tag','JavaScript lives in `<script> ... </script>`. Use `console.log(value)` to print a value in the console.'],cards:[
+ {t:'text',where:'Procurement Tracker · the whole file',h:'A web page has three layers',p:'Your HTML says **what** is on the page. CSS says how it **looks**. {{JavaScript|The programming language that runs inside the browser.}} says what it **does**: it reacts to taps, does the maths and redraws the screen. You already know the first layer, so this course covers the third.'},
+ {t:'code',where:'Procurement Tracker · bottom of index.html',h:'JavaScript sits inside a script tag',lines:[
+  ['<script>','Starts a block of JavaScript. Everything until the closing tag is code, not page text.'],
+  ['  const riskDays = 14;','One line of JavaScript. It stores the number 14 under the name riskDays. Each line ends with a semicolon.'],
+  ['  init();','Runs a function called init. The tracker calls it last, so the page starts working once everything is defined.'],
+  ['</script>','Ends the block.']],
+  p:'The tracker keeps all its JavaScript in one script block at the bottom, after the HTML it controls.'},
+ {t:'code',where:'Your browser',h:'The console is your notepad',p:'Every browser has a {{console|A panel where JavaScript prints messages. On a computer press F12 and open Console.}}. Use `console.log(x)` to see the value of x. You will use it to check what your code is doing.',lines:[
+  ["console.log('Hello tracker');",'Prints the text Hello tracker in the console.'],
+  ['console.log(2 + 3);','Prints 5. JavaScript does the maths first.']]},
+ {t:'quiz',q:'Where does the tracker\'s JavaScript go?',opts:['Inside a <script> block','Inside a <style> block','In the CSS only','Inside an <h1>'],a:0,why:'JavaScript goes between <script> and </script>. <style> is for CSS.'},
+ {t:'fill',q:'Complete the line that prints a message in the console.',code:["___.log('Hello');"],words:['console','script','print','init'],ans:['console'],why:'console.log prints to the console.'}
+]},
+u1l2:{title:'Storing values',min:5,cheat:['const and let','`const` makes a name that cannot be replaced. `let` makes a name you can change. Numbers have no quotes, text goes in quotes, and `true` / `false` are booleans.'],cards:[
+ {t:'text',where:'Procurement Tracker · settings',h:'A name for a value',p:'Code often needs to remember things: the at-risk limit, a vendor name, whether an order is delivered. You store a value under a name with {{const|Creates a name whose value cannot be replaced later.}} or {{let|Creates a name whose value can change later.}}.'},
+ {t:'code',where:'Procurement Tracker · status rule',h:'Fixed names and changing names',lines:[
+  ['const riskDays = 14;','const makes a fixed name. riskDays will always be 14 here.'],
+  ["let status = 'ok';","let makes a name you can change later. The tracker starts every order as 'ok'."],
+  ["status = 'late';",'Changes the value. No let this time, because the name already exists.'],
+  ['const delivered = false;','true and false are called booleans. Many tracker decisions are yes or no.']],
+  p:'Numbers have no quotes. Text goes in quotes. `true` and `false` have no quotes.'},
+ {t:'quiz',q:'Which line makes a name you can change later?',opts:['const riskDays = 14;',"let status = 'ok';",'const delivered = false;','riskDays;'],a:1,why:'let allows the value to change later. const does not.'},
+ {t:'quiz',q:"What kind of value is 'late'?",opts:['A number','Text','A boolean','A name'],a:1,why:'Anything in quotes is text, also called a string.'},
+ {t:'fill',q:'Complete the line so status can be changed on the next line.',code:["___ status = 'ok';","status = 'late';"],words:['const','let','true','riskDays'],ans:['let'],why:'Only let allows status = \'late\' afterwards.'}
+]},
+u1l3:{title:'Building text',min:5,cheat:['Template strings','Write text in backticks and put values in `${...}`, for example `${vendor} is late`.'],cards:[
+ {t:'text',where:'Order cards and status pills',h:'Joining values into text',p:'The tracker shows messages like Float -3 d. It builds them from values. The easy way is a {{template string|Text written in backticks, with holes that insert values.}}: backticks, with `${...}` where a value goes.'},
+ {t:'code',where:'A simple example',h:'Values go into the holes',lines:[
+  ["const vendor = 'Alder Steel';",'A text value.'],
+  ['const days = 12;','A number value.'],
+  ['`${vendor} is ${days} days late`','Backticks start a template string. Each ${...} is replaced by the value inside.'],
+  ['// Alder Steel is 12 days late','A comment showing the result. JavaScript ignores lines starting with //.']]},
+ {t:'code',where:'Procurement Tracker · status pill',h:'The tracker builds HTML the same way',lines:[
+  ["const STL = { ok: 'On track', late: 'Late' };",'A lookup list: status code on the left, words to show on the right. Records come in Unit 2.'],
+  ['const pill = s => `<span class="pill ${s}">${STL[s]}</span>`;','A small helper. Give it late and it returns HTML for a Late pill. ${s} fills the CSS class, ${STL[s]} fills the label.'],
+  ["pill('late');",'Returns the HTML for a Late pill, which the page then shows.']]},
+ {t:'quiz',q:'A template string is `Float ${days} d` and days is 5. What text does it make?',opts:['Float 5 d','Float ${days} d','Float days d','Float d'],a:0,why:'${days} is replaced by 5, so you get Float 5 d.'},
+ {t:'fill',q:'Complete the template string so it shows the vendor name.',code:["const vendor = 'Kestrel';","`Vendor: ${___}`"],words:['vendor',"'vendor'",'Vendor','days'],ans:['vendor'],why:'Inside ${ } you write the name of the value, without quotes.'}
+]},
+u2l1:{title:'Lists (arrays)',min:5,cheat:['Lists','A list is written in square brackets: `[a, b, c]`. `list.length` is the count, `list[0]` is the first item, `list.push(x)` adds one.'],cards:[
+ {t:'text',where:'Procurement Tracker · milestone list',h:'A list keeps things in order',p:'A {{list|Also called an array: values in order, written in square brackets and separated by commas.}} holds many values under one name. The tracker keeps its milestones in a list so it shows them in the same order every time.'},
+ {t:'code',where:'Procurement Tracker · milestones',h:'Counting starts at 0',lines:[
+  ["const keys = ['req', 'rfq', 'bids', 'award'];",'Square brackets make a list. Four short codes: requisition, RFQ, bids, PO issued.'],
+  ['keys.length','How many items: 4.'],
+  ['keys[0]',"The first item, 'req'. Counting starts at 0, not 1."],
+  ['keys[3]',"The fourth item, 'award'. The last index is always length minus 1."],
+  ["keys.push('accept');",'Adds an item at the end. The list now has 5 items.']]},
+ {t:'quiz',q:"What is keys[1] in the list ['req', 'rfq', 'bids']?",opts:["'req'","'rfq'","'bids'",'1'],a:1,why:'Index 0 is req, so index 1 is rfq.'},
+ {t:'quiz',q:'A list has 5 items. What is the index of the last one?',opts:['5','4','0','6'],a:1,why:'Counting starts at 0, so the indexes are 0, 1, 2, 3, 4.'},
+ {t:'fill',q:'Complete the line so it prints how many items are in keys.',code:['console.log(keys.___);'],words:['length','size','count','push'],ans:['length'],why:'keys.length gives the number of items.'}
+]},
+u2l2:{title:'Records (objects)',min:6,cheat:['Records','A record (object) groups facts as `{ name: value }`. Read with `po.vendor`, change with `po.value = 5`. A list of records is the shape of most app data.'],cards:[
+ {t:'text',where:'Procurement Tracker · one purchase order',h:'A record keeps related facts together',p:'One purchase order has a number, a vendor, a value and more. An {{object|A record of named values, written in curly braces. Each value has a name, called a property.}} groups them, each with a name, so you do not need a separate name for every fact.'},
+ {t:'code',where:'Procurement Tracker · an order',h:'Properties have names',lines:[
+  ['const po = {','Curly braces start an object. po is one purchase order.'],
+  ["  no: '4500-001',",'A property: name on the left, value on the right, then a comma.'],
+  ["  vendor: 'Alder Steel',",'A text value.'],
+  ['  value: 18600000,','A number value, no quotes.'],
+  ['  payments: []','A property can hold a list. The tracker keeps each order\'s payments here.'],
+  ['};','Closes the object.'],
+  ['po.vendor',"Dot notation reads a property: 'Alder Steel'."],
+  ['po.value = 19000000;','Changes a property. This is how the tracker updates an order after you edit it.']]},
+ {t:'text',where:'Procurement Tracker · all orders',h:'Records live inside lists',p:'The tracker keeps all its orders as a list of records. To find one it searches the list, which you learn in Unit 3. For now remember: **a list of records** is the shape of almost all app data.'},
+ {t:'quiz',q:'How does the tracker read the vendor of the order po?',opts:['po.vendor','po(vendor)','vendor.po','po:vendor'],a:0,why:'A dot between the record and the property name reads it.'},
+ {t:'fill',q:'Complete the line so it prints the order value.',code:["const po = { no: '4500-001', value: 1250000 };",'console.log(po.___);'],words:['value','1250000','po','no'],ans:['value'],why:'po.value reads the property called value.'}
+]},
+u2l3:{title:'Dates as day numbers',min:6,cheat:['Dates as numbers','Dates as text cannot be subtracted. The tracker turns them into day numbers (`dn`), so float = required date minus forecast date. A negative float means late.'],cards:[
+ {t:'text',where:'Procurement Tracker · float, slip, overdue',h:'Why dates become numbers',p:'The tracker needs answers like how many days late. A date written as text, such as 2026-11-27, cannot be subtracted. So it first turns each date into a **day number**, a plain number counting days from a fixed start. Then late days is one number minus another.'},
+ {t:'code',where:'Procurement Tracker · date helper',h:'dn: date text to day number',lines:[
+  ["// '2026-11-27' to a day number",'A comment. It is a note for people reading the code.'],
+  ['const dn = s => {','Creates a helper called dn. It takes one value, s, which is a date as text.'],
+  ['  if (!s) return null;','No date? Stop here and give back null (nothing), so blank dates do not break the maths.'],
+  ['  const p = String(s)','Makes sure s is text so the next steps always work.'],
+  ["    .split('-')",'Cuts the text at each dash: 2026-11-27 becomes the pieces 2026, 11 and 27.'],
+  ['    .map(Number);','Turns each piece of text into a real number.'],
+  ['  const ms = Date.UTC(p[0], p[1] - 1, p[2]);','Builds the date in milliseconds. JavaScript counts months from 0, so November (11) becomes 10.'],
+  ['  return Math.round(ms / 864e5);','864e5 is 86,400,000, the milliseconds in one day. Dividing gives a whole day number.'],
+  ['};','Closes the helper.']]},
+ {t:'code',where:'Procurement Tracker · float',h:'Float is one number minus another',lines:[
+  ["const ros = dn('2027-08-15');",'ROS is the required-on-site date, as a day number.'],
+  ["const forecast = dn('2027-08-29');",'The forecast delivery date as a day number.'],
+  ['const float = ros - forecast;','Required date minus forecast date. Here it is -14: the order arrives 14 days after it is needed.'],
+  ['console.log(float);','Prints -14. A negative float means Late.']]},
+ {t:'quiz',q:'ROS is day 100 and forecast delivery is day 95. What is the float?',opts:['5','-5','195','0'],a:0,why:'100 - 95 = 5 days to spare. A positive float is good.'},
+ {t:'quiz',q:'Why does the tracker turn dates into day numbers?',opts:['So it can subtract them to get days','So dates look nicer','Because browsers cannot show dates','To save space'],a:0,why:'Numbers can be subtracted. Date text cannot.'},
+ {t:'fill',q:'Complete the line that works out float.',code:['const float = ___ - forecast;'],words:['ros','forecast','14','float'],ans:['ros'],why:'Float is the required date minus the forecast date.'}
+]}
+};
+const ORDER=UNITS.flatMap(u=>u.lessons||[]);
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function fmt(s){return esc(s).replace(/\{\{(.+?)\|(.+?)\}\}/g,(m,a,b)=>'<button class="term" data-act="term" data-t="'+a+'" data-d="'+b+'">'+a+'</button>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>')}
+function hl(line){let out='',i=0,m;const re=/(\/\/.*$)|('(?:[^'\\]|\\.)*'|`[^`]*`)|\b(const|let|if|else|return|true|false|null)\b|(\b\d+(?:\.\d+)?(?:e\d+)?\b)/g;
+ while((m=re.exec(line))){out+=esc(line.slice(i,m.index));out+='<span class="'+(m[1]?'c':m[2]?'s':m[3]?'k':'n')+'">'+esc(m[0])+'</span>';i=re.lastIndex}
+ return out+esc(line.slice(i))}
+const tstr=d=>{const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return tstr(d)};
+const ICON={
+ home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+ course:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+ cheat:'<path d="M6 3h9l4 4v14H6zM9 12h7M9 16h5"/>',
+ set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12l5 5 9-10"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ flame:'<path d="M12 2s5 5 5 10a5 5 0 0 1-10 0c0-2 1-4 2-5 0 2 1 3 2 3 0-4 1-6 1-8z"/>',target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',book:'<path d="M6 3h12v18l-6-4-6 4z"/>'};
+const svg=(n,w=22,sw=1.8)=>'<svg aria-hidden="true" width="'+w+'" height="'+w+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+ICON[n]+'</svg>';
+
+/* ---------- saved progress ---------- */
+const KEY='jsessentials-progress';
+let P={done:{},streak:{n:0,last:''},daily:{},size:'m'};
+try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v==='object')P=Object.assign(P,v)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
+const SIZES={s:'12px',m:'13px',l:'15px'};
+const applySize=()=>document.documentElement.style.setProperty('--code',SIZES[P.size]||'13px');
+function complete(id){
+ if(P.done[id])return;const t=tstr();P.done[id]=t;
+ if(P.streak.last!==t){P.streak.n=P.streak.last===yest()?P.streak.n+1:1;P.streak.last=t}
+ P.daily[t]=(P.daily[t]||0)+1;save()}
+const streak=()=>(P.streak.last===tstr()||P.streak.last===yest())?P.streak.n:0;
+const current=()=>ORDER.find(id=>!P.done[id]);
+const doneCount=()=>ORDER.filter(id=>P.done[id]).length;
+
+/* ---------- state ---------- */
+const S={view:'home',lesson:null,card:0,sel:-1,picked:null,fill:[],sheet:null,q:'',toast:''};
+let toastT;
+function toast(m){S.toast=m;render();clearTimeout(toastT);toastT=setTimeout(()=>{S.toast='';render()},3200)}
+function resetCard(){S.sel=-1;S.picked=null;const c=curCard();S.fill=c&&c.t==='fill'?c.ans.map(()=>null):[]}
+const lessonCards=id=>L[id].cards.concat([{t:'done'}]);
+const curCard=()=>S.lesson?lessonCards(S.lesson)[S.card]:null;
+function openLesson(id){S.lesson=id;S.card=0;S.view='lesson';resetCard();render()}
+function go(v){S.view=v;S.lesson=null;render();const m=document.querySelector('main');if(m)m.scrollTop=0}
+
+/* ---------- views ---------- */
+function codeBlock(lines,interactive){
+ return '<div class="code">'+lines.map((l,i)=>'<button class="ln'+(interactive?'':' plain')+(S.sel===i?' on':'')+'" '+(interactive?'data-act="line" data-i="'+i+'"':'tabindex="-1"')+'><b>'+(i+1)+'</b><span>'+hl(l[0])+'</span></button>').join('')+'</div>'}
+function vHome(){
+ const cur=current(),t=tstr(),today=P.daily[t]||0,n=doneCount(),tot=ORDER.length;
+ return '<main><div><div class="eyebrow">JS Essentials</div><h1>'+(n?'Keep going':'Welcome')+'</h1><div class="sub">The JavaScript behind your Procurement Tracker</div></div>'+
+ '<div class="tiles"><div class="card row"><div class="ico" style="background:#fff4d6;color:#9a6200">'+svg('flame',20)+'</div><div><b>'+streak()+' day'+(streak()===1?'':'s')+'</b><span>Streak</span></div></div>'+
+ '<div class="card row"><div class="ico" style="background:var(--accent-soft);color:var(--accent)">'+svg('target',20)+'</div><div><b>'+Math.min(today,1)+' of 1</b><span>Lesson today</span></div></div></div>'+
+ (cur?'<div class="hero"><div class="eyebrow">Unit '+UNITS.find(u=>u.lessons&&u.lessons.includes(cur)).id+' · Lesson '+(ORDER.indexOf(cur)+1)+' of '+tot+'</div><h2>'+esc(L[cur].title)+'</h2><p>'+(n?'Pick up where you left off.':'Start with how JavaScript fits into a web page.')+'</p><div style="display:flex;gap:8px"><span class="chip">'+L[cur].min+' min</span><span class="chip">Real tracker code</span></div><button class="btn light" data-act="open" data-id="'+cur+'" style="margin-top:4px">'+(n?'Continue':'Start')+'</button></div>'
+ :'<div class="hero"><div class="eyebrow">Phase 1 complete</div><h2>Units 1 and 2 are done</h2><p>Units 3 to 6 and the Mini Tracker arrive in the next phases. Review your cheat sheet while you wait.</p><button class="btn light" data-act="nav" data-v="cheat">Open cheat sheet</button></div>')+
+ '<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="row" style="justify-content:space-between;font-size:14px"><b>Course progress</b><span class="sub">'+n+' of '+tot+' lessons ready</span></div><div class="bar"><i style="width:'+Math.round(n/tot*100)+'%"></i></div></div>'+
+ '<div class="card row" style="border-style:dashed"><div class="ico" style="background:#eef1f3;color:var(--muted)">'+svg('lock',20)+'</div><div class="grow"><b>Final project: Mini Tracker</b><div class="sub">Unlocks in a later phase</div></div></div></main>'}
+function vCourse(){
+ const cur=current();
+ return '<main><div><h1>Course</h1><div class="sub">Units 1 and 2 are ready. The rest follow phase by phase.</div></div>'+UNITS.map(u=>{
+  if(u.later)return '<div class="unit locked"><div class="uhead"><div class="num">'+u.id+'</div><div class="grow"><b>Unit '+u.id+' · '+u.title+'</b><div class="sub">'+u.sub+'</div></div><span style="color:var(--muted)">'+svg('lock',18)+'</span></div></div>';
+  const d=u.lessons.filter(id=>P.done[id]).length;
+  return '<div class="unit"><div class="uhead"><div class="num '+(d===u.lessons.length?'done':'cur')+'">'+(d===u.lessons.length?svg('check',18,2.4):u.id)+'</div><div class="grow"><b>Unit '+u.id+' · '+u.title+'</b><div class="sub">'+d+' of '+u.lessons.length+' done · '+u.sub+'</div></div></div>'+
+   u.lessons.map(id=>'<button class="les'+(id===cur?' cur':'')+'" data-act="open" data-id="'+id+'">'+(P.done[id]?'<span class="dot done" style="color:#fff">'+svg('check',12,3)+'</span>':'<span class="dot'+(id===cur?' cur':'')+'"></span>')+'<span class="grow">'+esc(L[id].title)+'</span><span class="sub">'+L[id].min+' min</span></button>').join('')+'</div>'}).join('')+'</main>'}
+function vCheat(){
+ const q=S.q.trim().toLowerCase();
+ const items=ORDER.filter(id=>P.done[id]).map(id=>L[id].cheat).filter(c=>!q||(c[0]+' '+c[1]).toLowerCase().includes(q));
+ return '<main><div><h1>My cheat sheet</h1><div class="sub">One card for each lesson you finish</div></div><input class="search" id="q" type="search" placeholder="Search cheat sheet" value="'+esc(S.q)+'" data-in="q">'+
+  (items.length?items.map(c=>'<div class="cheat"><div class="eyebrow">'+svg('book',16,2)+esc(c[0])+'</div><div>'+fmt(c[1])+'</div></div>').join(''):'<div class="card sub" style="text-align:center;padding:26px 14px">'+(doneCount()?'Nothing matches your search.':'Finish a lesson and its cheat card appears here.')+'</div>')+'</main>'}
+function vSettings(){
+ return '<main><h1>Settings</h1>'+
+ '<div class="card" style="display:flex;flex-direction:column;gap:8px"><b>Code text size</b><div class="seg">'+[['s','Small'],['m','Medium'],['l','Large']].map(a=>'<button class="'+(P.size===a[0]?'on':'')+'" data-act="size" data-v="'+a[0]+'">'+a[1]+'</button>').join('')+'</div></div>'+
+ '<div class="card" style="display:flex;flex-direction:column;gap:10px"><b>Back up your progress</b><div class="sub">Browsers on some work devices clear their data. Save a backup file and restore it when needed.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="backup">Save backup file</button><button class="btn sm line" data-act="pickfile">Restore from backup</button></div><input type="file" id="file" accept=".json,application/json" hidden></div>'+
+ '<div class="card" style="display:flex;flex-direction:column;gap:10px"><b>Start again</b><div class="sub">Clears finished lessons, streak and cheat sheet on this device.</div><button class="btn sm line" data-act="resetask" style="color:var(--bad);border-color:var(--bad);align-self:flex-start">Reset progress</button></div></main>'}
+function vLesson(){
+ const cards=lessonCards(S.lesson),c=cards[S.card],last=S.card===cards.length-1;
+ let body='',ok=true;
+ if(c.t==='text'){body='<div class="eyebrow">'+esc(c.where)+'</div><h2>'+esc(c.h)+'</h2><p>'+fmt(c.p)+'</p>'}
+ else if(c.t==='code'){
+  body='<div class="eyebrow">'+esc(c.where)+'</div><h2>'+esc(c.h)+'</h2>'+(c.p?'<p>'+fmt(c.p)+'</p>':'')+codeBlock(c.lines,true)+
+   (S.sel>=0?'<div class="explain"><b>Line '+(S.sel+1)+':</b> '+esc(c.lines[S.sel][1])+'</div>':'<div class="hint">Tap any line to see what it does</div>')}
+ else if(c.t==='quiz'){
+  ok=S.picked!==null;
+  body='<div class="eyebrow">Quick check</div><h2>'+esc(c.q)+'</h2><div class="opts">'+c.opts.map((o,i)=>{let k='';if(S.picked!==null){if(i===c.a)k=' ok';else if(i===S.picked)k=' no'}return '<button class="opt'+k+'" data-act="pick" data-i="'+i+'"'+(S.picked!==null?' disabled':'')+'><span class="l">'+'ABCD'[i]+'</span><span>'+esc(o)+'</span></button>'}).join('')+'</div>'+
+   (S.picked!==null?'<div class="fb '+(S.picked===c.a?'ok':'no')+'"><b>'+(S.picked===c.a?'Correct.':'Not quite.')+'</b> '+esc(c.why)+'</div>':'')}
+ else if(c.t==='fill'){
+  const all=S.fill.every(x=>x!==null),right=all&&S.fill.every((x,i)=>c.words[x]===c.ans[i]);ok=right;let bi=0;
+  const lines=c.code.map((ln,li)=>{const parts=ln.split('___');let h='';parts.forEach((p,pi)=>{h+=hl(p);if(pi<parts.length-1){const i=bi++,v=S.fill[i];h+='<button class="blank'+(v!==null?(all?(right?' ok':' no'):' f'):'')+'" data-act="blank" data-i="'+i+'" aria-label="Blank '+(i+1)+'">'+(v!==null?esc(c.words[v]):'&nbsp;')+'</button>'}});return '<div class="ln plain"><b>'+(li+1)+'</b><span>'+h+'</span></div>'}).join('');
+  body='<div class="eyebrow">Try it</div><h2>'+esc(c.q)+'</h2><div class="code">'+lines+'</div><div class="hint">Tap a word to fill the next blank. Tap a filled blank to clear it.</div><div class="words">'+c.words.map((w,i)=>'<button class="'+(S.fill.includes(i)?'used':'')+'" data-act="word" data-i="'+i+'">'+esc(w)+'</button>').join('')+'</div>'+
+   (all?'<div class="fb '+(right?'ok':'no')+'">'+(right?'<b>Correct.</b> '+esc(c.why):'<b>Not quite.</b> Tap a blank to clear it and try again.')+'</div>':'')}
+ else{const l=L[S.lesson],nx=ORDER[ORDER.indexOf(S.lesson)+1];
+  body='<div class="big">🎉</div><h2 style="text-align:center">Lesson complete</h2><p class="sub" style="text-align:center">'+esc(l.title)+' · streak '+streak()+' day'+(streak()===1?'':'s')+'</p><div class="cheat"><div class="eyebrow">'+svg('book',16,2)+'Added to your cheat sheet · '+esc(l.cheat[0])+'</div><div>'+fmt(l.cheat[1])+'</div></div>'}
+ const nx=ORDER[ORDER.indexOf(S.lesson)+1];
+ return '<div class="lesson" style="display:flex;flex-direction:column;height:100%"><div class="top"><button class="x" data-act="close" aria-label="Close lesson">'+svg('x')+'</button><div class="segs">'+cards.map((_,i)=>'<i class="'+(i<=S.card?'on':'')+'"></i>').join('')+'</div><div class="sub" style="flex:none">'+(S.card+1)+' / '+cards.length+'</div></div><main>'+body+'</main>'+
+  '<div class="foot">'+(S.card>0&&!last?'<button class="btn line" data-act="prev" aria-label="Previous card">Back</button>':'')+
+  (last?'<button class="btn" data-act="'+(nx?'open':'close')+'" data-id="'+(nx||'')+'">'+(nx?'Next lesson':'Back to course')+'</button>':'<button class="btn" data-act="next"'+(ok?'':' disabled')+'>Continue</button>')+'</div></div>'}
+
+function render(){
+ const a=document.activeElement,keep=a&&a.id==='q',pos=keep?a.selectionStart:0;
+ let h='';
+ if(S.view==='lesson')h=vLesson();
+ else{h=({home:vHome,course:vCourse,cheat:vCheat,settings:vSettings}[S.view]||vHome)()+'<nav aria-label="Main">'+[['home','Home'],['course','Course'],['cheat','Cheat sheet'],['set','Settings']].map(n=>{const v=n[0]==='set'?'settings':n[0];return '<button class="'+(S.view===v?'on':'')+'" data-act="nav" data-v="'+v+'">'+svg(n[0])+n[1]+'</button>'}).join('')+'</nav>'}
+ if(S.sheet)h+='<div class="sheet" data-act="closesheet"><div>'+(S.sheet.t==='confirm'?'<h2>Reset all progress?</h2><p class="sub">This clears your finished lessons, streak and cheat sheet on this device. Save a backup first if you may want them back.</p><div style="display:flex;gap:8px"><button class="btn line" data-act="closesheet" style="flex:1">Cancel</button><button class="btn" data-act="resetyes" style="flex:1;background:var(--bad)">Reset</button></div>':'<h2>'+esc(S.sheet.t)+'</h2><p>'+esc(S.sheet.d)+'</p><button class="btn sm" data-act="closesheet">Got it</button>')+'</div></div>';
+ if(S.toast)h+='<div class="toast" role="status">'+esc(S.toast)+'</div>';
+ $('#app').innerHTML=h;
+ const f=$('#q');if(keep&&f){f.focus();try{f.setSelectionRange(pos,pos)}catch(e){}}
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');if(!el)return;const d=el.dataset,act=d.act;
+ if(act==='closesheet'){if(el.classList.contains('sheet')&&e.target!==el)return;S.sheet=null;return render()}
+ if(S.sheet&&act!=='resetyes')return;
+ switch(act){
+  case 'nav':S.q='';go(d.v);break;
+  case 'open':openLesson(d.id);break;
+  case 'close':go('course');break;
+  case 'next':{const cards=lessonCards(S.lesson);S.card=Math.min(S.card+1,cards.length-1);resetCard();if(curCard().t==='done')complete(S.lesson);render();const m=document.querySelector('main');if(m)m.scrollTop=0}break;
+  case 'prev':S.card=Math.max(0,S.card-1);resetCard();render();break;
+  case 'line':S.sel=+d.i;render();break;
+  case 'pick':if(S.picked===null){S.picked=+d.i;render()}break;
+  case 'word':{const i=+d.i;if(S.fill.includes(i))break;const k=S.fill.indexOf(null);if(k>=0){S.fill[k]=i;render()}}break;
+  case 'blank':S.fill[+d.i]=null;render();break;
+  case 'term':S.sheet={t:d.t,d:d.d};render();break;
+  case 'size':P.size=d.v;save();applySize();render();break;
+  case 'backup':backup();break;
+  case 'pickfile':{const f=$('#file');if(f)f.click()}break;
+  case 'resetask':S.sheet={t:'confirm'};render();break;
+  case 'resetyes':P={done:{},streak:{n:0,last:''},daily:{},size:P.size};save();S.sheet=null;toast('Progress reset.');break;
+ }
+});
+document.addEventListener('change',e=>{if(e.target.id!=='file'||!e.target.files[0])return;
+ e.target.files[0].text().then(t=>{const v=JSON.parse(t);if(!v||typeof v.done!=='object'||!v.streak)throw 0;P=Object.assign({done:{},streak:{n:0,last:''},daily:{},size:'m'},v);save();applySize();toast('Progress restored.')}).catch(()=>toast('This is not a valid backup file.'));e.target.value=''});
+document.addEventListener('input',e=>{if(e.target.dataset.in==='q'){S.q=e.target.value;render()}});
+function backup(){try{const b=new Blob([JSON.stringify(P,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='js-essentials-progress-'+tstr()+'.json';document.body.appendChild(a);a.click();a.remove();toast('Backup file saved.')}catch(e){toast('Saving files is not available here.')}}
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+applySize();render();
+</script>
+</body>
+</html>
