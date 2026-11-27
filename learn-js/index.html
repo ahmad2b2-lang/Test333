@@ -19,8 +19,9 @@ button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1,h2,p{margin:0}
-#app{height:100dvh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);position:relative}
+#app{height:100vh;height:100dvh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);position:relative}
 @media (min-width:600px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+main>*{flex-shrink:0}
 main{flex:1;min-height:0;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 16px;display:flex;flex-direction:column;gap:12px}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 h1{font-size:26px;line-height:1.15;font-weight:700}
@@ -65,7 +66,19 @@ nav svg{width:22px;height:22px}
 .segs i{height:6px;border-radius:3px;background:var(--line)}
 .segs i.on{background:var(--accent)}
 .lesson{background:#fff}
-.lesson main{background:#fff}
+.lesson main{background:#fff;padding-top:20px}
+.done-ico{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;margin:8px auto 0}
+.picked{display:flex;flex-direction:column;gap:6px;min-height:52px;border:2px dashed #c9d3d9;border-radius:12px;padding:8px}
+.picked:empty::before{content:'Your answer appears here';color:var(--muted);font-size:13px;padding:6px}
+.oline{display:block;line-height:30px;width:100%;min-height:44px;border:1px solid #c9d3d9;border-radius:10px;background:#fff;padding:6px 12px;text-align:left;font-family:var(--mono);font-size:var(--code);white-space:pre;overflow-x:auto}
+.oline.used{opacity:.35}
+.picked .oline{background:var(--accent-soft);border-color:var(--accent)}
+.picked.ok .oline{background:var(--ok-bg);border-color:var(--ok)}
+.picked.no .oline{background:var(--bad-bg);border-color:var(--bad)}
+.ln.bugok{background:var(--ok-bg);box-shadow:inset 3px 0 0 var(--ok)}
+.ln.bugno{background:var(--bad-bg);box-shadow:inset 3px 0 0 var(--bad)}
+.gl{display:flex;flex-direction:column;gap:2px}
+.gl b{font-size:15px}
 .foot{flex:none;padding:12px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid #eef1f3;display:flex;gap:10px;background:#fff}
 .foot .btn{flex:1}
 .foot .btn.line{flex:none}
@@ -126,18 +139,18 @@ const UNITS=[
  {id:6,title:'App polish',sub:'charts, app feel, errors, reading AI code',later:true}
 ];
 const L={
-u1l1:{title:'Where JavaScript lives',min:4,cheat:['The script tag','JavaScript lives in `<script> ... </script>`. Use `console.log(value)` to print a value in the console.'],cards:[
+u1l1:{title:'Where JavaScript lives',min:4,cheat:['The script tag','JavaScript lives in `<script> ... <\/script>`. Use `console.log(value)` to print a value in the console.'],cards:[
  {t:'text',where:'Procurement Tracker · the whole file',h:'A web page has three layers',p:'Your HTML says **what** is on the page. CSS says how it **looks**. {{JavaScript|The programming language that runs inside the browser.}} says what it **does**: it reacts to taps, does the maths and redraws the screen. You already know the first layer, so this course covers the third.'},
  {t:'code',where:'Procurement Tracker · bottom of index.html',h:'JavaScript sits inside a script tag',lines:[
   ['<script>','Starts a block of JavaScript. Everything until the closing tag is code, not page text.'],
   ['  const riskDays = 14;','One line of JavaScript. It stores the number 14 under the name riskDays. Each line ends with a semicolon.'],
   ['  init();','Runs a function called init. The tracker calls it last, so the page starts working once everything is defined.'],
-  ['</script>','Ends the block.']],
+  ['<\/script>','Ends the block.']],
   p:'The tracker keeps all its JavaScript in one script block at the bottom, after the HTML it controls.'},
  {t:'code',where:'Your browser',h:'The console is your notepad',p:'Every browser has a {{console|A panel where JavaScript prints messages. On a computer press F12 and open Console.}}. Use `console.log(x)` to see the value of x. You will use it to check what your code is doing.',lines:[
   ["console.log('Hello tracker');",'Prints the text Hello tracker in the console.'],
   ['console.log(2 + 3);','Prints 5. JavaScript does the maths first.']]},
- {t:'quiz',q:'Where does the tracker\'s JavaScript go?',opts:['Inside a <script> block','Inside a <style> block','In the CSS only','Inside an <h1>'],a:0,why:'JavaScript goes between <script> and </script>. <style> is for CSS.'},
+ {t:'quiz',q:'Where does the tracker\'s JavaScript go?',opts:['Inside a <script> block','Inside a <style> block','In the CSS only','Inside an <h1>'],a:0,why:'JavaScript goes between <script> and <\/script>. <style> is for CSS.'},
  {t:'fill',q:'Complete the line that prints a message in the console.',code:["___.log('Hello');"],words:['console','script','print','init'],ans:['console'],why:'console.log prints to the console.'}
 ]},
 u1l2:{title:'Storing values',min:5,cheat:['const and let','`const` makes a name that cannot be replaced. `let` makes a name you can change. Numbers have no quotes, text goes in quotes, and `true` / `false` are booleans.'],cards:[
@@ -148,6 +161,8 @@ u1l2:{title:'Storing values',min:5,cheat:['const and let','`const` makes a name 
   ["status = 'late';",'Changes the value. No let this time, because the name already exists.'],
   ['const delivered = false;','true and false are called booleans. Many tracker decisions are yes or no.']],
   p:'Numbers have no quotes. Text goes in quotes. `true` and `false` have no quotes.'},
+ {t:'bug',q:'Spot the bug: this code stops with an error.',lines:['const riskDays = 14;','riskDays = 21;'],bug:1,why:'riskDays was made with const, so it cannot be replaced. Use let if a value needs to change.'},
+ {t:'order',q:'Put the lines in order so the console prints late.',lines:["let status = 'ok';","status = 'late';",'console.log(status);'],show:[2,0,1],why:'A name must be made before it is changed, and printed after the change.'},
  {t:'quiz',q:'Which line makes a name you can change later?',opts:['const riskDays = 14;',"let status = 'ok';",'const delivered = false;','riskDays;'],a:1,why:'let allows the value to change later. const does not.'},
  {t:'quiz',q:"What kind of value is 'late'?",opts:['A number','Text','A boolean','A name'],a:1,why:'Anything in quotes is text, also called a string.'},
  {t:'fill',q:'Complete the line so status can be changed on the next line.',code:["___ status = 'ok';","status = 'late';"],words:['const','let','true','riskDays'],ans:['let'],why:'Only let allows status = \'late\' afterwards.'}
@@ -160,26 +175,37 @@ u1l3:{title:'Building text',min:5,cheat:['Template strings','Write text in backt
   ['`${vendor} is ${days} days late`','Backticks start a template string. Each ${...} is replaced by the value inside.'],
   ['// Alder Steel is 12 days late','A comment showing the result. JavaScript ignores lines starting with //.']]},
  {t:'code',where:'Procurement Tracker · status pill',h:'The tracker builds HTML the same way',lines:[
-  ["const STL = { ok: 'On track', late: 'Late' };",'A lookup list: status code on the left, words to show on the right. Records come in Unit 2.'],
-  ['const pill = s => `<span class="pill ${s}">${STL[s]}</span>`;','A small helper. Give it late and it returns HTML for a Late pill. ${s} fills the CSS class, ${STL[s]} fills the label.'],
+  ['const STL = {','A lookup list: a status code on the left, the words to show on the right. Records come in Unit 2.'],
+  ["  ok: 'On track',",'The code ok shows as On track.'],
+  ["  late: 'Late'",'The code late shows as Late.'],
+  ['};','Closes the lookup list.'],
+  ['const pill = s => `','A small helper called pill. It takes one value, s, the status code. A template string can run over several lines.'],
+  ['  <span class="pill ${s}">','HTML you already know. ${s} puts the status code into the CSS class, so a late pill gets the red style.'],
+  ['    ${STL[s]}','Looks up the words for this code, so late becomes Late.'],
+  ['  </span>`;','Closes the span and the template string.'],
   ["pill('late');",'Returns the HTML for a Late pill, which the page then shows.']]},
+ {t:'order',q:'Put the lines in order so the console shows Late 12 d.',lines:['const days = 12;','const msg = `Late ${days} d`;','console.log(msg);'],show:[1,2,0],why:'days must exist before the template uses it, and msg must exist before it is printed.'},
  {t:'quiz',q:'A template string is `Float ${days} d` and days is 5. What text does it make?',opts:['Float 5 d','Float ${days} d','Float days d','Float d'],a:0,why:'${days} is replaced by 5, so you get Float 5 d.'},
  {t:'fill',q:'Complete the template string so it shows the vendor name.',code:["const vendor = 'Kestrel';","`Vendor: ${___}`"],words:['vendor',"'vendor'",'Vendor','days'],ans:['vendor'],why:'Inside ${ } you write the name of the value, without quotes.'}
 ]},
 u2l1:{title:'Lists (arrays)',min:5,cheat:['Lists','A list is written in square brackets: `[a, b, c]`. `list.length` is the count, `list[0]` is the first item, `list.push(x)` adds one.'],cards:[
  {t:'text',where:'Procurement Tracker · milestone list',h:'A list keeps things in order',p:'A {{list|Also called an array: values in order, written in square brackets and separated by commas.}} holds many values under one name. The tracker keeps its milestones in a list so it shows them in the same order every time.'},
  {t:'code',where:'Procurement Tracker · milestones',h:'Counting starts at 0',lines:[
-  ["const keys = ['req', 'rfq', 'bids', 'award'];",'Square brackets make a list. Four short codes: requisition, RFQ, bids, PO issued.'],
+  ['const keys = [','Square brackets start a list.'],
+  ["  'req', 'rfq',",'Items are separated by commas: requisition, RFQ…'],
+  ["  'bids', 'award'",'…bids received and PO issued. Four items in all.'],
+  ['];','Closes the list.'],
   ['keys.length','How many items: 4.'],
   ['keys[0]',"The first item, 'req'. Counting starts at 0, not 1."],
   ['keys[3]',"The fourth item, 'award'. The last index is always length minus 1."],
   ["keys.push('accept');",'Adds an item at the end. The list now has 5 items.']]},
+ {t:'bug',q:'Spot the bug: this should print the first milestone.',lines:["const keys = ['req', 'rfq'];",'console.log(keys[1]);'],bug:1,why:'Counting starts at 0, so the first item is keys[0]. keys[1] is rfq.'},
  {t:'quiz',q:"What is keys[1] in the list ['req', 'rfq', 'bids']?",opts:["'req'","'rfq'","'bids'",'1'],a:1,why:'Index 0 is req, so index 1 is rfq.'},
  {t:'quiz',q:'A list has 5 items. What is the index of the last one?',opts:['5','4','0','6'],a:1,why:'Counting starts at 0, so the indexes are 0, 1, 2, 3, 4.'},
  {t:'fill',q:'Complete the line so it prints how many items are in keys.',code:['console.log(keys.___);'],words:['length','size','count','push'],ans:['length'],why:'keys.length gives the number of items.'}
 ]},
 u2l2:{title:'Records (objects)',min:6,cheat:['Records','A record (object) groups facts as `{ name: value }`. Read with `po.vendor`, change with `po.value = 5`. A list of records is the shape of most app data.'],cards:[
- {t:'text',where:'Procurement Tracker · one purchase order',h:'A record keeps related facts together',p:'One purchase order has a number, a vendor, a value and more. An {{object|A record of named values, written in curly braces. Each value has a name, called a property.}} groups them, each with a name, so you do not need a separate name for every fact.'},
+ {t:'text',where:'Procurement Tracker · one purchase order',h:'A record keeps related facts together',p:'One purchase order has a number, a vendor, a value and more. An {{object|A record of named values, written in curly braces. Each value has a name, called a property.}} groups them, each with a name, so you do not need a separate name for every fact. You know this idea from HTML: in `<img src="a.png" alt="Logo">` each attribute is a name with a value.'},
  {t:'code',where:'Procurement Tracker · an order',h:'Properties have names',lines:[
   ['const po = {','Curly braces start an object. po is one purchase order.'],
   ["  no: '4500-001',",'A property: name on the left, value on the right, then a comma.'],
@@ -190,8 +216,9 @@ u2l2:{title:'Records (objects)',min:6,cheat:['Records','A record (object) groups
   ['po.vendor',"Dot notation reads a property: 'Alder Steel'."],
   ['po.value = 19000000;','Changes a property. This is how the tracker updates an order after you edit it.']]},
  {t:'text',where:'Procurement Tracker · all orders',h:'Records live inside lists',p:'The tracker keeps all its orders as a list of records. To find one it searches the list, which you learn in Unit 3. For now remember: **a list of records** is the shape of almost all app data.'},
+ {t:'bug',q:'Spot the bug: this should print the vendor.',lines:['const po = {',"  vendor: 'Kestrel'",'};','console.log(po.Vendor);'],bug:3,why:'Names must match exactly, capitals included: po.vendor, not po.Vendor. This prints undefined.'},
  {t:'quiz',q:'How does the tracker read the vendor of the order po?',opts:['po.vendor','po(vendor)','vendor.po','po:vendor'],a:0,why:'A dot between the record and the property name reads it.'},
- {t:'fill',q:'Complete the line so it prints the order value.',code:["const po = { no: '4500-001', value: 1250000 };",'console.log(po.___);'],words:['value','1250000','po','no'],ans:['value'],why:'po.value reads the property called value.'}
+ {t:'fill',q:'Complete the line so it prints the order value.',code:['const po = {',"  no: '4500-001',",'  value: 1250000','};','console.log(po.___);'],words:['value','1250000','po','no'],ans:['value'],why:'po.value reads the property called value.'}
 ]},
 u2l3:{title:'Dates as day numbers',min:6,cheat:['Dates as numbers','Dates as text cannot be subtracted. The tracker turns them into day numbers (`dn`), so float = required date minus forecast date. A negative float means late.'],cards:[
  {t:'text',where:'Procurement Tracker · float, slip, overdue',h:'Why dates become numbers',p:'The tracker needs answers like how many days late. A date written as text, such as 2026-11-27, cannot be subtracted. So it first turns each date into a **day number**, a plain number counting days from a fixed start. Then late days is one number minus another.'},
@@ -202,7 +229,8 @@ u2l3:{title:'Dates as day numbers',min:6,cheat:['Dates as numbers','Dates as tex
   ['  const p = String(s)','Makes sure s is text so the next steps always work.'],
   ["    .split('-')",'Cuts the text at each dash: 2026-11-27 becomes the pieces 2026, 11 and 27.'],
   ['    .map(Number);','Turns each piece of text into a real number.'],
-  ['  const ms = Date.UTC(p[0], p[1] - 1, p[2]);','Builds the date in milliseconds. JavaScript counts months from 0, so November (11) becomes 10.'],
+  ['  const ms = Date.UTC(','Builds the date in milliseconds (thousandths of a second)…'],
+  ['    p[0], p[1] - 1, p[2]);','…from year, month and day. JavaScript counts months from 0, so November (11) must become 10.'],
   ['  return Math.round(ms / 864e5);','864e5 is 86,400,000, the milliseconds in one day. Dividing gives a whole day number.'],
   ['};','Closes the helper.']]},
  {t:'code',where:'Procurement Tracker · float',h:'Float is one number minus another',lines:[
@@ -251,10 +279,10 @@ const current=()=>ORDER.find(id=>!P.done[id]);
 const doneCount=()=>ORDER.filter(id=>P.done[id]).length;
 
 /* ---------- state ---------- */
-const S={view:'home',lesson:null,card:0,sel:-1,picked:null,fill:[],sheet:null,q:'',toast:''};
+const S={view:'home',lesson:null,card:0,sel:-1,picked:null,fill:[],ord:[],sheet:null,q:'',tab:'cheat',toast:''};
 let toastT;
 function toast(m){S.toast=m;render();clearTimeout(toastT);toastT=setTimeout(()=>{S.toast='';render()},3200)}
-function resetCard(){S.sel=-1;S.picked=null;const c=curCard();S.fill=c&&c.t==='fill'?c.ans.map(()=>null):[]}
+function resetCard(){S.sel=-1;S.picked=null;S.ord=[];const c=curCard();S.fill=c&&c.t==='fill'?c.ans.map(()=>null):[]}
 const lessonCards=id=>L[id].cards.concat([{t:'done'}]);
 const curCard=()=>S.lesson?lessonCards(S.lesson)[S.card]:null;
 function openLesson(id){S.lesson=id;S.card=0;S.view='lesson';resetCard();render()}
@@ -279,10 +307,15 @@ function vCourse(){
   const d=u.lessons.filter(id=>P.done[id]).length;
   return '<div class="unit"><div class="uhead"><div class="num '+(d===u.lessons.length?'done':'cur')+'">'+(d===u.lessons.length?svg('check',18,2.4):u.id)+'</div><div class="grow"><b>Unit '+u.id+' · '+u.title+'</b><div class="sub">'+d+' of '+u.lessons.length+' done · '+u.sub+'</div></div></div>'+
    u.lessons.map(id=>'<button class="les'+(id===cur?' cur':'')+'" data-act="open" data-id="'+id+'">'+(P.done[id]?'<span class="dot done" style="color:#fff">'+svg('check',12,3)+'</span>':'<span class="dot'+(id===cur?' cur':'')+'"></span>')+'<span class="grow">'+esc(L[id].title)+'</span><span class="sub">'+L[id].min+' min</span></button>').join('')+'</div>'}).join('')+'</main>'}
+function glossary(){const m={};Object.values(L).forEach(l=>l.cards.forEach(c=>{(c.p||'').replace(/\{\{(.+?)\|(.+?)\}\}/g,(x,a,b)=>{m[a.toLowerCase()]=[a,b]})}));return Object.values(m).sort((a,b)=>a[0].localeCompare(b[0]))}
 function vCheat(){
  const q=S.q.trim().toLowerCase();
+ const seg='<div class="seg" style="grid-template-columns:1fr 1fr"><button class="'+(S.tab==='cheat'?'on':'')+'" data-act="tab" data-v="cheat">Cheat sheet</button><button class="'+(S.tab==='gloss'?'on':'')+'" data-act="tab" data-v="gloss">Glossary</button></div>';
+ if(S.tab==='gloss'){const g=glossary().filter(t=>!q||(t[0]+' '+t[1]).toLowerCase().includes(q));
+  return '<main><div><h1>Glossary</h1><div class="sub">Every highlighted word from the lessons</div></div>'+seg+'<input class="search" id="q" type="search" placeholder="Search glossary" value="'+esc(S.q)+'" data-in="q">'+
+   (g.length?g.map(t=>'<div class="card gl"><b>'+esc(t[0])+'</b><span class="sub">'+esc(t[1])+'</span></div>').join(''):'<div class="card sub" style="text-align:center;padding:26px 14px">Nothing matches your search.</div>')+'</main>'}
  const items=ORDER.filter(id=>P.done[id]).map(id=>L[id].cheat).filter(c=>!q||(c[0]+' '+c[1]).toLowerCase().includes(q));
- return '<main><div><h1>My cheat sheet</h1><div class="sub">One card for each lesson you finish</div></div><input class="search" id="q" type="search" placeholder="Search cheat sheet" value="'+esc(S.q)+'" data-in="q">'+
+ return '<main><div><h1>My cheat sheet</h1><div class="sub">One card for each lesson you finish</div></div>'+seg+'<input class="search" id="q" type="search" placeholder="Search cheat sheet" value="'+esc(S.q)+'" data-in="q">'+
   (items.length?items.map(c=>'<div class="cheat"><div class="eyebrow">'+svg('book',16,2)+esc(c[0])+'</div><div>'+fmt(c[1])+'</div></div>').join(''):'<div class="card sub" style="text-align:center;padding:26px 14px">'+(doneCount()?'Nothing matches your search.':'Finish a lesson and its cheat card appears here.')+'</div>')+'</main>'}
 function vSettings(){
  return '<main><h1>Settings</h1>'+
@@ -305,8 +338,17 @@ function vLesson(){
   const lines=c.code.map((ln,li)=>{const parts=ln.split('___');let h='';parts.forEach((p,pi)=>{h+=hl(p);if(pi<parts.length-1){const i=bi++,v=S.fill[i];h+='<button class="blank'+(v!==null?(all?(right?' ok':' no'):' f'):'')+'" data-act="blank" data-i="'+i+'" aria-label="Blank '+(i+1)+'">'+(v!==null?esc(c.words[v]):'&nbsp;')+'</button>'}});return '<div class="ln plain"><b>'+(li+1)+'</b><span>'+h+'</span></div>'}).join('');
   body='<div class="eyebrow">Try it</div><h2>'+esc(c.q)+'</h2><div class="code">'+lines+'</div><div class="hint">Tap a word to fill the next blank. Tap a filled blank to clear it.</div><div class="words">'+c.words.map((w,i)=>'<button class="'+(S.fill.includes(i)?'used':'')+'" data-act="word" data-i="'+i+'">'+esc(w)+'</button>').join('')+'</div>'+
    (all?'<div class="fb '+(right?'ok':'no')+'">'+(right?'<b>Correct.</b> '+esc(c.why):'<b>Not quite.</b> Tap a blank to clear it and try again.')+'</div>':'')}
+ else if(c.t==='bug'){
+  ok=S.picked!==null;
+  body='<div class="eyebrow">Spot the bug</div><h2>'+esc(c.q)+'</h2><div class="code">'+c.lines.map((l,i)=>{let k='';if(S.picked!==null){if(i===c.bug)k=' bugok';else if(i===S.picked)k=' bugno'}return '<button class="ln'+k+'" data-act="bugpick" data-i="'+i+'"><b>'+(i+1)+'</b><span>'+hl(l)+'</span></button>'}).join('')+'</div>'+
+   (S.picked===null?'<div class="hint">Tap the line with the bug</div>':'<div class="fb '+(S.picked===c.bug?'ok':'no')+'"><b>'+(S.picked===c.bug?'Correct.':'Not quite. The bug is on line '+(c.bug+1)+'.')+'</b> '+esc(c.why)+'</div>')}
+ else if(c.t==='order'){
+  const all=S.ord.length===c.lines.length,right=all&&S.ord.every((x,i)=>x===i);ok=right;
+  body='<div class="eyebrow">Put in order</div><h2>'+esc(c.q)+'</h2><div class="picked'+(all?(right?' ok':' no'):'')+'">'+S.ord.map((x,i)=>'<button class="oline" data-act="unord" data-i="'+i+'">'+hl(c.lines[x])+'</button>').join('')+'</div>'+
+   '<div class="opts">'+c.show.map(x=>'<button class="oline'+(S.ord.includes(x)?' used':'')+'" data-act="ord" data-i="'+x+'"'+(S.ord.includes(x)?' disabled':'')+'>'+hl(c.lines[x])+'</button>').join('')+'</div>'+
+   (all?'<div class="fb '+(right?'ok':'no')+'">'+(right?'<b>Correct.</b> '+esc(c.why):'<b>Not quite.</b> Tap a line in your answer to take it out, then try again.')+'</div>':'<div class="hint">Tap the lines in the right order. Tap a line in your answer to take it out.</div>')}
  else{const l=L[S.lesson],nx=ORDER[ORDER.indexOf(S.lesson)+1];
-  body='<div class="big">🎉</div><h2 style="text-align:center">Lesson complete</h2><p class="sub" style="text-align:center">'+esc(l.title)+' · streak '+streak()+' day'+(streak()===1?'':'s')+'</p><div class="cheat"><div class="eyebrow">'+svg('book',16,2)+'Added to your cheat sheet · '+esc(l.cheat[0])+'</div><div>'+fmt(l.cheat[1])+'</div></div>'}
+  body='<div class="done-ico">'+svg('check',34,2.6)+'</div><h2 style="text-align:center">Lesson complete</h2><p class="sub" style="text-align:center">'+esc(l.title)+' · streak '+streak()+' day'+(streak()===1?'':'s')+'</p><div class="cheat"><div class="eyebrow">'+svg('book',16,2)+'Added to your cheat sheet · '+esc(l.cheat[0])+'</div><div>'+fmt(l.cheat[1])+'</div></div>'}
  const nx=ORDER[ORDER.indexOf(S.lesson)+1];
  return '<div class="lesson" style="display:flex;flex-direction:column;height:100%"><div class="top"><button class="x" data-act="close" aria-label="Close lesson">'+svg('x')+'</button><div class="segs">'+cards.map((_,i)=>'<i class="'+(i<=S.card?'on':'')+'"></i>').join('')+'</div><div class="sub" style="flex:none">'+(S.card+1)+' / '+cards.length+'</div></div><main>'+body+'</main>'+
   '<div class="foot">'+(S.card>0&&!last?'<button class="btn line" data-act="prev" aria-label="Previous card">Back</button>':'')+
@@ -338,6 +380,10 @@ document.addEventListener('click',e=>{
   case 'pick':if(S.picked===null){S.picked=+d.i;render()}break;
   case 'word':{const i=+d.i;if(S.fill.includes(i))break;const k=S.fill.indexOf(null);if(k>=0){S.fill[k]=i;render()}}break;
   case 'blank':S.fill[+d.i]=null;render();break;
+  case 'bugpick':if(S.picked===null){S.picked=+d.i;render()}break;
+  case 'ord':{const i=+d.i;if(!S.ord.includes(i)){S.ord.push(i);render()}}break;
+  case 'unord':S.ord.splice(+d.i,1);render();break;
+  case 'tab':S.tab=d.v;S.q='';render();break;
   case 'term':S.sheet={t:d.t,d:d.d};render();break;
   case 'size':P.size=d.v;save();applySize();render();break;
   case 'backup':backup();break;
