@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#f5f6fa">
+<title>أنماط القدرات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:light only;
+    --bg:#f5f6fa; --card:#fff; --ink:#1c2233; --muted:#5d6577; --line:#e6e8ef;
+    --math:#2f6fe4; --mathSoft:#e8f0fd; --verb:#8a4fd8; --verbSoft:#f1eafc;
+    --ok:#1f9d55; --okSoft:#e3f5ea; --bad:#d64545; --badSoft:#fbe7e7; --warn:#b7791f; --warnSoft:#fdf3e1;
+    --accent:var(--math); --accentSoft:var(--mathSoft);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+  body{
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+    font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+    background:var(--bg);color:var(--ink);min-height:100dvh;font-size:16px;line-height:1.7;
+  }
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  #app{max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+       padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 20px)}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;gap:10px;min-height:48px;margin-bottom:6px}
+  .bar h1{font-size:22px;margin:0;flex:1}
+  .bar .title{flex:1;font-weight:700;font-size:17px}
+  .icon-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:20px;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .icon-btn:active{transform:scale(.94)}
+
+  .hero{background:linear-gradient(135deg,#2f6fe4,#8a4fd8);color:#fff;border-radius:22px;padding:18px;margin:6px 0 18px}
+  .hero b{font-size:18px;display:block;margin-bottom:4px}
+  .hero p{margin:0;opacity:.92;font-size:15px}
+  .hero .meter{margin-top:12px;height:8px;background:rgba(255,255,255,.3);border-radius:8px;overflow:hidden}
+  .hero .meter i{display:block;height:100%;background:#fff;border-radius:8px;transition:width .4s}
+  .hero small{display:block;margin-top:6px;opacity:.9}
+
+  h2.sec{font-size:15px;color:var(--muted);margin:14px 4px 8px;font-weight:600}
+  .pcard{display:flex;align-items:center;gap:14px;width:100%;text-align:right;background:var(--card);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:0 3px 14px rgba(0,0,0,.05);min-height:80px}
+  .pcard:active{transform:scale(.98)}
+  .pcard .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:26px;flex:none}
+  .pcard .t{font-weight:700;font-size:17px}
+  .pcard .d{color:var(--muted);font-size:14px;line-height:1.5}
+  .pcard .st{margin-inline-start:auto;font-size:12px;font-weight:700;border-radius:10px;padding:4px 9px;flex:none}
+  .st.done{background:var(--okSoft);color:var(--ok)}
+  .st.todo{background:#eef0f4;color:var(--muted)}
+  .pcard.soon{opacity:.55;box-shadow:none;border:1.5px dashed var(--line);background:transparent}
+
+  .wide-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:16px;font-weight:700;font-size:16px}
+  .primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(47,111,228,.25)}
+  .primary:active{transform:scale(.98)}
+  .primary:disabled{opacity:.4;box-shadow:none}
+  .ghost{background:var(--card);border:1.5px solid var(--line)}
+
+  /* lesson */
+  .steps{display:flex;gap:5px;margin:2px 0 14px}
+  .steps i{flex:1;height:6px;border-radius:6px;background:var(--line)}
+  .steps i.on{background:var(--accent)}
+  .kicker{display:inline-block;align-self:flex-start;font-size:13px;font-weight:700;color:var(--accent);background:var(--accentSoft);border-radius:10px;padding:3px 10px;margin-bottom:8px}
+  .stage{flex:1;display:flex;flex-direction:column}
+  .stage h3{font-size:21px;margin:0 0 6px;line-height:1.45}
+  .lead{color:var(--muted);margin:0 0 14px}
+  .card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 3px 14px rgba(0,0,0,.05);margin-bottom:12px}
+  .footer{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
+
+  .q-stem{font-size:16px;margin-bottom:10px}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+  .compare div{background:var(--accentSoft);border-radius:14px;padding:10px;text-align:center}
+  .compare small{display:block;color:var(--muted);font-size:13px}
+  .compare .v{font-size:20px;font-weight:700}
+  .pair{font-size:26px;font-weight:700;text-align:center;padding:10px;background:var(--accentSoft);border-radius:14px;letter-spacing:.5px}
+
+  .choices{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+  .choice{display:flex;align-items:center;gap:12px;text-align:right;min-height:54px;padding:10px 12px;border-radius:15px;background:var(--card);border:2px solid var(--line);font-size:16px;transition:border-color .15s,background .15s}
+  .choice:active{transform:scale(.985)}
+  .choice .l{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#eef0f4;font-weight:700;flex:none}
+  .choice.ok{border-color:var(--ok);background:var(--okSoft)}
+  .choice.ok .l{background:var(--ok);color:#fff}
+  .choice.bad{border-color:var(--bad);background:var(--badSoft)}
+  .choice.bad .l{background:var(--bad);color:#fff}
+  .choice:disabled{cursor:default}
+  .choice.dim{opacity:.55}
+
+  .fb{border-radius:15px;padding:12px 14px;margin-top:12px;font-size:15px;animation:pop .25s ease}
+  .fb.ok{background:var(--okSoft);color:#14532d}
+  .fb.bad{background:var(--badSoft);color:#7f1d1d}
+  .fb b{display:block;font-size:16px;margin-bottom:2px}
+  @keyframes pop{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+
+  ul.clean{margin:0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding-inline-start:30px;margin-bottom:10px}
+  ul.clean li::before{content:attr(data-i);position:absolute;inset-inline-start:0;top:2px;width:22px;height:22px;border-radius:7px;background:var(--accentSoft);color:var(--accent);font-size:13px;font-weight:700;display:grid;place-items:center}
+  .tip{background:var(--warnSoft);color:#6b4410;border-radius:14px;padding:11px 13px;font-size:15px}
+  .tip b{color:#5a3608}
+
+  table.try{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+  table.try th,table.try td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  table.try th{color:var(--muted);font-weight:600;font-size:13px}
+  .win1{color:var(--math);font-weight:700}.win2{color:var(--verb);font-weight:700}.eq{color:var(--warn);font-weight:700}
+
+  .sent{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .sent:last-child{border-bottom:0}
+  .sent .mk{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:700;flex:none}
+  .mk.y{background:var(--okSoft);color:var(--ok)} .mk.n{background:var(--badSoft);color:var(--bad)}
+
+  .trap{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .trap:last-child{border-bottom:0}
+  .trap .l{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--badSoft);color:var(--bad);font-weight:700;flex:none}
+  .trap .l.ok{background:var(--okSoft);color:var(--ok)}
+  .trap b{display:block}
+  .trap span{color:var(--muted);font-size:15px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .chip{background:var(--accentSoft);color:var(--accent);border-radius:10px;padding:4px 10px;font-size:14px;font-weight:600}
+
+  .pcount{font-size:14px;color:var(--muted);margin-bottom:6px}
+
+  /* pattern card */
+  .pc{background:var(--card);border-radius:22px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.07);margin-bottom:14px}
+  .pc .hd{background:var(--accent);color:#fff;padding:14px 16px}
+  .pc .hd small{opacity:.85}
+  .pc .hd b{display:block;font-size:20px}
+  .pc .bd{padding:14px 16px}
+  .pc h4{margin:10px 0 4px;font-size:14px;color:var(--accent)}
+  .pc h4:first-child{margin-top:0}
+  .pc p{margin:0 0 4px;font-size:15px}
+  .pc ol{margin:0;padding-inline-start:22px;font-size:15px;list-style:arabic-indic}
+  .pc .gold{margin-top:12px;background:var(--warnSoft);border-radius:12px;padding:10px 12px;font-weight:700;color:#5a3608;font-size:15px}
+  .score{display:flex;align-items:center;gap:10px;justify-content:center;font-size:15px;color:var(--muted);margin-bottom:10px}
+  .score b{font-size:22px;color:var(--ink)}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 16px}
+  .empty div{font-size:46px}
+
+  .m{direction:ltr;unicode-bidi:isolate;}
+  body.ar .m{direction:rtl}
+  .neg{direction:ltr;unicode-bidi:isolate}
+  .m{display:inline-block;font-weight:700;white-space:nowrap}
+  sup{font-size:.65em}
+
+  /* sheet */
+  .scrim{position:fixed;inset:0;background:rgba(20,24,36,.35);display:flex;align-items:flex-end;justify-content:center;z-index:10;animation:fade .2s}
+  .sheet{background:#fff;width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);animation:up .25s ease}
+  .sheet h3{margin:0 0 4px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .seg button{min-height:64px;border-radius:15px;border:2px solid var(--line);font-weight:700;line-height:1.4}
+  .seg button small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+  .seg button.on{border-color:var(--math);background:var(--mathSoft)}
+  @keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(40px);opacity:.4}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- iPhone pinch block ---------- */
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
+
+/* ---------- saved state (on this phone only) ---------- */
+const KEY='qudurat-patterns-v1';
+let S={learned:{},best:{},digits:'ar'};
+try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------- math digits: written in Western form, shown per setting ---------- */
+const AR='٠١٢٣٤٥٦٧٨٩';
+function conv(t){return t.replace(/[0-9]/g,d=>AR[d]).replace(/x/g,'س').replace(/y/g,'ص').replace(/%/g,'٪').replace(/a/g,'أ').replace(/b/g,'ب');}
+function M(html){ // only touches text, never tags
+  if(S.digits!=='ar') return html;
+  return html.replace(/(<[^>]*>)|([^<]+)/g,(a,tag,txt)=>tag?tag:
+    conv(txt.replace(/-(\d+)/g,'\u0001$1\u0002')).replace(/\u0001([^\u0002]*)\u0002/g,'<span class="neg">$1-</span>'));
+}
+const m=s=>`<span class="m">${s}</span>`;
+
+const L=['أ','ب','ج','د'];
+const CMP=['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'];
+
+/* ---------- content: 2 patterns ---------- */
+const PATTERNS=[
+{
+  id:'cmp', kind:'math', icon:'⚖️', name:'المقارنات الكمية', short:'من الأكبر؟ القيمة الأولى أم الثانية؟',
+  tryQ:{stem:`إذا كان ${m('x')} عددًا حقيقيًا، قارن بين:`, a:m('x<sup>2</sup>'), b:m('x'), choices:CMP, ans:3},
+  tryFb:{ok:'صحيح! لكن هل كان تخمينًا أم طريقة؟ لنكشف النمط الذي يجعلك تجيب بثقة.',
+         bad:'هذا هو الخطأ الأشهر في هذا السؤال! معظم الطلاب يقعون فيه. لنكشف السر.'},
+  spot:[
+    'السؤال يعطيك <b>«القيمة الأولى»</b> و<b>«القيمة الثانية»</b> بدل أن يطلب حساب ناتج.',
+    'الخيارات <b>دائمًا نفس الأربعة</b>: الأولى أكبر / الثانية أكبر / متساويتان / المعطيات غير كافية.',
+    'السؤال الحقيقي هو: <b>من الأكبر؟</b> وليس: كم الناتج؟ لذلك نادرًا ما تحتاج حسابًا كاملًا.'
+  ],
+  spotTip:'احفظ ترتيب الخيارات الأربعة مرة واحدة، فتوفّر وقت قراءتها في كل سؤال مقارنة.',
+  trick:[
+    'هل في السؤال متغيّر مثل '+m('x')+'؟ إذا <b>لا</b>: بسّط أو احسب، والجواب <b>لا يمكن</b> أن يكون (د).',
+    'إذا <b>نعم</b>: جرّب قيمًا من «القائمة الذهبية»: '+m('0')+'، '+m('1')+'، '+m('-1')+'، '+m('½')+'، '+m('10')+'.',
+    'إذا <b>تغيّر الفائز</b> بين تجربة وأخرى ← الجواب (د) المعطيات غير كافية.',
+    'إذا <b>بقي نفس الفائز</b> في كل التجارب ← اختره بثقة.'
+  ],
+  trickDemo:()=>`
+    <table class="try">
+      <tr><th>نجرّب</th><th>الأولى ${m('x<sup>2</sup>')}</th><th>الثانية ${m('x')}</th><th>الفائز</th></tr>
+      <tr><td>${m('x = 2')}</td><td>${m('4')}</td><td>${m('2')}</td><td class="win1">الأولى</td></tr>
+      <tr><td>${m('x = ½')}</td><td>${m('¼')}</td><td>${m('½')}</td><td class="win2">الثانية</td></tr>
+      <tr><td>${m('x = 1')}</td><td>${m('1')}</td><td>${m('1')}</td><td class="eq">تعادل</td></tr>
+    </table>
+    <div class="fb ok" style="margin-top:10px"><b>الفائز تغيّر ← الجواب (د)</b>تجربتان مختلفتان كانتا كافيتين. لا تحتاج أكثر.</div>`,
+  traps:[
+    {l:0,t:'«الأولى أكبر»',w:'جرّبت عددًا موجبًا كبيرًا فقط (مثل 2 أو 10). المربع يكبر، لكن ليس دائمًا.'},
+    {l:1,t:'«الثانية أكبر»',w:'جرّبت كسرًا فقط (مثل ½). الكسر يصغر عند تربيعه، لكن هذه حالة واحدة.'},
+    {l:2,t:'«متساويتان»',w:'جرّبت 0 أو 1 فقط. هذان العددان يتساوى مربعهما معهما، وهذا فخ مقصود.'},
+    {l:3,t:'«المعطيات غير كافية» ✓',w:'الصحيح، لأن النتيجة تتغيّر حسب قيمة '+m('x')+'.',ok:true}
+  ],
+  trapTip:'<b>قاعدة ذهبية:</b> لا تكتفِ بتجربة واحدة. جرّب على الأقل عددًا كبيرًا وكسرًا.',
+  practice:[
+    {stem:'قارن بين:', a:m('(-2)<sup>6</sup>'), b:m('(-2)<sup>7</sup>'), choices:CMP, ans:0,
+     why:'لا يوجد متغيّر، فالجواب ليس (د). العدد السالب للأس الزوجي موجب، وللأس الفردي سالب. موجب > سالب.'},
+    {stem:'إذا كان '+m('x > 0')+'، قارن بين:', a:m('x + 3'), b:m('3x'), choices:CMP, ans:3,
+     why:'جرّب '+m('x = 1')+': '+m('4')+' مقابل '+m('3')+' (الأولى). جرّب '+m('x = 2')+': '+m('5')+' مقابل '+m('6')+' (الثانية). الفائز تغيّر ← (د).'},
+    {stem:'قارن بين:', a:m('25%')+' من '+m('80'), b:m('80%')+' من '+m('25'), choices:CMP, ans:2,
+     why:'حيلة سريعة: '+m('a%')+' من '+m('b')+' = '+m('b%')+' من '+m('a')+' دائمًا. كلاهما = '+m('20')+' بدون حساب طويل.'}
+  ],
+  card:{
+    spot:'«القيمة الأولى» و«القيمة الثانية» + أربعة خيارات ثابتة.',
+    steps:['لا متغيّر ← احسب أو بسّط. (د) مستحيل.','يوجد متغيّر ← جرّب: 0، 1، -1، ½، 10.','الفائز تغيّر ← (د). ثابت ← اختره.'],
+    traps:'تجربة عدد واحد فقط، ونسيان الكسور والسالب والصفر.',
+    gold:'متغيّر + نتائج مختلفة = (د) — أعداد فقط = (د) مستحيل'
+  }
+},
+{
+  id:'ana', kind:'verb', icon:'🔗', name:'التناظر اللفظي', short:'كلمتان بينهما علاقة. ابحث عن زوج بنفس العلاقة.',
+  tryQ:{stem:'اختر الزوج الذي تشبه العلاقة بين كلمتيه العلاقة في:', pair:'بذرة : شجرة',
+        choices:['غصن : شجرة','طفل : رجل','تربة : زرع','فراشة : يرقة'], ans:1},
+  tryFb:{ok:'صحيح! لكن كيف تتأكد في كل مرة بدون تردد؟ هناك طريقة ثابتة.',
+         bad:'اختيار مفهوم، فالخيارات مصمّمة لتبدو قريبة. لنتعلّم الطريقة التي تكشفها.'},
+  spot:[
+    '<b>كلمتان بينهما نقطتان «:»</b> ثم أربعة أزواج من الكلمات.',
+    'المطلوب <b>ليس معنى الكلمات</b>، بل <b>نوع العلاقة</b> بينهما.',
+    'الخيارات الخاطئة غالبًا تشترك مع السؤال في <b>الموضوع</b> أو حتى في <b>كلمة</b>، لكن العلاقة مختلفة.'
+  ],
+  spotTip:'لا تنظر إلى الخيارات قبل أن تحدّد العلاقة. الخيارات مصمّمة لتشتيتك.',
+  trick:[
+    'كوّن <b>جملة قصيرة</b> تربط الكلمتين، قبل النظر للخيارات.',
+    'ضع <b>كل خيار</b> في نفس الجملة تمامًا، واحذف ما لا يصلح.',
+    'إذا صلحت الجملة لأكثر من خيار، اجعلها <b>أدق</b>.',
+    'تأكد من <b>الاتجاه</b>: الكلمة الأولى في السؤال تقابل الأولى في الخيار.'
+  ],
+  trickDemo:()=>`
+    <div style="font-weight:700;margin-bottom:6px">الجملة: «البذرة <u>تكبر فتصبح</u> شجرة»</div>
+    <div class="sent"><span class="mk n">✗</span><span>الغصن يكبر فيصبح شجرة؟ لا، الغصن <b>جزء</b> منها.</span></div>
+    <div class="sent"><span class="mk y">✓</span><span>الطفل يكبر فيصبح رجلًا. نعم!</span></div>
+    <div class="sent"><span class="mk n">✗</span><span>التربة تكبر فتصبح زرعًا؟ لا، التربة <b>تساعد</b> فقط.</span></div>
+    <div class="sent"><span class="mk n">✗</span><span>الفراشة تكبر فتصبح يرقة؟ لا، <b>الاتجاه معكوس</b>.</span></div>`,
+  relations:['جزء : كل','أداة : وظيفة','مرحلة : تطوّر','سبب : نتيجة','عامل : مكان','ضد','ترادف','مادة : مصنوع'],
+  traps:[
+    {l:0,t:'غصن : شجرة',w:'فخ «الكلمة المشتركة»: فيه كلمة «شجرة» نفسها، لكن العلاقة جزء من كل.'},
+    {l:1,t:'طفل : رجل ✓',w:'الصحيح: مرحلة أولى تكبر وتتطوّر إلى مرحلة لاحقة.',ok:true},
+    {l:2,t:'تربة : زرع',w:'فخ «الارتباط العام»: الكلمتان من نفس الموضوع، لكن التربة لا تصبح زرعًا.'},
+    {l:3,t:'فراشة : يرقة',w:'فخ «الاتجاه المعكوس»: العلاقة صحيحة لكن مقلوبة (اليرقة تصبح فراشة).'}
+  ],
+  trapTip:'<b>ثلاثة فخاخ تتكرر:</b> الكلمة المشتركة، الارتباط العام بالموضوع، والاتجاه المعكوس.',
+  practice:[
+    {stem:'العلاقة في:', pair:'طبيب : مستشفى', choices:['مريض : دواء','معلّم : مدرسة','قاضٍ : عدالة','طالب : كتاب'], ans:1,
+     why:'الجملة: «الطبيب يعمل في المستشفى». المعلّم يعمل في المدرسة. العلاقة: عامل ومكان عمله.'},
+    {stem:'العلاقة في:', pair:'إصبع : يد', choices:['قدم : حذاء','عين : نظر','صفحة : كتاب','رأس : قبعة'], ans:2,
+     why:'الجملة: «الإصبع جزء من اليد». الصفحة جزء من الكتاب. الحذاء والقبعة يُلبسان، والنظر وظيفة.'},
+    {stem:'العلاقة في:', pair:'إهمال : فشل', choices:['نجاح : جهد','اجتهاد : تفوّق','تعب : راحة','صبر : تحمّل'], ans:1,
+     why:'الجملة: «الإهمال يؤدي إلى الفشل». الاجتهاد يؤدي إلى التفوّق. (نجاح : جهد) اتجاهه معكوس، و(صبر : تحمّل) ترادف.'}
+  ],
+  card:{
+    spot:'كلمتان بينهما «:» + أربعة أزواج. المطلوب العلاقة لا المعنى.',
+    steps:['كوّن جملة تربط الكلمتين قبل رؤية الخيارات.','ضع كل خيار في نفس الجملة.','إذا صلح أكثر من خيار، اجعل الجملة أدق. وانتبه للاتجاه.'],
+    traps:'الكلمة المشتركة، الارتباط العام بالموضوع، الاتجاه المعكوس.',
+    gold:'الجملة أولًا، ثم الخيارات'
+  }
+}];
+
+const SOON=[
+  {kind:'math',icon:'٪',name:'النسب المئوية',short:'قريبًا'},
+  {kind:'verb',icon:'📖',name:'إكمال الجمل',short:'قريبًا'}
+];
+
+/* ---------- render helpers ---------- */
+const app=document.getElementById('app');
+let view={name:'home'};
+function setAccent(kind){
+  const r=document.documentElement.style;
+  r.setProperty('--accent',kind==='verb'?'var(--verb)':'var(--math)');
+  r.setProperty('--accentSoft',kind==='verb'?'var(--verbSoft)':'var(--mathSoft)');
+}
+function go(v){view=v;render();window.scrollTo(0,0);}
+function fmt(p,html){return p.kind==='math'?M(html):html;}
+function num(n){return S.digits==='ar'?conv(String(n)):String(n);}
+
+function render(){
+  document.body.classList.toggle('ar',S.digits==='ar');
+  if(view.name==='home') return home();
+  if(view.name==='cards') return cards();
+  if(view.name==='lesson') return lesson();
+}
+
+/* ---------- home ---------- */
+function home(){
+  setAccent('math');
+  const done=PATTERNS.filter(p=>S.learned[p.id]).length;
+  const pc=p=>`
+    <button class="pcard" data-open="${p.id}">
+      <div class="ic" style="background:${p.kind==='math'?'var(--mathSoft)':'var(--verbSoft)'}">${p.icon}</div>
+      <div><div class="t">${p.name}</div><div class="d">${p.short}</div></div>
+      <span class="st ${S.learned[p.id]?'done':'todo'}">${S.learned[p.id]?'تعلّمته ✓':'لم يبدأ'}</span>
+    </button>`;
+  const soon=s=>`
+    <div class="pcard soon"><div class="ic" style="background:${s.kind==='math'?'var(--mathSoft)':'var(--verbSoft)'}">${s.icon}</div>
+      <div><div class="t">${s.name}</div><div class="d">${s.short}</div></div></div>`;
+  app.innerHTML=`
+    <div class="bar"><h1>أنماط القدرات</h1>
+      <button class="icon-btn" id="set" aria-label="الإعدادات">⚙️</button></div>
+    <div class="hero"><b>لا تحفظ آلاف الأسئلة، احفظ الأنماط.</b>
+      <p>كل نمط يعلّمك: كيف تعرفه، كيف تحلّه بسرعة، وما الفخاخ التي يضعها الاختبار.</p>
+      <div class="meter"><i style="width:${done/PATTERNS.length*100}%"></i></div>
+      <small>تعلّمت ${num(done)} من ${num(PATTERNS.length)} أنماط</small></div>
+    <h2 class="sec">الكمي</h2>
+    ${PATTERNS.filter(p=>p.kind==='math').map(pc).join('')}${SOON.filter(s=>s.kind==='math').map(soon).join('')}
+    <h2 class="sec">اللفظي</h2>
+    ${PATTERNS.filter(p=>p.kind==='verb').map(pc).join('')}${SOON.filter(s=>s.kind==='verb').map(soon).join('')}
+    <div class="footer"><button class="wide-btn ghost" id="mycards">🗂️ بطاقاتي للمراجعة</button></div>`;
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go({name:'lesson',id:b.dataset.open,step:0}));
+  document.getElementById('mycards').onclick=()=>go({name:'cards'});
+  document.getElementById('set').onclick=settings;
+}
+
+/* ---------- settings sheet ---------- */
+function settings(){
+  const sc=document.createElement('div'); sc.className='scrim';
+  const draw=()=>{sc.innerHTML=`<div class="sheet">
+      <h3>شكل الأرقام في الرياضيات</h3>
+      <div style="color:var(--muted);font-size:15px">اختر الشكل الذي تراه في كتبك.</div>
+      <div class="seg">
+        <button data-d="ar" class="${S.digits==='ar'?'on':''}"><span class="m">٣س + ٢</span><small>أرقام عربية (الافتراضي)</small></button>
+        <button data-d="en" class="${S.digits==='en'?'on':''}"><span class="m">3x + 2</span><small>أرقام إنجليزية</small></button>
+      </div>
+      <button class="wide-btn primary" id="close">تم</button></div>`;
+    sc.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{S.digits=b.dataset.d;save();draw();render();});
+    sc.querySelector('#close').onclick=()=>sc.remove();
+    sc.querySelector('.sheet').onclick=e=>e.stopPropagation();
+  };
+  sc.onclick=()=>sc.remove(); draw(); document.body.appendChild(sc);
+}
+
+/* ---------- question block ---------- */
+function qHTML(p,q){
+  let body=`<div class="q-stem">${fmt(p,q.stem)}</div>`;
+  if(q.pair) body+=`<div class="pair">${q.pair}</div>`;
+  else body+=fmt(p,`<div class="compare"><div><small>القيمة الأولى</small><span class="v">${q.a}</span></div><div><small>القيمة الثانية</small><span class="v">${q.b}</span></div></div>`);
+  body+=`<div class="choices">${q.choices.map((c,i)=>`<button class="choice" data-c="${i}"><span class="l">${L[i]}</span><span>${c}</span></button>`).join('')}</div><div class="fbx"></div>`;
+  return `<div class="card">${body}</div>`;
+}
+function wireQ(root,q,onAnswer){
+  const btns=[...root.querySelectorAll('.choice')];
+  btns.forEach(b=>b.onclick=()=>{
+    const pick=+b.dataset.c, right=pick===q.ans;
+    btns.forEach((x,i)=>{x.disabled=true; if(i===q.ans)x.classList.add('ok'); else if(i===pick)x.classList.add('bad'); else x.classList.add('dim');});
+    onAnswer(right,root.querySelector('.fbx'));
+  });
+}
+
+/* ---------- lesson (6 steps) ---------- */
+const STEP_NAMES=['جرّب أولًا','اكشف النمط','الطريقة','الفخاخ','أثبتها','بطاقة النمط'];
+function lesson(){
+  const p=PATTERNS.find(x=>x.id===view.id); setAccent(p.kind);
+  const st=view.step;
+  const bar=`<div class="bar"><button class="icon-btn" id="back" aria-label="رجوع">→</button>
+      <div class="title">${p.name}</div><button class="icon-btn" id="home" aria-label="الرئيسية">✕</button></div>
+    <div class="steps">${STEP_NAMES.map((_,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>`;
+  let html='', after=null;
+  const next=(label='التالي')=>`<button class="wide-btn primary" id="next">${label}</button>`;
+
+  if(st===0){
+    html=`<span class="kicker">١ · ${STEP_NAMES[0]}</span><h3>جرّب بدون مساعدة</h3>
+      <p class="lead">أجب كما لو كنت في الاختبار الآن. لا بأس إن أخطأت.</p>
+      ${qHTML(p,p.tryQ)}<div class="footer">${next('اكشف النمط').replace('id="next"','id="next" disabled')}</div>`;
+    after=()=>wireQ(app,p.tryQ,(ok,fb)=>{
+      view.tryOk=ok;
+      fb.innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'إجابة صحيحة ✓':'ليست هذه ✗'}</b>${p.tryFb[ok?'ok':'bad']}</div>`;
+      document.getElementById('next').disabled=false;
+    });
+  }
+  else if(st===1){
+    html=`<span class="kicker">٢ · ${STEP_NAMES[1]}</span><h3>هذا نمط «${p.name}»</h3>
+      <p class="lead">كيف تعرفه في أقل من ٥ ثوانٍ:</p>
+      <div class="card"><ul class="clean">${p.spot.map((s,i)=>`<li data-i="${num(i+1)}">${fmt(p,s)}</li>`).join('')}</ul></div>
+      <div class="tip">💡 ${p.spotTip}</div>
+      <div class="footer">${next('تعلّم الطريقة')}</div>`;
+  }
+  else if(st===2){
+    html=`<span class="kicker">٣ · ${STEP_NAMES[2]}</span><h3>الطريقة السريعة</h3>
+      <p class="lead">نفس الخطوات تنفع لكل سؤال من هذا النمط.</p>
+      <div class="card"><ul class="clean">${p.trick.map((s,i)=>`<li data-i="${num(i+1)}">${fmt(p,s)}</li>`).join('')}</ul></div>
+      <div class="card"><div class="kicker" style="margin-bottom:6px">نطبّقها على سؤالك</div>${fmt(p,p.trickDemo())}</div>
+      ${p.relations?`<div class="card"><b>علاقات تتكرر كثيرًا في الاختبار</b><div class="chips">${p.relations.map(r=>`<span class="chip">${r}</span>`).join('')}</div></div>`:''}
+      <div class="footer">${next('اعرف الفخاخ')}</div>`;
+  }
+  else if(st===3){
+    html=`<span class="kicker">٤ · ${STEP_NAMES[3]}</span><h3>لماذا الخيارات الأخرى فخ؟</h3>
+      <p class="lead">كل خيار خاطئ وُضع ليصطاد نوعًا معيّنًا من الأخطاء.</p>
+      <div class="card">${p.traps.map(t=>`<div class="trap"><span class="l ${t.ok?'ok':''}">${L[t.l]}</span><div><b>${t.t}</b><span>${fmt(p,t.w)}</span></div></div>`).join('')}</div>
+      <div class="tip">⚠️ ${fmt(p,p.trapTip)}</div>
+      <div class="footer">${next('أثبت أنك فهمت')}</div>`;
+  }
+  else if(st===4){
+    const qi=view.qi||0, q=p.practice[qi];
+    html=`<span class="kicker">٥ · ${STEP_NAMES[4]}</span><h3>أسئلة مشابهة</h3>
+      <div class="pcount">سؤال ${num(qi+1)} من ${num(p.practice.length)}، طبّق نفس الطريقة.</div>
+      ${qHTML(p,q)}<div class="footer">${next(qi<p.practice.length-1?'السؤال التالي':'اعرض بطاقة النمط').replace('id="next"','id="next" disabled')}</div>`;
+    after=()=>wireQ(app,q,(ok,fb)=>{
+      view.right=(view.right||0)+(ok?1:0);
+      fb.innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'صحيح ✓':'ليست هذه ✗'}</b>${fmt(p,q.why)}</div>`;
+      document.getElementById('next').disabled=false;
+    });
+  }
+  else if(st===5){
+    const r=view.right||0, n=p.practice.length;
+    html=`<span class="kicker">٦ · ${STEP_NAMES[5]}</span><h3>بطاقتك لهذا النمط</h3>
+      <div class="score">أجبت <b>${num(r)} من ${num(n)}</b> ${r===n?'🎉 ممتاز!':r>=n-1?'👍 جيد جدًا':'راجع الطريقة مرة أخرى'}</div>
+      ${cardHTML(p)}
+      <div class="footer">${next('احفظها في بطاقاتي')}
+        <button class="wide-btn ghost" id="again">أعد الدرس من البداية</button></div>`;
+  }
+
+  app.innerHTML=bar+`<div class="stage">${html}</div>`;
+  document.getElementById('home').onclick=()=>go({name:'home'});
+  document.getElementById('back').onclick=()=>{
+    if(st===4 && view.qi>0){view.qi--;view.right=Math.max(0,(view.right||0)-1);render();return;}
+    if(st===0) return go({name:'home'});
+    if(st===5){view.qi=0;view.right=0;}
+    view.step=st===5?3:st-1; render(); window.scrollTo(0,0);
+  };
+  const nb=document.getElementById('next');
+  if(nb) nb.onclick=()=>{
+    if(st===4 && (view.qi||0)<p.practice.length-1){view.qi=(view.qi||0)+1;}
+    else if(st===5){
+      S.learned[p.id]=true; S.best[p.id]=Math.max(S.best[p.id]||0,view.right||0); save();
+      return go({name:'cards',flash:p.id});
+    } else {view.step=st+1; if(view.step===4){view.qi=0;view.right=0;}}
+    render(); window.scrollTo(0,0);
+  };
+  const ag=document.getElementById('again'); if(ag) ag.onclick=()=>go({name:'lesson',id:p.id,step:0});
+  if(after) after();
+}
+
+function cardHTML(p){
+  const c=p.card, col=p.kind==='verb'?'var(--verb)':'var(--math)';
+  return `<div class="pc" style="--accent:${col}">
+    <div class="hd"><small>${p.kind==='math'?'الكمي':'اللفظي'} · بطاقة نمط</small><b>${p.icon} ${p.name}</b></div>
+    <div class="bd">
+      <h4>🔎 كيف أعرفه</h4><p>${fmt(p,c.spot)}</p>
+      <h4>🛠️ الطريقة</h4><ol>${c.steps.map(s=>`<li>${fmt(p,s)}</li>`).join('')}</ol>
+      <h4>⚠️ الفخاخ</h4><p>${fmt(p,c.traps)}</p>
+      <div class="gold">⭐ ${fmt(p,c.gold)}</div>
+    </div></div>`;
+}
+
+/* ---------- my cards ---------- */
+function cards(){
+  setAccent('math');
+  const mine=PATTERNS.filter(p=>S.learned[p.id]);
+  app.innerHTML=`<div class="bar"><button class="icon-btn" id="back" aria-label="رجوع">→</button><div class="title">بطاقاتي للمراجعة</div></div>
+    ${view.flash?`<div class="fb ok" style="margin:0 0 12px"><b>تم الحفظ ✓</b>راجع بطاقاتك قبل الاختبار بدقائق.</div>`:''}
+    ${mine.length?mine.map(p=>cardHTML(p)+`<div class="score" style="margin-top:-6px">أفضل نتيجة: <b style="font-size:16px">${num(S.best[p.id]||0)} من ${num(p.practice.length)}</b> · <button style="color:var(--math);font-weight:700;min-height:44px" data-redo="${p.id}">أعد الدرس</button></div>`).join('')
+      :`<div class="empty"><div>🗂️</div>لا توجد بطاقات بعد.<br>أكمل درس نمط لتحصل على بطاقته.</div>`}
+    <div class="footer"><button class="wide-btn ghost" id="h">الرئيسية</button></div>`;
+  document.getElementById('back').onclick=()=>go({name:'home'});
+  document.getElementById('h').onclick=()=>go({name:'home'});
+  app.querySelectorAll('[data-redo]').forEach(b=>b.onclick=()=>go({name:'lesson',id:b.dataset.redo,step:0}));
+}
+
+render();
+</script>
+</body>
+</html>
