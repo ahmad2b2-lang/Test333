@@ -174,6 +174,18 @@
   .seg button.on{border-color:var(--accent);background:var(--accentSoft)}
   @keyframes fade{from{opacity:0}} @keyframes up{from{transform:translateY(40px);opacity:.4}}
   .pop{animation:fade .25s}
+  /* flash cards */
+  .fc{background:var(--card);border-radius:22px;box-shadow:0 2px 12px rgba(0,0,0,.06);min-height:min(56vh,440px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:28px 22px;animation:cardIn .3s ease;cursor:pointer}
+  .fc.back{animation:flip .3s ease}
+  .fc .lab{font-size:14px;color:var(--muted);margin-bottom:12px}
+  .fc .big{font-size:30px;font-weight:700;line-height:1.45}
+  .fc .mid{font-size:20px;font-weight:600;line-height:1.75}
+  .fc .sm{font-size:15px;color:var(--muted);margin-top:14px}
+  .fc .q{box-shadow:none;padding:0;background:transparent;width:100%}
+  .fc table.try{font-size:16px}
+  .tap-hint{font-size:13px;color:var(--faint);margin-top:22px}
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.98)}}
+  @keyframes flip{from{opacity:0;transform:rotateY(70deg)}}
 </style>
 </head>
 <body>
@@ -309,6 +321,7 @@ const clueIdx=c=>toks(c).map((t,i)=>t.k==='c'?i:-1).filter(i=>i>=0);
 
 /* ---------- shared ---------- */
 S.resume=S.resume||{};
+if(S.rv!==3){S.resume={};S.rv=3;save();}
 const app=document.getElementById('app');
 let view={name:'home'}, timer=null;
 function go(v){clearTimeout(timer);view=v;render();window.scrollTo(0,0);}
@@ -359,8 +372,8 @@ function wireFam(right,cb){
   });
 }
 const famFb=(p,ok,right)=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'الإجابة: '+FAM[right].name}</b>${why('البصمة: '+fx(p,famLine(right)))}</div>`;
-const topbar=(cur,total)=>`<div class="top"><button class="x" id="x" aria-label="خروج">✕</button>
-  <div class="prog"><i style="width:${cur/total*100}%"></i></div><div class="pnum">${nAr(cur)} من ${nAr(total)}</div></div>`;
+const topbar=(cur,total,label)=>`<div class="top"><button class="x" id="x" aria-label="خروج">✕</button>
+  <div class="prog"><i style="width:${cur/total*100}%"></i></div><div class="pnum">${label||nAr(cur)+' من '+nAr(total)}</div></div>`;
 const gear=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="#f7f7f5"/><circle cx="15" cy="17" r="2.2" fill="#f7f7f5"/></svg>`;
 
 function render(){
@@ -370,8 +383,9 @@ function render(){
 
 /* ---------- home: one clear next step ---------- */
 function seqOf(p){
-  return [...p.fams.map((f,i)=>({t:'fam',i})),{t:'clues'},{t:'name'},{t:'work'},{t:'review'},
-          {t:'disguise'},{t:'odd'},{t:'flash',T:7},{t:'flash',T:5},{t:'summary'}];
+  return [{t:'intro'},...p.fams.flatMap((f,i)=>[{t:'famName',i},{t:'famPrint',i},{t:'famEx',i}]),
+          {t:'clues'},{t:'name'},{t:'method'},{t:'apply'},{t:'answer'},{t:'rvClues'},{t:'rvFam'},{t:'rvScore'},
+          {t:'disguise'},{t:'odd'},{t:'flash',T:7},{t:'flash',T:5},{t:'deck'}];
 }
 function openPattern(pid){
   const r=S.resume[pid];
@@ -384,13 +398,13 @@ function home(){
   if(nextP){
     const res=S.resume[nextP.id], len=seqOf(nextP).length;
     card=res&&res.k>0
-      ?{small:`وصلت إلى ${nAr(res.k+1)} من ${nAr(len)}`,title:nextP.name,btn:'تابع',act:()=>openPattern(nextP.id)}
+      ?{small:`أكملت ${nAr(Math.round(res.k/len*100))}٪`,title:nextP.name,btn:'تابع',act:()=>openPattern(nextP.id)}
       :{small:'خطوتك التالية',title:nextP.name,btn:'ابدأ',act:()=>openPattern(nextP.id)};
   } else card={small:'أكملت كل الأنماط',title:'اختبار التعرّف المختلط',btn:'ابدأ',act:startLineup};
   const status=p=>{const res=S.resume[p.id]; if(S.learned[p.id]) return 'مكتمل';
-    if(res&&res.k>0) return `متوقف عند ${nAr(res.k+1)} من ${nAr(seqOf(p).length)}`; return 'لم يبدأ';};
+    if(res&&res.k>0) return `أكملت ${nAr(Math.round(res.k/seqOf(p).length*100))}٪`; return 'لم يبدأ';};
   app.innerHTML=`
-    <div class="homehead"><h1>تحليل القدرات</h1><span class="lv">المستوى ${nAr(r.lvl)} · ${nAr(S.stars||0)} نقطة</span>
+    <div class="homehead"><h1>تحليل القدرات</h1><span class="lv"><bdi>المستوى ${nAr(r.lvl)}</bdi>، <bdi>النقاط ${nAr(S.stars||0)}</bdi></span>
       <button class="icon-btn" id="set" aria-label="الإعدادات">${gear}</button></div>
     <div class="next-card"><small>${card.small}</small><h2>${card.title}</h2><button class="btn" id="go">${card.btn}</button></div>
     <div class="seclabel">الأنماط</div>
@@ -400,12 +414,12 @@ function home(){
     <div class="seclabel" style="margin-top:22px">المزيد</div>
     <div class="plist">
       <button class="prow" id="lu"><div><div class="t">اختبار التعرّف المختلط</div><div class="s">٨ أسئلة سريعة من كل الأنماط</div></div><span class="chev">‹</span></button>
-      <button class="prow" id="fl"><div><div class="t">الملخصات</div><div class="s">للمراجعة قبل الاختبار</div></div><span class="chev">‹</span></button>
+      <button class="prow" id="fl"><div><div class="t">بطاقات المراجعة</div><div class="s">بطاقة لكل فصيلة، للمراجعة قبل الاختبار</div></div><span class="chev">‹</span></button>
     </div>`;
   document.getElementById('go').onclick=card.act;
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPattern(b.dataset.open));
   document.getElementById('lu').onclick=startLineup;
-  document.getElementById('fl').onclick=()=>go({name:'files'});
+  document.getElementById('fl').onclick=()=>go({name:'files',di:0,flip:false});
   document.getElementById('set').onclick=settings;
 }
 
@@ -425,26 +439,35 @@ function settings(){
   sc.onclick=()=>sc.remove(); draw(); document.body.appendChild(sc);
 }
 
-/* ---------- lesson: one thing per screen ---------- */
+/* ---------- lesson: flash cards, one idea at a time ---------- */
+const PASSIVE=new Set(['intro','famName','famPrint','famEx','method','apply','rvClues','rvFam','rvScore']);
+const SECTION=t=>({intro:'الفصائل',famName:'الفصائل',famPrint:'الفصائل',famEx:'الفصائل',
+  clues:'سؤال كامل',name:'سؤال كامل',method:'سؤال كامل',apply:'سؤال كامل',answer:'سؤال كامل',rvClues:'سؤال كامل',rvFam:'سؤال كامل',rvScore:'سؤال كامل',
+  disguise:'تدريب',odd:'تدريب',flash:'تدريب',deck:'الملخص'})[t];
 function lesson(){
   const p=PAT[view.pid], seq=seqOf(p), sc=seq[view.k], c=CASE[p.big];
   S.resume[p.id]=Object.assign({},view); save();
   let html='', wire=()=>{};
   const next=()=>{clearTimeout(timer); view.k++; view.d=null; view.msg=''; render(); scrollTo(0,0);};
+  const back=()=>{view.k--; view.d=null; render(); scrollTo(0,0);};
+  const canBack=view.k>0&&PASSIVE.has(sc.t)&&PASSIVE.has(seq[view.k-1].t);
   const btn=(label,dis)=>`<button class="btn" id="next" ${dis?'disabled':''}>${label}</button>`;
   const enable=()=>{const n=document.getElementById('next'); if(n)n.disabled=false;};
   const bindNext=()=>{const n=document.getElementById('next'); if(n) n.onclick=next;};
+  /* a flash card: tap it or press "next" */
+  const card=(inner,label='التالي')=>{
+    html=`<div class="fc" id="fc">${inner}<div class="tap-hint">اضغط على البطاقة للمتابعة</div></div>
+      <div class="bottom">${btn(label)}${canBack?'<button class="link" id="back">رجوع</button>':''}</div>`;
+    wire=()=>{bindNext(); document.getElementById('fc').onclick=next; const b=document.getElementById('back'); if(b) b.onclick=back;};
+  };
+  const F=FAM[c.f];
 
-  if(sc.t==='fam'){
-    const f=p.fams[sc.i], F=FAM[f], ex=casesOf(f).find(x=>x.id!==p.big)||casesOf(f)[0];
-    html=`${sc.i===0?`<p class="sub">لأسئلة «${p.name}» ${nAr(p.fams.length)} فصائل. لكل واحدة بصمة تكشفها.</p>`:''}
-      <div class="fnum">الفصيلة ${nAr(sc.i+1)} من ${nAr(p.fams.length)}</div>
-      <div class="fname">${F.name}</div>
-      <div class="fprint">${fx(p,famLine(f))}</div>
-      <div class="seclabel">مثال</div>${qView(ex,{reveal:'hit'})}
-      <div class="bottom">${btn('التالي')}</div>`;
-    wire=bindNext;
-  }
+  if(sc.t==='intro') card(`<div class="lab">${p.name}</div><div class="big">${nAr(p.fams.length)} فصائل</div><div class="sm">كل سؤال ينتمي لواحدة منها، ولكل فصيلة بصمة تكشفها.</div>`,'ابدأ');
+  else if(sc.t==='famName') card(`<div class="lab">الفصيلة ${nAr(sc.i+1)} من ${nAr(p.fams.length)}</div><div class="big">${FAM[p.fams[sc.i]].name}</div>`);
+  else if(sc.t==='famPrint'){const f=p.fams[sc.i]; card(`<div class="lab">بصمة «${FAM[f].name}»</div>${FAM[f].print.map(x=>`<div class="mid">${fx(p,x)}</div>`).join('')}`);}
+  else if(sc.t==='famEx'){const f=p.fams[sc.i], ex=casesOf(f).find(x=>x.id!==p.big)||casesOf(f)[0];
+    card(`<div class="lab">مثال على «${FAM[f].name}»</div>${qView(ex,{reveal:'hit'})}<div class="sm">المحدّد هو البصمة.</div>`);}
+
   else if(sc.t==='clues'){
     const cl=clueIdx(c), found=view.found||(view.found=[]);
     html=`<h2>ما الذي يكشف نوع السؤال؟</h2><p class="sub">اضغط على الكلمات التي تعتبرها أدلة.</p>
@@ -469,7 +492,7 @@ function lesson(){
     };
   }
   else if(sc.t==='name'){
-    html=`<h2>ما فصيلة هذا السؤال؟</h2><p class="sub">اعتمد على الأدلة، ولا تحلّ بعد.</p>
+    html=`<h2>ما فصيلة هذا السؤال؟</h2>
       ${qView(c,{found:view.found,small:true})}${famList(p)}<div id="fb"></div>
       <div class="bottom">${btn('التالي',true)}</div>`;
     wire=()=>{
@@ -477,11 +500,10 @@ function lesson(){
       bindNext();
     };
   }
-  else if(sc.t==='work'){
-    const F=FAM[c.f];
-    html=`<h2>طبّق الطريقة</h2>
-      <div class="rule"><b>${F.name}:</b> ${fx(p,F.method)}</div>
-      <div class="work">${fx(p,c.work())}<div id="after"></div></div>
+  else if(sc.t==='method') card(`<div class="lab">طريقة «${F.name}»</div><div class="mid">${fx(p,F.method)}</div>`);
+  else if(sc.t==='apply') card(`<div class="lab">نطبّقها على السؤال</div><div style="width:100%">${fx(p,c.work())}</div>`);
+  else if(sc.t==='answer'){
+    html=`<h2>اختر الإجابة</h2>
       <div class="list">${c.choices.map((x,i)=>`<button class="opt" data-c="${i}"><span class="n">${L[i]}</span><span>${x}</span></button>`).join('')}</div>
       <div id="fb"></div>
       <div class="bottom">${btn('التالي',true)}</div>`;
@@ -490,27 +512,24 @@ function lesson(){
       bs.forEach(b=>b.onclick=()=>{
         const k=+b.dataset.c, ok=k===c.ans;
         bs.forEach((x,i)=>{x.disabled=true; if(i===c.ans)x.classList.add('ok'); else if(i===k)x.classList.add('bad'); else x.classList.add('dim');});
-        if(c.after) document.getElementById('after').innerHTML='<div style="margin-top:8px">'+c.after()+'</div>';
         document.getElementById('fb').innerHTML=`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b>${why(fx(p,c.why[k]))}</div>`;
         enable();
       });
       bindNext();
     };
   }
-  else if(sc.t==='review'){
-    const cl=clueIdx(c), T=toks(c), found=view.found||[];
+  else if(sc.t==='rvClues'){
+    const cl=clueIdx(c), T=toks(c), found=view.found||[], all=cl.every(i=>found.includes(i));
+    card(`<div class="lab">الأدلة في هذا السؤال</div><div class="mid">${cl.map(i=>`<span style="${found.includes(i)?'':'color:var(--bad)'}">${fx(p,T[i].t)}</span>`).join('، ')}</div>
+      <div class="sm">${all?'وجدتها كلها.':'باللون الأحمر: دليل فاتك.'}</div>`);
+  }
+  else if(sc.t==='rvFam') card(`<div class="lab">قادتك الأدلة إلى</div><div class="big">${F.name}</div><div class="sm">ومنها إلى الإجابة: ${c.answerLabel}</div>`);
+  else if(sc.t==='rvScore'){
+    const cl=clueIdx(c), found=view.found||[];
     const got=[cl.every(i=>found.includes(i)),!!view.nameOk,!!view.nameOk&&view.nameMs<20000];
     if(!view.scored){view.scored=true; addStars(got.filter(Boolean).length); S.resume[p.id]=Object.assign({},view); save();}
-    html=`<h2>من الأدلة إلى الإجابة</h2>
-      <div class="rows">
-        <div class="row"><span class="k">الأدلة</span><span>${cl.map(i=>`<span class="${found.includes(i)?'':'miss'}">${fx(p,T[i].t)}</span>`).join('، ')}</span></div>
-        <div class="row"><span class="k">الفصيلة</span><span>${FAM[c.f].name}</span></div>
-        <div class="row"><span class="k">الإجابة</span><span>${c.answerLabel}</span></div>
-      </div>
-      ${got[0]?'':'<p class="sub" style="text-align:center;margin-top:8px">باللون الأحمر: دليل فاتك.</p>'}
-      <div class="stars">${got.map(g=>g?'<b>★</b>':'★').join('')}<small>${nAr(got.filter(Boolean).length)} من ٣ نقاط</small></div>
-      <div class="bottom">${btn('التالي: تدريب سريع')}</div>`;
-    wire=bindNext;
+    card(`<div class="lab">نقاطك</div><div class="stars" style="margin:0">${got.map(g=>g?'<b>★</b>':'★').join('')}</div>
+      <div class="sm">كل الأدلة، الفصيلة من أول محاولة، السرعة</div>`,'التالي: تدريب سريع');
   }
   else if(sc.t==='disguise'){
     if(!view.d){const ok=p.fams.filter(f=>casesOf(f).length>=3), f=pick(ok);
@@ -563,25 +582,33 @@ function lesson(){
       };
     }
   }
-  else if(sc.t==='summary'){
-    html=`<h2>ملخص ${p.name}</h2><p class="sub">اضغط على أي فصيلة لترى طريقتها.</p>
-      ${sumHTML(p)}
-      <div class="bottom">${btn('حفظ والعودة')}</div>`;
-    wire=()=>{wireSum(); document.getElementById('next').onclick=()=>{S.learned[p.id]=true; delete S.resume[p.id]; save(); go({name:'home'});};};
+  else if(sc.t==='deck'){
+    const r=deck(p.fams,view,()=>{S.learned[p.id]=true; delete S.resume[p.id]; save(); go({name:'home'});},'حفظ والعودة');
+    html=r.html; wire=r.wire;
   }
 
-  app.innerHTML=topbar(view.k+1,seq.length)+`<div class="screen">${html}</div>`;
+  app.innerHTML=topbar(view.k+1,seq.length,SECTION(sc.t))+`<div class="screen">${html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   wire();
 }
 
-function sumHTML(p){
-  return `<div class="sum">${p.fams.map(f=>{const F=FAM[f], a=famAcc(f);
-    return `<button class="srow"><div class="t">${F.name}${a!==null?`<span class="acc">دقتك ${nAr(a)}٪</span>`:''}<span class="chev">⌄</span></div>
-      <div class="p">${fx(p,famLine(f))}</div><div class="mth" hidden>${fx(p,F.method)}</div></button>`;}).join('')}</div>
-    <div class="goldline">${p.gold}</div>`;
+/* flip-card deck: front = family name, back = fingerprint + method */
+function deck(fams,st,onDone,doneLabel){
+  st.di=st.di||0; const f=fams[st.di], F=FAM[f], p=PAT[F.p], last=st.di===fams.length-1, a=famAcc(f);
+  const html=`<div class="fc ${st.flip?'back':''}" id="fc">
+      ${st.flip
+        ?`<div class="lab">${F.name}</div><div class="sm" style="margin:0 0 4px">البصمة</div><div class="mid">${fx(p,famLine(f))}</div>
+           <div class="sm" style="margin:16px 0 4px">الطريقة</div><div class="mid" style="font-weight:500">${fx(p,F.method)}</div>`
+        :`<div class="lab">${p.name}، بطاقة ${nAr(st.di+1)} من ${nAr(fams.length)}</div><div class="big">${F.name}</div>
+           ${a!==null?`<div class="sm">دقتك في التعرّف عليها ${nAr(a)}٪</div>`:''}<div class="tap-hint">تذكّر بصمتها، ثم اقلب البطاقة</div>`}
+    </div>
+    <div class="bottom"><button class="btn" id="dk">${!st.flip?'اقلب البطاقة':last?doneLabel:'البطاقة التالية'}</button>
+      ${st.di>0?'<button class="link" id="dprev">البطاقة السابقة</button>':''}</div>`;
+  const act=()=>{ if(!st.flip){st.flip=true;render();} else if(last){onDone();} else {st.di++;st.flip=false;render();} };
+  const wire=()=>{document.getElementById('dk').onclick=act; document.getElementById('fc').onclick=act;
+    const pv=document.getElementById('dprev'); if(pv) pv.onclick=()=>{st.di--;st.flip=false;render();};};
+  return {html,wire};
 }
-function wireSum(){app.querySelectorAll('.srow').forEach(r=>r.onclick=()=>{const m=r.querySelector('.mth'); m.hidden=!m.hidden;});}
 
 /* ---------- mixed line-up ---------- */
 function startLineup(){
@@ -605,7 +632,7 @@ function lineup(){
   }
   const c=CASE[v.list[v.i]], p=patOf(c);
   app.innerHTML=topbar(v.i+1,v.list.length)+`<div class="screen">
-      <h2>ما الفصيلة؟</h2><p class="sub">${p.name} · بسرعة، دون حل.</p>
+      <h2>ما الفصيلة؟</h2><p class="sub">${p.name}، بسرعة، دون حل.</p>
       ${qView(c,{small:v.done,reveal:v.done?'hit':null})}
       ${v.done?v.fb:famList(p)}
       <div class="bottom"><button class="btn" id="next" ${v.done?'':'disabled'}>${v.i<v.list.length-1?'التالي':'النتيجة'}</button></div></div>`;
@@ -614,14 +641,20 @@ function lineup(){
   document.getElementById('next').onclick=()=>{v.i++;v.done=false;v.fb='';render();scrollTo(0,0);};
 }
 
-/* ---------- summaries ---------- */
+/* ---------- summaries: revision deck ---------- */
 function files(){
-  const mine=Object.values(PAT).filter(p=>S.learned[p.id]);
-  app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div style="font-weight:700">الملخصات</div></div>
-    <div class="screen">${mine.length?mine.map(p=>`<div class="seclabel" style="margin-top:6px">${p.name}</div>${sumHTML(p)}<div style="height:18px"></div>`).join('')
-      :'<div class="empty">لا توجد ملخصات بعد.<br>أكمل درس نمط ليُحفظ ملخصه هنا.</div>'}</div>`;
+  const fams=Object.values(PAT).filter(p=>S.learned[p.id]).flatMap(p=>p.fams);
+  let body;
+  if(!fams.length){
+    body='<div class="empty">لا توجد بطاقات بعد.<br>أكمل درس نمط لتُضاف بطاقاته هنا.</div>';
+    app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div style="font-weight:700">بطاقات المراجعة</div></div><div class="screen">${body}</div>`;
+    document.getElementById('x').onclick=()=>go({name:'home'}); return;
+  }
+  const r=deck(fams,view,()=>go({name:'home'}),'انتهت المراجعة');
+  app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div class="prog"><i style="width:${(view.di+1)/fams.length*100}%"></i></div><div class="pnum">مراجعة</div></div>
+    <div class="screen">${r.html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
-  wireSum();
+  r.wire();
 }
 
 render();
