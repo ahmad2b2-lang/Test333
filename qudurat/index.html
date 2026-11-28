@@ -179,7 +179,8 @@
   .q .qtext u{text-decoration-color:var(--accent);text-underline-offset:5px;text-decoration-thickness:2px}
   .q .passage{font-size:15px;line-height:1.95;text-align:right;color:var(--ink);background:#f7f7f5;border-radius:12px;padding:12px 14px;margin-bottom:14px;max-height:210px;overflow:auto;-webkit-user-select:text;user-select:text}
   .q .fig{display:flex;flex-direction:column;align-items:center;margin:10px 0 4px}
-  .q.small .fig{transform:scale(.85);margin:0}
+  .q.small .fig{transform:scale(.8);margin:-8px 0}
+  .q.small .qtext{font-size:15px;line-height:1.8}
   .q .ab{display:flex;flex-direction:column;gap:8px;text-align:right;font-size:16px}
   .q .ab div{background:#f7f7f5;border-radius:12px;padding:8px 12px}
   .q .ab small{display:block;color:var(--muted);font-size:13px}
@@ -199,6 +200,29 @@
   .legend + .figcap{margin-top:4px}
   .quote{background:#f7f7f5;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.9;text-align:right;margin-bottom:6px}
   .steps-math{font-size:18px;line-height:2.2;text-align:center}
+  /* explanation video */
+  .player{background:var(--card);border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;margin-top:4px}
+  .vbar{height:4px;background:var(--line)}
+  .vbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+  .vid{padding:18px 18px 22px;height:min(50vh,430px);overflow:auto;text-align:right;cursor:pointer;scroll-behavior:smooth}
+  .vid .sc{display:none;margin-bottom:14px}
+  .vid .sc.on{display:block;animation:scIn .35s ease}
+  @keyframes scIn{from{opacity:0;transform:translateY(8px)}}
+  .vid .lab{font-size:14px;color:var(--muted);text-align:center}
+  .vtitle{font-size:28px;font-weight:700;text-align:center;line-height:1.5;margin-bottom:4px}
+  .vline{font-size:17px;line-height:1.85}
+  .vline.soft{color:var(--muted);font-size:15px}
+  .vgold{font-size:17px;line-height:1.85;background:#fff8e6;border-radius:12px;padding:10px 12px}
+  .vid b{font-weight:700;background:linear-gradient(var(--accentSoft),var(--accentSoft)) no-repeat right/0% 100%;transition:background-size .6s ease;border-radius:3px}
+  .vid .sc.done b{background-size:100% 100%}
+  .vdemo{font-size:15px}
+  .caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-3px;margin:0 1px;animation:blink .8s steps(1) infinite}
+  .vid.paused .caret{animation:none}
+  @keyframes blink{50%{opacity:0}}
+  .vctl{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px}
+  .vbtn{min-height:40px;padding:0 18px;border-radius:20px;background:var(--card);border:1.5px solid var(--line);font-weight:600;font-size:15px}
+  .fc .qref,.screen > .qref{width:100%;margin-bottom:12px}
+  .screen > .qref .q{background:#efefeb;box-shadow:none}
   /* flash cards */
   .fc{background:var(--card);border-radius:22px;box-shadow:0 2px 12px rgba(0,0,0,.06);min-height:min(56vh,440px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:28px 22px;animation:cardIn .3s ease;cursor:pointer}
   .fc.back{animation:flip .3s ease}
@@ -462,8 +486,8 @@ const PAT=Object.fromEntries(PATTERNS.map(p=>[p.id,p]));
 
 /* ---------- shared ---------- */
 const app=document.getElementById('app');
-let view={name:'home'};
-function go(v){view=v;render();window.scrollTo(0,0);}
+let view={name:'home'}, timer=null;
+function go(v){clearTimeout(timer);view=v;render();window.scrollTo(0,0);}
 const fx=(p,html)=>p.kind==='math'?M(html):html;
 document.addEventListener('click',e=>{const b=e.target.closest('[data-why]'); if(b){b.nextElementSibling.hidden=false;b.remove();}});
 const why=html=>`<button class="why-btn" data-why>لماذا؟</button><div class="why" hidden>${html}</div>`;
@@ -499,9 +523,9 @@ function render(){
 
 /* ---------- home: one clear next step ---------- */
 S.resume=S.resume||{};
-if(S.rv!==4){S.resume={};S.rv=4;save();}
+if(S.rv!==5){S.resume={};S.rv=5;save();}
 function seqOf(p){
-  return [{t:'try'},{t:'pattern'},{t:'method'},{t:'trap'},...p.practice.map((_,i)=>({t:'prac',i})),{t:'done'}];
+  return [{t:'try'},{t:'explain'},...p.practice.map((_,i)=>({t:'prac',i})),{t:'done'}];
 }
 function openPattern(pid){
   const r=S.resume[pid];
@@ -547,12 +571,12 @@ function settings(){
 }
 
 /* ---------- lesson: 1 question, 3 cards, 3 practice questions ---------- */
-const SECTION=t=>({try:'جرّب أولًا',pattern:'بطاقة ١ من ٣',method:'بطاقة ٢ من ٣',trap:'بطاقة ٣ من ٣',prac:'تدريب',done:'النتيجة'})[t];
+const SECTION=t=>({try:'جرّب أولًا',explain:'الشرح',prac:'تدريب',done:'النتيجة'})[t];
 function lesson(){
   const p=PAT[view.pid], seq=seqOf(p), sc=seq[view.k];
   S.resume[p.id]=Object.assign({},view); save();
   let html='', wire=()=>{};
-  const next=()=>{view.k++; view.done=false; render(); scrollTo(0,0);};
+  const next=()=>{clearTimeout(timer); view.k++; view.done=false; render(); scrollTo(0,0);};
   const back=()=>{view.k--; render(); scrollTo(0,0);};
   const btn=(label,dis)=>`<button class="btn" id="next" ${dis?'disabled':''}>${label}</button>`;
   const card=(inner,canBack)=>{
@@ -569,12 +593,22 @@ function lesson(){
   };
 
   if(sc.t==='try') quiz(p.tryQ,'جرّب بدون مساعدة',ok=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b><div class="why">${ok?'صحيح. الآن لنعرف النمط الذي يجعلك تجيب بثقة في كل مرة.':'لا بأس. لنعرف النمط الذي يكشف الإجابة.'}</div></div>`);
-  else if(sc.t==='pattern') card(`${qRef(p)}<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div>
-      <div class="sm" style="color:var(--ink);font-size:17px">تعرفه من: ${fx(p,p.card.spot)}</div>`);
-  else if(sc.t==='method') card(`<div class="lab">الطريقة</div><div class="mid" style="margin-bottom:14px">${fx(p,p.rule)}</div>
-      <div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`,true);
-  else if(sc.t==='trap') card(`<div class="lab">الفخ الشائع</div><div class="mid">${fx(p,p.card.traps)}</div>
-      <div class="sm" style="color:var(--ink);font-size:17px;margin-top:20px"><b>القاعدة:</b> ${fx(p,p.card.gold)}</div>`,true);
+  else if(sc.t==='explain'){
+    const scenes=[
+      `<div class="lab">هذا السؤال من نمط</div><div class="vtitle">${p.name}</div>`,
+      `<div class="vline"><b>تعرفه من:</b> ${p.card.spot}</div>`,
+      `<div class="vline"><b>الطريقة:</b> ${p.rule}</div>`,
+      `<div class="vdemo">${p.demo()}</div>`,
+      `<div class="vline soft">${p.demoNote}</div>`,
+      `<div class="vline"><b>الفخ:</b> ${p.card.traps}</div>`,
+      `<div class="vgold"><b>القاعدة:</b> ${p.card.gold}</div>`
+    ].map(h=>fx(p,h));
+    html=`${qRef(p)}
+      <div class="player"><div class="vbar"><i id="vbar"></i></div><div class="vid" id="vid"></div></div>
+      <div class="vctl"><button class="vbtn" id="vplay">إيقاف</button><button class="link" id="vall">عرض الكل</button></div>
+      <div class="bottom">${btn('التالي')}</div>`;
+    wire=()=>{document.getElementById('next').onclick=next; playExplain(scenes);};
+  }
   else if(sc.t==='prac'){const q=p.practice[sc.i];
     quiz(q,`سؤال مشابه (${nAr(sc.i+1)} من ${nAr(p.practice.length)})`,(ok)=>{ if(ok&&!view.done) view.right=(view.right||0)+1; view.done=true; S.resume[p.id]=Object.assign({},view); save();
       return `<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b>${why(fx(p,q.why))}</div>`;});}
@@ -592,6 +626,50 @@ function lesson(){
   app.innerHTML=topbar((view.k+1)/seq.length,SECTION(sc.t))+`<div class="screen">${html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   wire();
+}
+
+
+/* ---------- explanation "video": text is typed live, scene by scene ---------- */
+function playExplain(scenes){
+  const vid=document.getElementById('vid'), bar=document.getElementById('vbar'),
+        playBtn=document.getElementById('vplay'), allBtn=document.getElementById('vall');
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  vid.innerHTML=scenes.map(h=>`<div class="sc">${h}</div>`).join('');
+  const scs=[...vid.querySelectorAll('.sc')];
+  // remember each text node's full text, then empty it
+  const nodes=scs.map(sc=>{const w=document.createTreeWalker(sc,NodeFilter.SHOW_TEXT); const out=[]; let n;
+    while((n=w.nextNode())){ if(n.data.trim()==='' ) continue; out.push({n,full:n.data}); n.data=''; } return out;});
+  const total=nodes.flat().reduce((a,x)=>a+x.full.length,0)||1;
+  const caret=document.createElement('span'); caret.className='caret';
+  let si=0, ni=0, ci=0, typed=0, paused=false, finished=false;
+  const setBar=()=>{bar.style.width=(typed/total*100)+'%';};
+  const finishScene=sc=>sc.classList.add('done');
+  const showAll=()=>{clearTimeout(timer);
+    nodes.flat().forEach(x=>x.n.data=x.full); scs.forEach(sc=>{sc.classList.add('on','done');});
+    caret.remove(); typed=total; setBar(); finished=true; playBtn.textContent='إعادة'; allBtn.hidden=true;};
+  const tick=()=>{
+    if(paused||finished) return;
+    if(si>=scs.length){ caret.remove(); finished=true; playBtn.textContent='إعادة'; allBtn.hidden=true; return; }
+    const sc=scs[si];
+    if(!sc.classList.contains('on')){ sc.classList.add('on'); vid.scrollTop=vid.scrollHeight; timer=setTimeout(tick,si===0?250:380); return; }
+    const list=nodes[si];
+    if(ni>=list.length){ finishScene(sc); si++; ni=0; ci=0; timer=setTimeout(tick,520); return; }
+    const x=list[ni];
+    if(ci===0) x.n.parentNode.insertBefore(caret,x.n.nextSibling);
+    const step=x.full.charCodeAt(ci)===32?2:1;          // skip quickly over spaces
+    ci=Math.min(ci+step,x.full.length); x.n.data=x.full.slice(0,ci); typed+=step; setBar();
+    if(ci>=x.full.length){ ni++; ci=0; }
+    vid.scrollTop=vid.scrollHeight;
+    const ch=x.full[ci-1]||'';
+    timer=setTimeout(tick, /[.،:؟!]/.test(ch)?220:(si===0?45:19));
+  };
+  playBtn.onclick=()=>{
+    if(finished){ go(Object.assign({},view)); return; }       // replay from the start
+    paused=!paused; playBtn.textContent=paused?'تشغيل':'إيقاف'; vid.classList.toggle('paused',paused); if(!paused) tick();
+  };
+  allBtn.onclick=showAll;
+  vid.onclick=()=>{ if(!finished) showAll(); };
+  if(reduce) showAll(); else tick();
 }
 
 render();
