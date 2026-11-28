@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -7,11 +7,11 @@
 <meta name="theme-color" content="#ef6c1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Family Shop">
+<meta name="apple-mobile-web-app-title" content="متسوق العائلة">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<title>Family Shop</title>
+<title>متسوق العائلة</title>
 <style>
 :root{color-scheme:light only;--a:#ef6c1a;--a-d:#c9530c;--a2:#fff0e4;--bg:#fff8f1;--card:#fff;--tx:#2b2118;--mu:#7a6a5c;--ln:#f1e3d5;--ok:#2e8b57;--ok2:#e5f4ea;--bad:#d64545;--r:18px}
 *{box-sizing:border-box}
@@ -27,7 +27,8 @@ button{font-family:inherit;font-size:16px;cursor:pointer;color:inherit;border:0;
 /* top bar */
 .top{position:sticky;top:0;z-index:20;background:var(--a);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(150,60,0,.18)}
 .top h1{font-size:20px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chip{background:rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:0 14px;min-height:40px;display:flex;align-items:center;gap:6px;font-weight:600;max-width:52vw}
+.chip{background:rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:0 14px;min-height:40px;display:flex;align-items:center;gap:6px;font-weight:600;max-width:42vw}
+.lang{min-width:44px;height:44px;border-radius:14px;padding:0 10px;font-size:15px;font-weight:800;background:rgba(255,255,255,.18);color:#fff}
 .chip span.n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .icbtn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:rgba(255,255,255,.18)}
 
@@ -39,7 +40,7 @@ main.withbar{padding-bottom:calc(env(safe-area-inset-bottom) + 160px)}
 .tabs button{flex:1;min-height:56px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:600;color:var(--mu);position:relative}
 .tabs button .i{font-size:24px;line-height:1}
 .tabs button.on{color:var(--a-d);background:var(--a2)}
-.badge{position:absolute;top:4px;left:calc(50% + 8px);background:var(--bad);color:#fff;border-radius:999px;font-size:12px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;font-weight:700}
+.badge{position:absolute;top:4px;inset-inline-start:calc(50% + 8px);background:var(--bad);color:#fff;border-radius:999px;font-size:12px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;font-weight:700}
 
 /* common */
 h2{font-size:22px;margin:4px 2px 12px}
@@ -71,8 +72,8 @@ h3{font-size:15px;margin:18px 4px 8px;color:var(--mu);text-transform:uppercase;l
 .search{position:relative;margin-bottom:10px}
 .search input{width:100%;min-height:50px;border-radius:16px;border:1px solid var(--ln);background:#fff;padding:0 44px 0 44px;outline:none}
 .search input:focus{border-color:var(--a)}
-.search .s{position:absolute;left:14px;top:13px;font-size:18px;opacity:.6}
-.search .x{position:absolute;right:4px;top:3px;width:44px;height:44px;font-size:18px;color:var(--mu)}
+.search .s{position:absolute;inset-inline-start:14px;top:13px;font-size:18px;opacity:.6}
+.search .x{position:absolute;inset-inline-end:4px;top:3px;width:44px;height:44px;font-size:18px;color:var(--mu)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
 .card{background:#fff;border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:6px;box-shadow:0 3px 14px rgba(120,60,10,.07);border:2px solid transparent}
 .card.sel{border-color:var(--a)}
@@ -108,13 +109,13 @@ h3{font-size:15px;margin:18px 4px 8px;color:var(--mu);text-transform:uppercase;l
 .who-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .wc{font-size:13px;background:#f6efe8;border-radius:999px;padding:3px 10px;display:inline-flex;align-items:center;gap:4px;min-height:28px}
 .wc.mine{background:var(--a2);color:var(--a-d);font-weight:600}
-.wc button{width:28px;height:28px;margin:-4px -8px -4px 0;font-size:14px;color:var(--a-d)}
+.wc button{width:28px;height:28px;margin-block:-4px;margin-inline:0 -8px;font-size:14px;color:var(--a-d)}
 .chk{width:34px;height:34px;border-radius:10px;border:2.5px solid #d9c3ae;flex:none;display:grid;place-items:center;font-size:20px;color:#fff;font-weight:900}
 .row.done .chk{background:var(--ok);border-color:var(--ok)}
 .xbtn{width:44px;height:44px;border-radius:12px;color:var(--mu);font-size:18px;flex:none}
 .note{background:#fffbe6;border:1px solid #f4e3a1;border-radius:16px;padding:12px 14px;margin-bottom:10px}
 .note .by{font-size:13px;color:var(--mu);font-weight:700;margin-bottom:2px}
-.tag{font-size:12px;background:#eee;color:#666;border-radius:8px;padding:2px 8px;margin-left:6px;font-weight:600}
+.tag{font-size:12px;background:#eee;color:#666;border-radius:8px;padding:2px 8px;margin-inline-start:6px;font-weight:600}
 textarea,.inp{width:100%;border:1px solid var(--ln);border-radius:14px;padding:12px 14px;background:#fff;outline:none;min-height:50px}
 textarea{min-height:84px;resize:vertical}
 textarea:focus,.inp:focus{border-color:var(--a)}
@@ -155,7 +156,7 @@ textarea:focus,.inp:focus{border-color:var(--a)}
 .dots{display:flex;gap:16px;margin-bottom:26px}
 .dots i{width:18px;height:18px;border-radius:50%;border:2px solid var(--a);display:block}
 .dots i.on{background:var(--a)}
-.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px}
+.pad{direction:ltr;display:grid;grid-template-columns:repeat(3,76px);gap:14px}
 .pad button{height:76px;border-radius:50%;background:#fff;font-size:28px;font-weight:600;box-shadow:0 3px 10px rgba(120,60,10,.08)}
 .pad button:active{background:var(--a2)}
 .pad button.blank{visibility:hidden}
@@ -169,7 +170,7 @@ textarea:focus,.inp:focus{border-color:var(--a)}
 </head>
 <body>
 <header class="top" id="top"></header>
-<div id="off" class="offline hidden">You're offline. Showing the last saved list.</div>
+<div id="off" class="offline hidden"></div>
 <main id="app"></main>
 <div id="bbar" class="bbar hidden"></div>
 <nav id="tabs" class="tabs hidden"></nav>
@@ -190,14 +191,60 @@ const LS=mk(()=>localStorage), SS=mk(()=>sessionStorage);
 let sb=null;
 try{sb=supabase.createClient('https://bhfgwlkzkbwcwyoypwhy.supabase.co','sb_publishable_9YylflVQca-62NHsBKSTeA_GY896nj3');}catch(e){}
 
+let LANG=LS.get('fs.lang','ar')==='en'?'en':'ar';
+const TX={
+ar:{app:'متسوق العائلة',admin:'الإدارة',done:'تم',back:'رجوع',tabList:'قائمة التسوق',tabProducts:'المنتجات',tabFamily:'العائلة',tabShop:'تسوّق',tabBasket:'سلتي',tabFamilyList:'قائمة العائلة',
+ inBasket:'🧺 {0} في السلة',view:'عرض ‹',offline:'لا يوجد اتصال. تُعرض آخر قائمة محفوظة.',
+ welcome:'أهلاً وسهلاً!',noNames:'لا توجد أسماء بعد. يضيفها المسؤول أولاً.',loading:'جارٍ التحميل…',imAdmin:'أنا المسؤول',whoAreYou:'من أنت؟',
+ noProducts:'لا توجد منتجات بعد',noProductsP:'لم يضف المسؤول أي منتجات. يمكنك طلب أي شيء.',askSomething:'✏️ اطلب شيئاً',search:'ابحث عن طعام أو مشروب',food:'🍽️ طعام',drinks:'🥤 مشروبات',
+ per:'لكل {0}',onList:'📋 {0} في القائمة',add:'+ أضف',less:'أقل',more:'أكثر',clear:'مسح',somethingElse:'شيء آخر؟',notHere:'اطلب منتجاً غير موجود هنا',nothingFound:'لا نتائج لـ “{0}”.',noItemsHere:'لا توجد منتجات هنا بعد.',
+ askElse:'✏️ اطلب شيئاً آخر',whatNeed:'ماذا تحتاج؟',egYogurt:'مثال: زبادي بالفراولة',howMany:'كم العدد؟',cancel:'إلغاء',addToBasket:'أضف إلى السلة',addedBasket:'أُضيف إلى سلتك',
+ sent:'تم الإرسال!',sentP:'طلبك الآن في قائمة العائلة.',seeList:'عرض قائمة العائلة',addMore:'أضف المزيد',basketEmpty:'سلتك فارغة',basketEmptyP:'اختر الطعام والمشروبات التي تريدها.',startShopping:'🛒 ابدأ التسوق',
+ myBasket:'سلتي',notInList:'غير موجود في القائمة',note:'ملاحظة (اختياري)',notePh:'مثال: خذ الحليب قليل الدسم إن وُجد',send:'📤 أرسل إلى قائمة التسوق',sending:'جارٍ الإرسال…',
+ listEmpty:'القائمة فارغة',listEmptyP:'لم يطلب أحد شيئاً بعد.',addSomething:'🛒 أضف شيئاً',familyList:'قائمة العائلة',stillToBuy:'المتبقي للشراء ({0})',allBought:'تم شراء كل شيء 🎉',boughtN:'تم شراؤه ✓ ({0})',removeMine:'احذف طلبي',
+ createPin:'أنشئ رمز المسؤول',enterPin:'أدخل رمز المسؤول',choosePin:'اختر 4 أرقام. لا يعرفها أحد غيرك.',again:'اكتبه مرة أخرى للتأكيد',noMatch:'الرمزان غير متطابقين. ابدأ من جديد.',pinExists:'يوجد رمز مسبقاً. أدخله.',
+ noRequests:'لا توجد طلبات بعد',noRequestsP:'عندما ترسل العائلة طلباتها ستظهر هنا.',toBuy:'للشراء',bought:'تم شراؤه',person:'شخص',people:'أشخاص',tapTick:'للشراء · اضغط للتأشير',allDone:'انتهى كل شيء! 🎉',
+ newList:'🧹 انتهى التسوق · ابدأ قائمة جديدة',extra:'إضافي',remove:'حذف',hidden:'مخفي',addProduct:'➕ أضف منتجاً',noProductsAdmin:'أضف الطعام والمشروبات التي تختار منها العائلة. أضف صورة أو اختر رمزاً.',noneYet:'لا شيء بعد.',
+ editProduct:'تعديل المنتج',newProduct:'منتج جديد',addPhoto:'📷 أضف صورة',removePhoto:'احذف الصورة',name:'الاسم',egMilk:'مثال: حليب',category:'الفئة',soldBy:'يُباع بـ',emojiLbl:'رمز (يظهر إن لم توجد صورة)',
+ hideFamily:'إخفاء عن العائلة مؤقتاً',del:'حذف',save:'حفظ',saveAnother:'احفظ وأضف آخر',badPhoto:'تعذّرت قراءة الصورة',typeName:'اكتب الاسم من فضلك',saved:'تم الحفظ',added:'أُضيف “{0}”',
+ delProduct:'حذف “{0}”؟ سيُحذف أيضاً من قائمة التسوق.',deleted:'تم الحذف',addMember:'➕ أضف فرداً من العائلة',familyN:'العائلة ({0})',addEveryone:'أضف كل من سيختار الطعام والمشروبات.',
+ shareHint:'شارك رابط هذه الصفحة مع عائلتك. يضغط كل فرد على اسمه، يختار ما يريد، ثم يضغط إرسال.',editMember:'تعديل فرد من العائلة',newMember:'إضافة فرد من العائلة',egSara:'مثال: سارة',picture:'الصورة',
+ removeMember:'حذف {0} من العائلة؟',removed:'تم الحذف',finished:'انتهيت من التسوق؟ سيتم مسح القائمة للجميع.',clearList:'امسح القائمة',freshList:'قائمة جديدة جاهزة ✨',removeYours:'حذف طلبك؟',
+ removeItem:'حذف “{0}” من القائمة؟',removeNote:'حذف هذه الملاحظة من القائمة؟',langBtn:'EN',
+ e_wrong_pin:'رمز خاطئ',e_locked:'محاولات خاطئة كثيرة. انتظر 15 دقيقة.',e_no_pin:'لم يُنشأ رمز بعد',e_bad_data:'تحقق من البيانات من فضلك',e_network:'لا يوجد إنترنت. حاول مرة أخرى.',
+ e_server:'حدث خطأ. حاول مرة أخرى.',e_no_member:'تم حذف اسمك. اختر اسمك من جديد.',e_not_found:'هذا العنصر لم يعد موجوداً'},
+en:{app:'Family Shop',admin:'Admin',done:'Done',back:'Back',tabList:'Shopping list',tabProducts:'Products',tabFamily:'Family',tabShop:'Shop',tabBasket:'My basket',tabFamilyList:'Family list',
+ inBasket:'🧺 {0} in basket',view:'View ›',offline:"You're offline. Showing the last saved list.",
+ welcome:'Welcome!',noNames:'No family names yet. The admin adds them first.',loading:'Loading…',imAdmin:"I'm the admin",whoAreYou:'Who are you?',
+ noProducts:'No products yet',noProductsP:"The admin hasn't added any products. You can still ask for anything.",askSomething:'✏️ Ask for something',search:'Search food or drinks',food:'🍽️ Food',drinks:'🥤 Beverages',
+ per:'per {0}',onList:'📋 {0} on list',add:'+ Add',less:'Less',more:'More',clear:'Clear',somethingElse:'Something else?',notHere:"Ask for an item that's not here",nothingFound:'Nothing found for “{0}”.',noItemsHere:'No items here yet.',
+ askElse:'✏️ Ask for something else',whatNeed:'What do you need?',egYogurt:'e.g. strawberry yogurt',howMany:'How many?',cancel:'Cancel',addToBasket:'Add to basket',addedBasket:'Added to your basket',
+ sent:'Sent!',sentP:'Your request is on the family list.',seeList:'See the family list',addMore:'Add more',basketEmpty:'Your basket is empty',basketEmptyP:'Pick the food and drinks you want.',startShopping:'🛒 Start shopping',
+ myBasket:'My basket',notInList:'Not in the list',note:'Note (optional)',notePh:'e.g. Get the low-fat milk if they have it',send:'📤 Send to the shopping list',sending:'Sending…',
+ listEmpty:'The list is empty',listEmptyP:'Nobody has asked for anything yet.',addSomething:'🛒 Add something',familyList:'Family list',stillToBuy:'Still to buy ({0})',allBought:'Everything has been bought 🎉',boughtN:'Bought ✓ ({0})',removeMine:'Remove mine',
+ createPin:'Create an admin PIN',enterPin:'Enter admin PIN',choosePin:'Choose 4 digits. Only you should know it.',again:'Type it again to confirm',noMatch:'The PINs did not match. Start again.',pinExists:'A PIN already exists. Enter it.',
+ noRequests:'No requests yet',noRequestsP:'When the family sends what they want, it shows up here.',toBuy:'to buy',bought:'bought',person:'person',people:'people',tapTick:'To buy · tap to tick',allDone:'All done! 🎉',
+ newList:'🧹 Done shopping · start a new list',extra:'extra',remove:'Remove',hidden:'hidden',addProduct:'➕ Add a product',noProductsAdmin:'Add the food and drinks your family can choose from. Add a photo or pick an emoji.',noneYet:'None yet.',
+ editProduct:'Edit product',newProduct:'New product',addPhoto:'📷 Add photo',removePhoto:'Remove photo',name:'Name',egMilk:'e.g. Milk',category:'Category',soldBy:'Sold by',emojiLbl:"Emoji (shown if there's no photo)",
+ hideFamily:'Hide from family for now',del:'Delete',save:'Save',saveAnother:'Save & add another',badPhoto:'Could not read that photo',typeName:'Please type a name',saved:'Saved',added:'Added “{0}”',
+ delProduct:'Delete “{0}”? It will also leave the shopping list.',deleted:'Deleted',addMember:'➕ Add family member',familyN:'Family ({0})',addEveryone:'Add everyone who will pick food and drinks.',
+ shareHint:"Share this page's link with your family. They tap their name, pick what they want and press Send.",editMember:'Edit family member',newMember:'Add family member',egSara:'e.g. Sara',picture:'Picture',
+ removeMember:'Remove {0} from the family list?',removed:'Removed',finished:'Finished shopping? This clears the whole list for everyone.',clearList:'Clear list',freshList:'Fresh list ready ✨',removeYours:'Remove your request?',
+ removeItem:'Remove “{0}” from the list?',removeNote:'Remove this note from the list?',langBtn:'عربي',
+ e_wrong_pin:'Wrong PIN',e_locked:'Too many wrong tries. Wait 15 minutes.',e_no_pin:'No PIN set yet',e_bad_data:'Please check the details',e_network:'No internet. Try again.',
+ e_server:'Something went wrong. Try again.',e_no_member:'Your name was removed. Pick your name again.',e_not_found:'That item no longer exists'}};
+const T=(k,...a)=>{const s=TX[LANG][k]??TX.en[k];return s==null?undefined:s.replace(/\{(\d)\}/g,(m,i)=>a[i])};
+function applyLang(){const h=document.documentElement;h.lang=LANG;h.dir=LANG==='ar'?'rtl':'ltr';document.title=T('app');$('off').textContent=T('offline')}
 const UNITS={piece:['piece','pieces'],pack:['pack','packs'],bottle:['bottle','bottles'],can:['can','cans'],box:['box','boxes'],
   bag:['bag','bags'],carton:['carton','cartons'],kg:['kg','kg'],liter:['liter','liters'],dozen:['dozen','dozen']};
+/* Arabic: [one, two, 3-10] */
+const UNITS_AR={piece:['قطعة','قطعتان','قطع'],pack:['عبوة','عبوتان','عبوات'],bottle:['زجاجة','زجاجتان','زجاجات'],can:['علبة','علبتان','علب'],box:['صندوق','صندوقان','صناديق'],
+  bag:['كيس','كيسان','أكياس'],carton:['كرتون','كرتونان','كراتين'],kg:['كيلو','كيلو','كيلو'],liter:['لتر','لتران','لترات'],dozen:['دزينة','دزينتان','دزينات']};
 const HALF={kg:1,liter:1};
 const FOOD_EMO='🍎🍌🍇🍓🍊🍉🥑🥕🥔🧅🍅🥒🥬🍞🥐🧀🥚🥛🍗🥩🐟🍚🍝🍕🍔🥫🍪🍫🍩🍦🍯🧈🥣🌶️🫒🥜'.match(/\p{Extended_Pictographic}️?/gu);
 const DRINK_EMO='🥤🧃💧🥛☕🍵🧋🍹🥥🍋🧊🫖🍶'.match(/\p{Extended_Pictographic}️?/gu);
 const FACE_EMO='🙂😀😎🤓🥳😇👩👨👧👦👵👴👶🧕🧔🐱🐶🦁🐻🦄⭐'.match(/\p{Extended_Pictographic}️?/gu);
-const ERR={wrong_pin:'Wrong PIN',locked:'Too many wrong tries. Wait 15 minutes.',no_pin:'No PIN set yet',bad_data:'Please check the details',
-  network:'No internet. Try again.',server:'Something went wrong. Try again.',no_member:'Your name was removed. Pick your name again.',not_found:'That item no longer exists'};
+const ERR=new Proxy({},{get:(o,k)=>typeof k==='string'?T('e_'+k):undefined});
 
 let S=LS.get('fs.state',{ok:true,has_pin:true,members:[],products:[],requests:[]});
 let me=LS.get('fs.me',null);
@@ -211,7 +258,9 @@ const meM=()=>S.members.find(m=>m.id===me);
 const prodById=id=>S.products.find(p=>p.id===id);
 const saveBasket=()=>LS.set('fs.basket',basket);
 const fmt=n=>{n=+n;return Number.isInteger(n)?String(n):String(Math.round(n*100)/100)};
-const unitTxt=(u,n)=>{const x=UNITS[u]||[u,u];return +n===1?x[0]:x[1]};
+const unitTxt=(u,n)=>{n=+n;
+  if(LANG==='ar'){const x=UNITS_AR[u]||[u,u,u];return n===2?x[1]:(Number.isInteger(n)&&n>=3&&n<=10)?x[2]:x[0]}
+  const x=UNITS[u]||[u,u];return n===1?x[0]:x[1]};
 const qtyTxt=(n,u)=>fmt(n)+' '+unitTxt(u||'piece',n);
 const stepOf=u=>HALF[u]?0.5:1;
 
@@ -272,7 +321,7 @@ function sheet(html){
 function closeSheet(){$('wrap').classList.remove('on');setTimeout(()=>{if(!$('wrap').classList.contains('on'))$('wrap').innerHTML=''},200);if(pending)render()}
 function ask(msg,okLabel,danger){
   return new Promise(res=>{
-    const s=sheet(`<h2>${esc(msg)}</h2><div class="two"><button class="btn ghost" data-a="0">Cancel</button><button class="btn ${danger?'danger':''}" data-a="1">${esc(okLabel)}</button></div>`);
+    const s=sheet(`<h2>${esc(msg)}</h2><div class="two"><button class="btn ghost" data-a="0">${T('cancel')}</button><button class="btn ${danger?'danger':''}" data-a="1">${esc(okLabel)}</button></div>`);
     s.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{closeSheet();res(b.dataset.a==='1')});
   });
 }
@@ -290,7 +339,7 @@ function lines(){
     L.rows.push(r);L.total+=+r.qty;
   }
   const order=L=>(L.p?(L.p.category==='food'?0:1):2);
-  const all=Object.values(g).sort((a,b)=>order(a)-order(b)||String(a.text).localeCompare(String(b.text)));
+  const all=Object.values(g).sort((a,b)=>order(a)-order(b)||String(a.text).localeCompare(String(b.text),LANG));
   return{todo:all.filter(l=>!l.bought),done:all.filter(l=>l.bought),notes};
 }
 function whoChips(L,canCancel){
@@ -298,7 +347,7 @@ function whoChips(L,canCancel){
   for(const r of L.rows){const k=r.member_id||r.member_name;(by[k]=by[k]||{name:r.member_name,mid:r.member_id,qty:0,ids:[]});by[k].qty+=+r.qty;by[k].ids.push(r.id)}
   return `<div class="who-chips">${Object.values(by).map(w=>{
     const mine=canCancel&&w.mid===me&&!L.bought;
-    return `<span class="wc ${mine?'mine':''}">${esc(w.name)} · ${esc(fmt(w.qty))}${mine?`<button data-cancel="${esc(w.ids.join(','))}" aria-label="Remove mine">✕</button>`:''}</span>`}).join('')}</div>`;
+    return `<span class="wc ${mine?'mine':''}">${esc(w.name)} · ${esc(fmt(w.qty))}${mine?`<button data-cancel="${esc(w.ids.join(','))}" aria-label="${esc(T('removeMine'))}">✕</button>`:''}</span>`}).join('')}</div>`;
 }
 
 /* ---------- render ---------- */
@@ -317,22 +366,24 @@ function render(){
   const admin=view==='admin';
   const m=meM();
   // top
+  applyLang();
+  const lb=`<button class="lang" data-go="lang" aria-label="Language">${T('langBtn')}</button>`;
   let top='';
-  if(admin)top=`<h1>⚙️ Admin</h1><button class="chip" data-go="exit">Done</button>`;
-  else if(view==='pin')top=`<h1>🔒 Admin</h1><button class="chip" data-go="back">Back</button>`;
-  else top=`<h1>🧺 Family Shop</h1>${m&&view!=='who'?`<button class="chip" data-go="who"><span>${esc(m.emoji)}</span><span class="n">${esc(m.name)}</span> ▾</button>`:''}<button class="icbtn" data-go="admin" aria-label="Admin">⚙️</button>`;
+  if(admin)top=`<h1>⚙️ ${T('admin')}</h1>${lb}<button class="chip" data-go="exit">${T('done')}</button>`;
+  else if(view==='pin')top=`<h1>🔒 ${T('admin')}</h1>${lb}<button class="chip" data-go="back">${T('back')}</button>`;
+  else top=`<h1>${m&&view!=='who'?'':'🧺 '}${T('app')}</h1>${m&&view!=='who'?`<button class="chip" data-go="who"><span>${esc(m.emoji)}</span><span class="n">${esc(m.name)}</span> ▾</button>`:''}${lb}<button class="icbtn" data-go="admin" aria-label="${T('admin')}">⚙️</button>`;
   $('top').innerHTML=top;
 
   // tabs
   const tabs=$('tabs');
   if(admin){
     const n=lines().todo.length;
-    tabs.innerHTML=[['list','📋','Shopping list',n],['products','🍎','Products'],['family','👪','Family']]
+    tabs.innerHTML=[['list','📋',T('tabList'),n],['products','🍎',T('tabProducts')],['family','👪',T('tabFamily')]]
       .map(([k,i,l,b])=>`<button class="${adminTab===k?'on':''}" data-tab="${k}"><span class="i">${i}</span>${l}${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
     tabs.classList.remove('hidden');
   }else if(m&&['shop','basket','list'].includes(view)){
     const bc=basketCount(),lc=lines().todo.length;
-    tabs.innerHTML=[['shop','🛒','Shop'],['basket','🧺','My basket',bc],['list','📋','Family list',lc]]
+    tabs.innerHTML=[['shop','🛒',T('tabShop')],['basket','🧺',T('tabBasket'),bc],['list','📋',T('tabFamilyList'),lc]]
       .map(([k,i,l,b])=>`<button class="${view===k?'on':''}" data-go="${k}"><span class="i">${i}</span>${l}${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
     tabs.classList.remove('hidden');
   }else tabs.classList.add('hidden');
@@ -351,7 +402,7 @@ function updateBar(){
   const bar=$('bbar');const n=basketCount();
   const show=view==='shop'&&n>0&&meM();
   bar.classList.toggle('hidden',!show);$('app').classList.toggle('withbar',!!show);
-  if(show)bar.innerHTML=`<span>🧺 ${n} item${n===1?'':'s'} in basket</span><span>View ›</span>`;
+  if(show)bar.innerHTML=`<span>${T('inBasket',LANG==='ar'?n:n+' item'+(n===1?'':'s'))}</span><span>${T('view')}</span>`;
   bar.onclick=()=>go('basket');
   const bb=document.querySelector('[data-go="basket"]');
   if(bb){let b=bb.querySelector('.badge');if(n){if(!b){b=document.createElement('span');b.className='badge';bb.appendChild(b)}b.textContent=n}else if(b)b.remove()}
@@ -360,37 +411,37 @@ function updateBar(){
 /* who */
 function vWho(){
   if(!S.members.length){
-    return `<div class="empty"><div class="big">👪</div><h2>Welcome!</h2>
-      <p>${loaded?'No family names yet. The admin adds them first.':'Loading…'}</p>
-      ${loaded?`<button class="btn" data-go="admin">I'm the admin</button>`:''}</div>`;
+    return `<div class="empty"><div class="big">👪</div><h2>${T('welcome')}</h2>
+      <p>${loaded?T('noNames'):T('loading')}</p>
+      ${loaded?`<button class="btn" data-go="admin">${T('imAdmin')}</button>`:''}</div>`;
   }
-  return `<h2>Who are you?</h2><div class="who">${S.members.map(m=>`<button data-me="${esc(m.id)}"><span class="e">${esc(m.emoji)}</span>${esc(m.name)}</button>`).join('')}</div>
-    <button class="link" data-go="admin">⚙️ Admin</button>`;
+  return `<h2>${T('whoAreYou')}</h2><div class="who">${S.members.map(m=>`<button data-me="${esc(m.id)}"><span class="e">${esc(m.emoji)}</span>${esc(m.name)}</button>`).join('')}</div>
+    <button class="link" data-go="admin">⚙️ ${T('admin')}</button>`;
 }
 
 /* shop */
 function vShop(){
   const vis=S.products.filter(p=>!p.hidden);
-  if(!vis.length)return `<div class="empty"><div class="big">🛒</div><h2>No products yet</h2><p>The admin hasn't added any products. You can still ask for anything.</p>
-    <button class="btn" data-other="1">✏️ Ask for something</button></div>`;
-  return `<div class="search"><span class="s">🔎</span><input id="q" type="search" placeholder="Search food or drinks" value="${esc(q)}" autocomplete="off"><button class="x ${q?'':'hidden'}" id="qx" aria-label="Clear">✕</button></div>
-    <div class="seg ${q?'hidden':''}" id="seg"><button class="${cat==='food'?'on':''}" data-cat="food">🍽️ Food</button><button class="${cat==='drink'?'on':''}" data-cat="drink">🥤 Beverages</button></div>
+  if(!vis.length)return `<div class="empty"><div class="big">🛒</div><h2>${T('noProducts')}</h2><p>${T('noProductsP')}</p>
+    <button class="btn" data-other="1">${T('askSomething')}</button></div>`;
+  return `<div class="search"><span class="s">🔎</span><input id="q" type="search" placeholder="${esc(T('search'))}" value="${esc(q)}" autocomplete="off"><button class="x ${q?'':'hidden'}" id="qx" aria-label="${esc(T('clear'))}">✕</button></div>
+    <div class="seg ${q?'hidden':''}" id="seg"><button class="${cat==='food'?'on':''}" data-cat="food">${T('food')}</button><button class="${cat==='drink'?'on':''}" data-cat="drink">${T('drinks')}</button></div>
     <div class="grid" id="grid">${gridHtml()}</div>`;
 }
 function onListQty(pid){let t=0;for(const r of S.requests)if(r.product_id===pid&&!r.bought&&r.kind==='item')t+=+r.qty;return t}
 function cardHtml(p){
   const n=basket.items[p.id]||0;const ol=onListQty(p.id);
   return `<div class="card ${n?'sel':''}" data-card="${esc(p.id)}">${pic(p,'pic')}
-    <div class="nm">${esc(p.name)}</div><div class="un">per ${esc(unitTxt(p.unit,1))}</div>
-    ${ol?`<span class="onlist">📋 ${esc(qtyTxt(ol,p.unit))} on list</span>`:''}
-    ${n?`<div class="step"><button data-dec="${esc(p.id)}" aria-label="Less">−</button><b>${esc(fmt(n))}</b><button data-inc="${esc(p.id)}" aria-label="More">+</button></div>`
-       :`<button class="add" data-inc="${esc(p.id)}">+ Add</button>`}</div>`;
+    <div class="nm">${esc(p.name)}</div><div class="un">${esc(T('per',unitTxt(p.unit,1)))}</div>
+    ${ol?`<span class="onlist">${esc(T('onList',qtyTxt(ol,p.unit)))}</span>`:''}
+    ${n?`<div class="step"><button data-dec="${esc(p.id)}" aria-label="${T('less')}">−</button><b>${esc(fmt(n))}</b><button data-inc="${esc(p.id)}" aria-label="${T('more')}">+</button></div>`
+       :`<button class="add" data-inc="${esc(p.id)}">${T('add')}</button>`}</div>`;
 }
 function gridHtml(){
   const t=q.trim().toLowerCase();
   const list=S.products.filter(p=>!p.hidden&&(t?p.name.toLowerCase().includes(t):p.category===cat));
-  const other=`<button class="card other" data-other="1"><span class="e">✏️</span>Something else?<span class="muted" style="font-weight:500;font-size:14px">Ask for an item that's not here</span></button>`;
-  if(!list.length)return `<div class="empty" style="grid-column:1/-1;padding:20px">${t?'Nothing found for “'+esc(q)+'”.':'No items here yet.'}</div>`+other;
+  const other=`<button class="card other" data-other="1"><span class="e">✏️</span>${T('somethingElse')}<span class="muted" style="font-weight:500;font-size:14px">${T('notHere')}</span></button>`;
+  if(!list.length)return `<div class="empty" style="grid-column:1/-1;padding:20px">${t?T('nothingFound',esc(q)):T('noItemsHere')}</div>`+other;
   return list.map(cardHtml).join('')+other;
 }
 function changeQty(pid,dir){
@@ -406,64 +457,64 @@ function changeQty(pid,dir){
 /* custom item */
 function otherSheet(){
   let n=1;
-  const s=sheet(`<h2>✏️ Ask for something else</h2>
-    <label class="fl">What do you need?</label><input class="inp" id="ot" maxlength="80" placeholder="e.g. strawberry yogurt">
-    <label class="fl">How many?</label><div class="qrow"><div class="step sm"><button id="om">−</button><b id="on">1</b><button id="op">+</button></div></div>
-    <div class="two"><button class="btn ghost" id="oc">Cancel</button><button class="btn" id="ok">Add to basket</button></div>`);
+  const s=sheet(`<h2>${T('askElse')}</h2>
+    <label class="fl">${T('whatNeed')}</label><input class="inp" id="ot" maxlength="80" placeholder="${esc(T('egYogurt'))}">
+    <label class="fl">${T('howMany')}</label><div class="qrow"><div class="step sm"><button id="om">−</button><b id="on">1</b><button id="op">+</button></div></div>
+    <div class="two"><button class="btn ghost" id="oc">${T('cancel')}</button><button class="btn" id="ok">${T('addToBasket')}</button></div>`);
   const upd=()=>s.querySelector('#on').textContent=n;
   s.querySelector('#om').onclick=()=>{if(n>1){n--;upd()}};
   s.querySelector('#op').onclick=()=>{if(n<99){n++;upd()}};
   s.querySelector('#oc').onclick=closeSheet;
   s.querySelector('#ok').onclick=()=>{
     const t=s.querySelector('#ot').value.trim();if(!t){s.querySelector('#ot').focus();return}
-    basket.custom.push({text:t.slice(0,80),qty:n});saveBasket();closeSheet();toast('Added to your basket');render();
+    basket.custom.push({text:t.slice(0,80),qty:n});saveBasket();closeSheet();toast(T('addedBasket'));render();
   };
   setTimeout(()=>s.querySelector('#ot').focus(),250);
 }
 
 /* basket */
 function vBasket(){
-  if(justSent){return `<div class="success"><div class="big">🎉</div><h2>Sent!</h2><p class="muted">Your request is on the family list.</p>
-     <div class="actions"><button class="btn" data-go="list">See the family list</button><button class="btn light" data-go="shop">Add more</button></div></div>`}
+  if(justSent){return `<div class="success"><div class="big">🎉</div><h2>${T('sent')}</h2><p class="muted">${T('sentP')}</p>
+     <div class="actions"><button class="btn" data-go="list">${T('seeList')}</button><button class="btn light" data-go="shop">${T('addMore')}</button></div></div>`}
   const items=Object.entries(basket.items).map(([id,n])=>({p:prodById(id),n})).filter(x=>x.p&&!x.p.hidden);
-  if(!items.length&&!basket.custom.length)return `<div class="empty"><div class="big">🧺</div><h2>Your basket is empty</h2><p>Pick the food and drinks you want.</p><button class="btn" data-go="shop">🛒 Start shopping</button></div>`;
-  return `<h2>My basket</h2><div class="list">
+  if(!items.length&&!basket.custom.length)return `<div class="empty"><div class="big">🧺</div><h2>${T('basketEmpty')}</h2><p>${T('basketEmptyP')}</p><button class="btn" data-go="shop">${T('startShopping')}</button></div>`;
+  return `<h2>${T('myBasket')}</h2><div class="list">
     ${items.map(({p,n})=>`<div class="row">${pic(p,'th')}<div class="bd"><div class="t">${esc(p.name)}</div><div class="s">${esc(qtyTxt(n,p.unit))}</div></div>
       <div class="step sm"><button data-dec="${esc(p.id)}">−</button><b>${esc(fmt(n))}</b><button data-inc="${esc(p.id)}">+</button></div></div>`).join('')}
-    ${basket.custom.map((c,i)=>`<div class="row"><span class="th">✏️</span><div class="bd"><div class="t">${esc(c.text)}</div><div class="s">Not in the list</div></div>
+    ${basket.custom.map((c,i)=>`<div class="row"><span class="th">✏️</span><div class="bd"><div class="t">${esc(c.text)}</div><div class="s">${T('notInList')}</div></div>
       <div class="step sm"><button data-cdec="${i}">−</button><b>${esc(c.qty)}</b><button data-cinc="${i}">+</button></div></div>`).join('')}
     </div>
-    <button class="btn light block" style="margin-top:10px" data-other="1">✏️ Ask for something else</button>
-    <label class="fl" for="note">Note (optional)</label>
-    <textarea id="note" maxlength="300" placeholder="e.g. Get the low-fat milk if they have it">${esc(basket.note||'')}</textarea>
-    <div class="actions"><button class="btn ok block" id="send">📤 Send to the shopping list</button></div>`;
+    <button class="btn light block" style="margin-top:10px" data-other="1">${T('askElse')}</button>
+    <label class="fl" for="note">${T('note')}</label>
+    <textarea id="note" maxlength="300" placeholder="${esc(T('notePh'))}">${esc(basket.note||'')}</textarea>
+    <div class="actions"><button class="btn ok block" id="send">${T('send')}</button></div>`;
 }
 async function send(btn){
   const m=meM();if(!m)return go('who');
   const items=Object.entries(basket.items).filter(([id])=>prodById(id)&&!prodById(id).hidden).map(([id,n])=>({product_id:id,qty:n}))
     .concat(basket.custom.map(c=>({text:c.text,qty:c.qty})));
   if(!items.length&&!(basket.note||'').trim())return;
-  btn.disabled=true;btn.textContent='Sending…';
+  btn.disabled=true;btn.textContent=T('sending');
   const r=await rpc('fs_send',{p_member:m.id,p_items:items,p_note:basket.note||''});
   if(r&&r.ok){basket={items:{},custom:[],note:''};saveBasket();ping();justSent=true;await refresh();render();}
-  else{btn.disabled=false;btn.textContent='📤 Send to the shopping list';toast(ERR[r&&r.error]||ERR.server);if(r&&r.error==='no_member')refresh();}
+  else{btn.disabled=false;btn.textContent=T('send');toast(ERR[r&&r.error]||ERR.server);if(r&&r.error==='no_member')refresh();}
 }
 
 /* family list */
 function vList(){
   const {todo,done,notes}=lines();
-  if(!todo.length&&!done.length&&!notes.length)return `<div class="empty"><div class="big">📋</div><h2>The list is empty</h2><p>Nobody has asked for anything yet.</p><button class="btn" data-go="shop">🛒 Add something</button></div>`;
+  if(!todo.length&&!done.length&&!notes.length)return `<div class="empty"><div class="big">📋</div><h2>${T('listEmpty')}</h2><p>${T('listEmptyP')}</p><button class="btn" data-go="shop">${T('addSomething')}</button></div>`;
   const row=L=>`<div class="row ${L.bought?'done':''}">${pic(L.p,'th')}<div class="bd"><div class="t">${esc(L.text)}${L.bought?' ✓':''}</div>${whoChips(L,true)}</div><div class="q">${esc(qtyTxt(L.total,L.unit))}</div></div>`;
-  return `<h2>Family list</h2>
+  return `<h2>${T('familyList')}</h2>
     ${notes.map(n=>`<div class="note"><div class="by">📝 ${esc(n.member_name)}</div>${esc(n.text)}</div>`).join('')}
-    ${todo.length?`<h3>Still to buy (${todo.length})</h3><div class="list">${todo.map(row).join('')}</div>`:`<div class="empty" style="padding:20px">Everything has been bought 🎉</div>`}
-    ${done.length?`<h3>Bought ✓ (${done.length})</h3><div class="list">${done.map(row).join('')}</div>`:''}`;
+    ${todo.length?`<h3>${T('stillToBuy',todo.length)}</h3><div class="list">${todo.map(row).join('')}</div>`:`<div class="empty" style="padding:20px">${T('allBought')}</div>`}
+    ${done.length?`<h3>${T('boughtN',done.length)}</h3><div class="list">${done.map(row).join('')}</div>`:''}`;
 }
 
 /* pin */
 function vPin(){
-  return `<div class="pinv"><h2>${pinMode==='create'?'Create an admin PIN':'Enter admin PIN'}</h2>
-    <p class="${pinErr?'err':''}" id="pmsg">${esc(pinMsg||(pinMode==='create'?'Choose 4 digits. Only you should know it.':' '))}</p>
+  return `<div class="pinv"><h2>${pinMode==='create'?T('createPin'):T('enterPin')}</h2>
+    <p class="${pinErr?'err':''}" id="pmsg">${esc(pinMsg||(pinMode==='create'?T('choosePin'):' '))}</p>
     <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
     <div class="pad">${['1','2','3','4','5','6','7','8','9','','0','⌫'].map(k=>`<button class="${k?'':'blank'}" data-k="${k}">${k}</button>`).join('')}</div></div>`;
 }
@@ -482,10 +533,10 @@ async function pinKey(k){
   pinBuf+=k;drawDots();if(pinBuf.length<4)return;
   const v=pinBuf;
   if(pinMode==='create'){
-    if(!pinFirst){pinFirst=v;pinBuf='';setTimeout(drawDots,150);return setPinMsg('Type it again to confirm')}
-    if(pinFirst!==v){pinFirst='';pinBuf='';setTimeout(drawDots,150);return setPinMsg('The PINs did not match. Start again.',true)}
+    if(!pinFirst){pinFirst=v;pinBuf='';setTimeout(drawDots,150);return setPinMsg(T('again'))}
+    if(pinFirst!==v){pinFirst='';pinBuf='';setTimeout(drawDots,150);return setPinMsg(T('noMatch'),true)}
     pinBusy=true;const r=await rpc('fs_set_pin',{p_pin:v});pinBusy=false;
-    if(!r||!r.ok){pinFirst='';pinBuf='';pinMode='enter';render();return setPinMsg(r&&r.error==='pin_exists'?'A PIN already exists. Enter it.':ERR[r&&r.error]||ERR.server,true)}
+    if(!r||!r.ok){pinFirst='';pinBuf='';pinMode='enter';render();return setPinMsg(r&&r.error==='pin_exists'?T('pinExists'):ERR[r&&r.error]||ERR.server,true)}
   }
   pinBusy=true;const r=await rpc('fs_login',{p_pin:v});pinBusy=false;
   if(r&&r.ok){PIN=v;SS.set('fs.pin',v);S.has_pin=true;adminTab='list';go('admin');refresh();}
@@ -496,17 +547,17 @@ async function pinKey(k){
 function vAList(){
   const {todo,done,notes}=lines();
   const people=new Set(S.requests.map(r=>r.member_name)).size;
-  if(!todo.length&&!done.length&&!notes.length)return `<div class="empty"><div class="big">📋</div><h2>No requests yet</h2><p>When the family sends what they want, it shows up here.</p></div>`;
+  if(!todo.length&&!done.length&&!notes.length)return `<div class="empty"><div class="big">📋</div><h2>${T('noRequests')}</h2><p>${T('noRequestsP')}</p></div>`;
   const row=L=>`<div class="row tap ${L.bought?'done':''}" data-mark="${esc(L.rows.map(r=>r.id).join(','))}" data-on="${L.bought?0:1}">
       <span class="chk">${L.bought?'✓':''}</span>${pic(L.p,'th')}
-      <div class="bd"><div class="t">${esc(L.text)}${L.p?'':'<span class="tag">extra</span>'}</div>${whoChips(L,false)}</div>
+      <div class="bd"><div class="t">${esc(L.text)}${L.p?'':`<span class="tag">${T('extra')}</span>`}</div>${whoChips(L,false)}</div>
       <div class="q">${esc(qtyTxt(L.total,L.unit))}</div>
-      <button class="xbtn" data-rm="${esc(L.rows.map(r=>r.id).join(','))}" data-name="${esc(L.text)}" aria-label="Remove">✕</button></div>`;
-  return `<div class="summary"><div><b>${todo.length}</b><span>to buy</span></div><div><b>${done.length}</b><span>bought</span></div><div><b>${people}</b><span>${people===1?'person':'people'}</span></div></div>
-    ${notes.map(n=>`<div class="note"><div class="by">📝 ${esc(n.member_name)}</div><div class="qrow" style="align-items:flex-start"><div style="flex:1">${esc(n.text)}</div><button class="xbtn" style="margin:-10px -8px -10px 0" data-rm="${esc(n.id)}" data-name="this note">✕</button></div></div>`).join('')}
-    ${todo.length?`<h3>To buy · tap to tick</h3><div class="list">${todo.map(row).join('')}</div>`:`<div class="empty" style="padding:20px">All done! 🎉</div>`}
-    ${done.length?`<h3>Bought</h3><div class="list">${done.map(row).join('')}</div>`:''}
-    <div class="actions"><button class="btn danger block" id="clear">🧹 Done shopping · start a new list</button></div>`;
+      <button class="xbtn" data-rm="${esc(L.rows.map(r=>r.id).join(','))}" data-name="${esc(L.text)}" aria-label="${T('remove')}">✕</button></div>`;
+  return `<div class="summary"><div><b>${todo.length}</b><span>${T('toBuy')}</span></div><div><b>${done.length}</b><span>${T('bought')}</span></div><div><b>${people}</b><span>${people===1?T('person'):T('people')}</span></div></div>
+    ${notes.map(n=>`<div class="note"><div class="by">📝 ${esc(n.member_name)}</div><div class="qrow" style="align-items:flex-start"><div style="flex:1">${esc(n.text)}</div><button class="xbtn" style="margin-block:-10px;margin-inline:0 -8px" data-rm="${esc(n.id)}" data-name="__note">✕</button></div></div>`).join('')}
+    ${todo.length?`<h3>${T('tapTick')}</h3><div class="list">${todo.map(row).join('')}</div>`:`<div class="empty" style="padding:20px">${T('allDone')}</div>`}
+    ${done.length?`<h3>${T('bought')}</h3><div class="list">${done.map(row).join('')}</div>`:''}
+    <div class="actions"><button class="btn danger block" id="clear">${T('newList')}</button></div>`;
 }
 async function mark(ids,on){
   for(const r of S.requests)if(ids.includes(r.id))r.bought=on;render();
@@ -515,9 +566,9 @@ async function mark(ids,on){
 
 /* admin: products */
 function vAProducts(){
-  const sec=(c,l)=>{const ps=S.products.filter(p=>p.category===c);return `<h3>${l} (${ps.length})</h3>`+(ps.length?`<div class="list">${ps.map(p=>`<div class="row tap" data-edit="${esc(p.id)}">${pic(p,'th')}<div class="bd"><div class="t">${esc(p.name)}${p.hidden?'<span class="tag">hidden</span>':''}</div><div class="s">per ${esc(unitTxt(p.unit,1))}</div></div><span class="muted">›</span></div>`).join('')}</div>`:`<p class="muted" style="margin:4px">None yet.</p>`)};
-  return `<button class="btn block" data-edit="new">➕ Add a product</button>
-    ${!S.products.length?`<div class="empty"><div class="big">🍎</div><p>Add the food and drinks your family can choose from. Add a photo or pick an emoji.</p></div>`:sec('food','🍽️ Food')+sec('drink','🥤 Beverages')}`;
+  const sec=(c,l)=>{const ps=S.products.filter(p=>p.category===c);return `<h3>${l} (${ps.length})</h3>`+(ps.length?`<div class="list">${ps.map(p=>`<div class="row tap" data-edit="${esc(p.id)}">${pic(p,'th')}<div class="bd"><div class="t">${esc(p.name)}${p.hidden?`<span class="tag">${T('hidden')}</span>`:''}</div><div class="s">${esc(T('per',unitTxt(p.unit,1)))}</div></div><span class="muted">${LANG==='ar'?'‹':'›'}</span></div>`).join('')}</div>`:`<p class="muted" style="margin:4px">${T('noneYet')}</p>`)};
+  return `<button class="btn block" data-edit="new">${T('addProduct')}</button>
+    ${!S.products.length?`<div class="empty"><div class="big">🍎</div><p>${T('noProductsAdmin')}</p></div>`:sec('food',T('food'))+sec('drink',T('drinks'))}`;
 }
 function resizeImage(file){
   return new Promise((res,rej)=>{
@@ -533,17 +584,17 @@ function productSheet(id){
   const p=id==='new'?null:prodById(id);
   const f={name:p?p.name:'',category:p?p.category:(adminTab==='products'&&cat)||'food',unit:p?p.unit:'piece',emoji:p?p.emoji:'',hidden:p?p.hidden:false,
     image:p&&p.has_image&&imgs[p.id]?imgs[p.id].d:null,imgChanged:false};
-  const s=sheet(`<h2>${p?'Edit product':'New product'}</h2>
+  const s=sheet(`<h2>${p?T('editProduct'):T('newProduct')}</h2>
     <div class="photo"><span class="pv" id="pv"></span><div class="bt">
-      <label class="btn light" style="cursor:pointer">📷 ${'Add photo'}<input type="file" accept="image/*" id="pf" class="hidden"></label>
-      <button class="btn ghost" id="prm">Remove photo</button></div></div>
-    <label class="fl" for="pn">Name</label><input class="inp" id="pn" maxlength="60" placeholder="e.g. Milk" value="${esc(f.name)}">
-    <label class="fl">Category</label><div class="seg" id="pc"><button data-v="food">🍽️ Food</button><button data-v="drink">🥤 Beverages</button></div>
-    <label class="fl">Sold by</label><div class="chips" id="pu">${Object.keys(UNITS).map(u=>`<button data-v="${u}">${esc(UNITS[u][0])}</button>`).join('')}</div>
-    <label class="fl">Emoji (shown if there's no photo)</label><div class="emos" id="pe"></div>
-    <label class="sw"><input type="checkbox" id="ph" ${f.hidden?'checked':''}> Hide from family for now</label>
-    <div class="two">${p?`<button class="btn danger" id="pdel">Delete</button>`:`<button class="btn ghost" id="pcan">Cancel</button>`}<button class="btn" id="psave">Save</button></div>
-    ${p?'':`<button class="btn light block" style="margin-top:10px" id="pmore">Save &amp; add another</button>`}`);
+      <label class="btn light" style="cursor:pointer">${T('addPhoto')}<input type="file" accept="image/*" id="pf" class="hidden"></label>
+      <button class="btn ghost" id="prm">${T('removePhoto')}</button></div></div>
+    <label class="fl" for="pn">${T('name')}</label><input class="inp" id="pn" maxlength="60" placeholder="${esc(T('egMilk'))}" value="${esc(f.name)}">
+    <label class="fl">${T('category')}</label><div class="seg" id="pc"><button data-v="food">${T('food')}</button><button data-v="drink">${T('drinks')}</button></div>
+    <label class="fl">${T('soldBy')}</label><div class="chips" id="pu">${Object.keys(UNITS).map(u=>`<button data-v="${u}">${esc(unitTxt(u,1))}</button>`).join('')}</div>
+    <label class="fl">${T('emojiLbl')}</label><div class="emos" id="pe"></div>
+    <label class="sw"><input type="checkbox" id="ph" ${f.hidden?'checked':''}> ${T('hideFamily')}</label>
+    <div class="two">${p?`<button class="btn danger" id="pdel">${T('del')}</button>`:`<button class="btn ghost" id="pcan">${T('cancel')}</button>`}<button class="btn" id="psave">${T('save')}</button></div>
+    ${p?'':`<button class="btn light block" style="margin-top:10px" id="pmore">${esc(T('saveAnother'))}</button>`}`);
   const draw=()=>{
     s.querySelector('#pv').outerHTML=f.image?`<img class="pv" id="pv" src="${esc(f.image)}" alt="">`:`<span class="pv" id="pv">${esc(f.emoji||(f.category==='drink'?'🥤':'🛒'))}</span>`;
     s.querySelector('#prm').classList.toggle('hidden',!f.image);
@@ -557,43 +608,43 @@ function productSheet(id){
   s.querySelector('#pu').onclick=e=>{const b=e.target.closest('button');if(b){f.unit=b.dataset.v;draw()}};
   s.querySelector('#pe').onclick=e=>{const b=e.target.closest('button');if(b){f.emoji=b.dataset.v;draw()}};
   s.querySelector('#pf').onchange=async e=>{const file=e.target.files[0];if(!file)return;
-    try{f.image=await resizeImage(file);f.imgChanged=true;draw()}catch(err){toast('Could not read that photo')}};
+    try{f.image=await resizeImage(file);f.imgChanged=true;draw()}catch(err){toast(T('badPhoto'))}};
   s.querySelector('#prm').onclick=()=>{f.image=null;f.imgChanged=true;draw()};
   const can=s.querySelector('#pcan');if(can)can.onclick=closeSheet;
   const save=async(again,btn)=>{
     f.name=s.querySelector('#pn').value.trim();f.hidden=s.querySelector('#ph').checked;
-    if(!f.name){s.querySelector('#pn').focus();return toast('Please type a name')}
+    if(!f.name){s.querySelector('#pn').focus();return toast(T('typeName'))}
     btn.disabled=true;
     const r=await arpc('fs_product_save',{p_id:p?p.id:null,p_name:f.name,p_category:f.category,p_unit:f.unit,
       p_emoji:f.emoji||(f.category==='drink'?'🥤':'🛒'),p_image:f.image,p_image_change:!p||f.imgChanged,p_hidden:f.hidden});
     btn.disabled=false;
     if(r.ok){
       if(f.image&&r.id)imgs[r.id]={v:-1,d:f.image};
-      cat=f.category;toast(p?'Saved':'Added “'+f.name+'”');await refresh();
+      cat=f.category;toast(p?T('saved'):T('added',f.name));await refresh();
       if(again)productSheet('new');else{closeSheet();render()}
     }
   };
   s.querySelector('#psave').onclick=e=>save(false,e.currentTarget);
   const more=s.querySelector('#pmore');if(more)more.onclick=e=>save(true,e.currentTarget);
   const del=s.querySelector('#pdel');
-  if(del)del.onclick=async()=>{if(await ask('Delete “'+p.name+'”? It will also leave the shopping list.','Delete',true)){const r=await arpc('fs_product_delete',{p_id:p.id});if(r.ok){toast('Deleted');await refresh();render()}}};
+  if(del)del.onclick=async()=>{if(await ask(T('delProduct',p.name),T('del'),true)){const r=await arpc('fs_product_delete',{p_id:p.id});if(r.ok){toast(T('deleted'));await refresh();render()}}};
   if(!p)setTimeout(()=>s.querySelector('#pn').focus(),250);
 }
 
 /* admin: family */
 function vAFamily(){
-  return `<button class="btn block" data-medit="new">➕ Add family member</button>
-    ${S.members.length?`<h3>Family (${S.members.length})</h3><div class="list">${S.members.map(m=>`<div class="row tap" data-medit="${esc(m.id)}"><span class="th">${esc(m.emoji)}</span><div class="bd"><div class="t">${esc(m.name)}</div></div><span class="muted">›</span></div>`).join('')}</div>`
-      :`<div class="empty"><div class="big">👪</div><p>Add everyone who will pick food and drinks.</p></div>`}
-    <p class="muted" style="margin:18px 4px;font-size:14px">Share this page's link with your family. They tap their name, pick what they want and press Send.</p>`;
+  return `<button class="btn block" data-medit="new">${T('addMember')}</button>
+    ${S.members.length?`<h3>${T('familyN',S.members.length)}</h3><div class="list">${S.members.map(m=>`<div class="row tap" data-medit="${esc(m.id)}"><span class="th">${esc(m.emoji)}</span><div class="bd"><div class="t">${esc(m.name)}</div></div><span class="muted">${LANG==='ar'?'‹':'›'}</span></div>`).join('')}</div>`
+      :`<div class="empty"><div class="big">👪</div><p>${T('addEveryone')}</p></div>`}
+    <p class="muted" style="margin:18px 4px;font-size:14px">${T('shareHint')}</p>`;
 }
 function memberSheet(id){
   const m=id==='new'?null:S.members.find(x=>x.id===id);
   const f={name:m?m.name:'',emoji:m?m.emoji:'🙂'};
-  const s=sheet(`<h2>${m?'Edit':'Add'} family member</h2>
-    <label class="fl" for="mn">Name</label><input class="inp" id="mn" maxlength="40" placeholder="e.g. Sara" value="${esc(f.name)}">
-    <label class="fl">Picture</label><div class="emos" id="me"></div>
-    <div class="two">${m?`<button class="btn danger" id="mdel">Delete</button>`:`<button class="btn ghost" id="mcan">Cancel</button>`}<button class="btn" id="msave">Save</button></div>`);
+  const s=sheet(`<h2>${m?T('editMember'):T('newMember')}</h2>
+    <label class="fl" for="mn">${T('name')}</label><input class="inp" id="mn" maxlength="40" placeholder="${esc(T('egSara'))}" value="${esc(f.name)}">
+    <label class="fl">${T('picture')}</label><div class="emos" id="me"></div>
+    <div class="two">${m?`<button class="btn danger" id="mdel">${T('del')}</button>`:`<button class="btn ghost" id="mcan">${T('cancel')}</button>`}<button class="btn" id="msave">${T('save')}</button></div>`);
   const draw=()=>s.querySelector('#me').innerHTML=FACE_EMO.map(e=>`<button data-v="${esc(e)}" class="${e===f.emoji?'on':''}">${esc(e)}</button>`).join('');
   draw();
   s.querySelector('#me').onclick=e=>{const b=e.target.closest('button');if(b){f.emoji=b.dataset.v;draw()}};
@@ -602,10 +653,10 @@ function memberSheet(id){
     f.name=s.querySelector('#mn').value.trim();if(!f.name)return s.querySelector('#mn').focus();
     const btn=e.currentTarget;btn.disabled=true;
     const r=await arpc('fs_member_save',{p_id:m?m.id:null,p_name:f.name,p_emoji:f.emoji});
-    if(r.ok){closeSheet();toast('Saved');await refresh();render()}else btn.disabled=false;
+    if(r.ok){closeSheet();toast(T('saved'));await refresh();render()}else btn.disabled=false;
   };
   const del=s.querySelector('#mdel');
-  if(del)del.onclick=async()=>{if(await ask('Remove '+m.name+' from the family list?','Remove',true)){const r=await arpc('fs_member_delete',{p_id:m.id});if(r.ok){toast('Removed');await refresh();render()}}};
+  if(del)del.onclick=async()=>{if(await ask(T('removeMember',m.name),T('remove'),true)){const r=await arpc('fs_member_delete',{p_id:m.id});if(r.ok){toast(T('removed'));await refresh();render()}}};
   if(!m)setTimeout(()=>s.querySelector('#mn').focus(),250);
 }
 
@@ -616,6 +667,7 @@ document.addEventListener('click',async e=>{
   const d=t.dataset;
   if(d.go){
     if(d.go==='admin')return openAdmin();
+    if(d.go==='lang'){LANG=LANG==='ar'?'en':'ar';LS.set('fs.lang',LANG);return render()}
     if(d.go==='exit'||d.go==='back')return go(meM()?'shop':'who');
     if(d.go==='who')return go('who');
     justSent=false;return go(d.go);
@@ -629,10 +681,10 @@ document.addEventListener('click',async e=>{
   if(d.other)return otherSheet();
   if(t.id==='qx'){q='';return render()}
   if(t.id==='send')return send(t);
-  if(t.id==='clear'){if(await ask('Finished shopping? This clears the whole list for everyone.','Clear list',true)){const r=await arpc('fs_clear',{});if(r.ok){toast('Fresh list ready ✨');await refresh();render()}}return}
-  if(d.cancel){const ids=d.cancel.split(',');if(!await ask('Remove your request?','Remove',true))return;
-    for(const id of ids)await rpc('fs_cancel',{p_member:me,p_id:id});ping();toast('Removed');await refresh();return render()}
-  if(d.rm){e.stopPropagation();if(await ask('Remove '+(d.name==='this note'?'this note':'“'+d.name+'”')+' from the list?','Remove',true)){const r=await arpc('fs_remove',{p_ids:d.rm.split(',')});if(r.ok){await refresh();render()}}return}
+  if(t.id==='clear'){if(await ask(T('finished'),T('clearList'),true)){const r=await arpc('fs_clear',{});if(r.ok){toast(T('freshList'));await refresh();render()}}return}
+  if(d.cancel){const ids=d.cancel.split(',');if(!await ask(T('removeYours'),T('remove'),true))return;
+    for(const id of ids)await rpc('fs_cancel',{p_member:me,p_id:id});ping();toast(T('removed'));await refresh();return render()}
+  if(d.rm){e.stopPropagation();if(await ask(d.name==='__note'?T('removeNote'):T('removeItem',d.name),T('remove'),true)){const r=await arpc('fs_remove',{p_ids:d.rm.split(',')});if(r.ok){await refresh();render()}}return}
   if(d.mark)return mark(d.mark.split(','),d.on==='1');
   if(d.edit)return productSheet(d.edit);
   if(d.medit)return memberSheet(d.medit);

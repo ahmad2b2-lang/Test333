@@ -1,5 +1,5 @@
 // Family Shop offline cache: network first, saved copy when offline.
-const C='fs-app-v1';
+const C='fs-app-v2';
 const FILES=['./','index.html','manifest.json','icon-192.png','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>Promise.all(FILES.map(f=>c.add(f).catch(()=>{})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('fs-app-')&&k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
