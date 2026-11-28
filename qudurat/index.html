@@ -184,6 +184,10 @@
   .fc .q{box-shadow:none;padding:0;background:transparent;width:100%}
   .fc table.try{font-size:16px}
   .tap-hint{font-size:13px;color:var(--faint);margin-top:22px}
+  .fc .qref{width:100%;margin-bottom:18px}
+  .fc .qref .q{background:#f4f4f1;padding:12px 14px;border-radius:14px}
+  .qlab{font-size:13px;color:var(--faint);margin-bottom:6px}
+  .fc .chosen{font-size:22px;font-weight:700;color:var(--bad);margin-bottom:6px}
   @keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.98)}}
   @keyframes flip{from{opacity:0;transform:rotateY(70deg)}}
 </style>
@@ -325,6 +329,7 @@ function qView(p,q,small){
   const inner=`<div class="stem">${q.stem}</div>`+(q.pair?`<div class="pair">${q.pair}</div>`:`<div class="vs">${q.a}<span class="or">مقابل</span>${q.b}</div>`);
   return fx(p,`<div class="q ${small?'small':''}">${inner}</div>`);
 }
+const qRef=(p,label='السؤال الذي جرّبته')=>`<div class="qref"><div class="qlab">${label}</div>${qView(p,p.tryQ,true)}</div>`;
 function choicesHTML(q){return `<div class="list">${q.choices.map((x,i)=>`<button class="opt" data-c="${i}"><span class="n">${L[i]}</span><span>${x}</span></button>`).join('')}</div>`;}
 function wireChoices(q,cb){
   const bs=[...app.querySelectorAll('.opt[data-c]')];
@@ -428,14 +433,14 @@ function lesson(){
   };
 
   if(sc.t==='try') quiz(p.tryQ,'جرّب بدون مساعدة',ok=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b><div class="why">${p.tryFb[ok?'ok':'bad']}</div></div>`);
-  else if(sc.t==='reveal') card(`<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div><div class="sm">${p.short}</div>`);
+  else if(sc.t==='reveal') card(`${qRef(p)}<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div><div class="sm">${p.short}</div>`);
   else if(sc.t==='spot') card(`<div class="lab">كيف تعرفه (${nAr(sc.i+1)} من ${nAr(p.spot.length)})</div><div class="mid" style="font-weight:500">${fx(p,p.spot[sc.i])}</div>`);
   else if(sc.t==='spotTip') card(`<div class="lab">نصيحة</div><div class="mid">${fx(p,p.spotTip)}</div>`);
   else if(sc.t==='trick') card(`<div class="lab">الطريقة: خطوة ${nAr(sc.i+1)} من ${nAr(p.trick.length)}</div><div class="mid" style="font-weight:500">${fx(p,p.trick[sc.i])}</div>`);
-  else if(sc.t==='demo') card(`<div class="lab">نطبّقها على سؤالك</div><div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`);
+  else if(sc.t==='demo') card(`${qRef(p,'نطبّق الطريقة على هذا السؤال')}<div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`);
   else if(sc.t==='relations') card(`<div class="lab">علاقات تتكرر في الاختبار</div><div class="mid" style="font-weight:500;line-height:2.1">${p.relations.join('<br>')}</div>`);
   else if(sc.t==='trap'){const t=p.traps[sc.i];
-    card(`<div class="lab">لماذا يخدعك الخيار (${L[t.l]})؟</div><div class="big" style="font-size:24px">${t.t}</div><div class="sm" style="font-size:17px;color:var(--ink)">${fx(p,t.w)}</div>`);}
+    card(`${qRef(p)}<div class="lab">خيار خاطئ (${L[t.l]})</div><div class="chosen">${t.t}</div><div class="sm" style="font-size:17px;color:var(--ink);margin-top:4px">${fx(p,t.w)}</div>`);}
   else if(sc.t==='trapTip') card(`<div class="lab">القاعدة</div><div class="mid">${fx(p,p.trapTip)}</div>`);
   else if(sc.t==='prac'){const q=p.practice[sc.i];
     quiz(q,`سؤال مشابه (${nAr(sc.i+1)} من ${nAr(p.practice.length)})`,(ok)=>{ if(ok&&!view.done) view.right=(view.right||0)+1; view.done=true; S.resume[p.id]=Object.assign({},view); save();
