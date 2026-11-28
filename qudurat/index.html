@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="light only">
 <meta name="theme-color" content="#f5f6fa">
-<title>محقق القدرات</title>
+<title>تحليل القدرات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -34,21 +34,23 @@
   .bar .title{flex:1;font-weight:700;font-size:17px}
   .icon-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:20px;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.05);flex:none}
   .icon-btn:active{transform:scale(.94)}
-  .rank{display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--card);border-radius:14px;padding:2px 12px;min-height:44px;box-shadow:0 2px 8px rgba(0,0,0,.05);font-weight:700;font-size:13px;line-height:1.35;white-space:nowrap}
-  .rank small{color:var(--warn);font-size:12px}
+  .rank{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px 12px;min-height:44px;font-weight:700;font-size:13px;line-height:1.35;white-space:nowrap}
+  .rank small{color:var(--muted);font-size:12px;font-weight:600}
+  .rank small b{color:var(--warn)}
 
-  .hero{background:linear-gradient(135deg,#2f6fe4,#8a4fd8);color:#fff;border-radius:22px;padding:18px;margin:6px 0 16px}
-  .hero b{font-size:18px;display:block;margin-bottom:4px}
-  .hero p{margin:0;opacity:.92;font-size:15px}
-  .hero .meter{margin-top:12px;height:8px;background:rgba(255,255,255,.3);border-radius:8px;overflow:hidden}
-  .hero .meter i{display:block;height:100%;background:#fff;border-radius:8px}
-  .hero small{display:block;margin-top:6px;opacity:.9}
+  .hero{background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--ink);border-radius:16px;padding:16px;margin:6px 0 16px}
+  .hero .eyebrow{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+  .hero b{font-size:18px;display:block;margin:2px 0 4px;line-height:1.5}
+  .hero p{margin:0;color:var(--muted);font-size:15px}
+  .hero .meter{margin-top:12px;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+  .hero .meter i{display:block;height:100%;background:var(--ink);border-radius:6px}
+  .hero small{display:block;margin-top:6px;color:var(--muted)}
 
   h2.sec{font-size:15px;color:var(--muted);margin:14px 4px 8px;font-weight:600}
   .pblock{background:var(--card);border-radius:20px;box-shadow:0 3px 14px rgba(0,0,0,.05);margin-bottom:12px;overflow:hidden}
   .pcard{display:flex;align-items:center;gap:14px;width:100%;text-align:right;padding:14px;min-height:80px}
   .pcard:active{background:#fafbfd}
-  .pcard .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:26px;flex:none}
+  .pcard .ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:15px;font-weight:700;flex:none}
   .pcard .t{font-weight:700;font-size:17px}
   .pcard .d{color:var(--muted);font-size:14px;line-height:1.5}
   .pcard .st{margin-inline-start:auto;font-size:12px;font-weight:700;border-radius:10px;padding:4px 9px;flex:none}
@@ -81,51 +83,51 @@
   .footer{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
 
   /* case file */
-  .file{position:relative;background:var(--paper);border:1.5px solid var(--paperLine);border-radius:18px;padding:30px 14px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(120,100,40,.07)}
-  .file::before{content:attr(data-label);position:absolute;top:-1.5px;inset-inline-start:16px;background:var(--paperLine);color:#7a6420;font-size:12px;font-weight:700;padding:2px 12px;border-radius:0 0 10px 10px}
-  .file.compact{padding:26px 12px 10px;margin-bottom:9px}
+  .file{position:relative;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:14px;padding:32px 14px 14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .file::before{content:attr(data-label);position:absolute;top:9px;inset-inline-start:14px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.3px}
+  .file.compact{padding:30px 12px 10px;margin-bottom:9px}
   .file.compact .compare .v{font-size:17px}
   .file.compact .pair{font-size:21px;padding:6px}
   .file.pick{width:100%;text-align:right;display:block;font:inherit;cursor:pointer}
   .file.pick:active{transform:scale(.985)}
   .file.right{border-color:var(--ok);background:#f4fbf6}
   .file.wrong{border-color:var(--bad);background:#fdf5f5}
-  .ftag{position:absolute;top:4px;inset-inline-end:10px;font-size:12px;font-weight:700;border-radius:8px;padding:1px 8px;background:var(--accentSoft);color:var(--accent)}
+  .ftag{position:absolute;top:7px;inset-inline-end:10px;font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;background:var(--accentSoft);color:var(--accent)}
   .stem{font-size:16px;margin-bottom:10px;line-height:2.1}
   .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .compare div{background:rgba(255,255,255,.75);border:1px solid var(--paperLine);border-radius:14px;padding:8px;text-align:center}
+  .compare div{background:#f7f8fb;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
   .compare small{display:block;color:var(--muted);font-size:12px}
   .compare .v{font-size:20px;font-weight:700;line-height:2}
-  .pair{font-size:27px;font-weight:700;text-align:center;padding:10px;background:rgba(255,255,255,.75);border:1px solid var(--paperLine);border-radius:14px;word-spacing:4px}
-  .skel{font-size:18px;font-weight:700;text-align:center;color:#6b5a1d;padding:16px 6px;background:repeating-linear-gradient(45deg,#fff8de,#fff8de 10px,#fffbea 10px,#fffbea 20px);border-radius:12px;line-height:1.9}
+  .pair{font-size:27px;font-weight:700;text-align:center;padding:10px;background:#f7f8fb;border:1px solid var(--line);border-radius:12px;word-spacing:4px}
+  .skel{font-size:17px;font-weight:700;text-align:center;color:var(--ink);padding:16px 6px;background:#f3f5f9;border:1px dashed #b9c0cf;border-radius:12px;line-height:1.9}
   .tok{border-radius:6px;padding:0 3px;transition:background .2s}
-  .tok.tap{border-bottom:2px dotted #c4b88f;cursor:pointer}
-  .tok.hit{background:linear-gradient(transparent 30%,var(--hl) 30%,var(--hl) 92%,transparent 92%);border-bottom-color:transparent}
+  .tok.tap{border-bottom:1.5px dashed #b9c0cf;cursor:pointer}
+  .tok.hit{background:var(--accentSoft);box-shadow:inset 0 -2px 0 var(--accent);border-bottom-color:transparent}
   .tok.missed{background:rgba(214,69,69,.13);outline:1.5px dashed var(--bad);outline-offset:1px}
   .tok.shake{animation:shake .4s}
   .tok.pulse{animation:pulse .8s 4}
   @keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
-  @keyframes pulse{50%{background:var(--hl);box-shadow:0 0 0 4px rgba(255,228,92,.5)}}
-  .stamp{position:absolute;top:10px;inset-inline-end:12px;border:3px solid var(--bad);color:var(--bad);font-weight:800;font-size:15px;padding:2px 10px;border-radius:8px;transform:rotate(-12deg);background:rgba(255,255,255,.7);animation:stamp .45s cubic-bezier(.3,1.6,.6,1)}
+  @keyframes pulse{50%{background:var(--accentSoft);box-shadow:0 0 0 3px var(--accent)}}
+  .stamp{position:absolute;top:7px;inset-inline-end:10px;border:1.5px solid var(--muted);color:var(--muted);font-weight:700;font-size:12px;padding:0 10px;border-radius:20px;background:#fff;animation:fade .3s}
   .stamp.ok{border-color:var(--ok);color:var(--ok)}
-  @keyframes stamp{from{transform:rotate(-12deg) scale(2.2);opacity:0}}
 
   .counter{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:10px}
   .counter b{font-size:15px}
   .dots{display:flex;gap:5px}
-  .dots i{width:14px;height:14px;border-radius:50%;border:2px solid #d9cf9f;background:#fff}
-  .dots i.on{background:var(--hl);border-color:#e3c320}
+  .dots i{width:12px;height:12px;border-radius:50%;border:2px solid var(--line);background:#fff}
+  .dots i.on{background:var(--accent);border-color:var(--accent)}
   .notes{background:var(--card);border-radius:16px;padding:10px 14px;box-shadow:0 3px 14px rgba(0,0,0,.05)}
   .notes .h{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:2px}
   .note{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px;animation:pop .25s}
   .note:last-child{border-bottom:0}
-  .note .w{font-weight:700;background:linear-gradient(transparent 30%,var(--hl) 30%,var(--hl) 92%,transparent 92%);padding:0 3px;flex:none;align-self:flex-start}
+  .note .w{font-weight:700;background:var(--accentSoft);box-shadow:inset 0 -2px 0 var(--accent);padding:0 4px;border-radius:4px;flex:none;align-self:flex-start}
   .note.empty{color:var(--muted)}
 
   .famgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}
   .fam{display:flex;align-items:center;gap:8px;text-align:right;min-height:58px;padding:8px 10px;border-radius:15px;background:var(--card);border:2px solid var(--line);font-weight:600;font-size:15px;line-height:1.35}
   .fam:active{transform:scale(.97)}
-  .fam .i{font-size:20px;flex:none}
+  .fam .i,.fi{width:26px;height:26px;border-radius:7px;display:inline-grid;place-items:center;background:var(--accentSoft);color:var(--accent);font-size:13px;font-weight:700;flex:none}
+  .fi{margin-inline-end:6px;vertical-align:1px;width:22px;height:22px;font-size:12px}
   .fam.ok{border-color:var(--ok);background:var(--okSoft)}
   .fam.bad{border-color:var(--bad);background:var(--badSoft)}
   .fam.dim{opacity:.5}
@@ -160,15 +162,16 @@
   .chain{display:flex;flex-direction:column;align-items:stretch;gap:0}
   .link{background:var(--card);border-radius:15px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
   .link small{display:block;color:var(--muted);font-size:12px;font-weight:700}
-  .arrow{text-align:center;color:var(--muted);font-size:18px;line-height:1.6}
-  .cl{display:inline-block;margin:3px 0 0 6px;font-weight:700;padding:0 4px;background:linear-gradient(transparent 30%,var(--hl) 30%,var(--hl) 92%,transparent 92%)}
-  .cl.miss{background:none;color:var(--bad);text-decoration:line-through dashed}
+  .arrow{width:2px;height:14px;background:var(--line);margin:0 auto}
+  .cl{display:inline-block;margin:3px 0 0 6px;font-weight:700;padding:0 4px;border-radius:4px;background:var(--accentSoft);box-shadow:inset 0 -2px 0 var(--accent)}
+  .cl.miss{background:none;box-shadow:none;color:var(--bad);text-decoration:line-through}
   .stars{display:flex;justify-content:center;gap:10px;margin:14px 0 4px}
   .starbox{flex:1;background:var(--card);border-radius:14px;padding:8px 4px;text-align:center;font-size:12px;color:var(--muted);box-shadow:0 2px 10px rgba(0,0,0,.05);line-height:1.4}
-  .starbox b{display:block;font-size:24px;filter:grayscale(1);opacity:.35}
-  .starbox.on b{filter:none;opacity:1}
+  .starbox b{display:block;font-size:20px;color:#d5d9e2}
+  .starbox.on b{color:var(--warn)}
+  .starbox.num b{color:var(--ink);font-size:20px}
 
-  .famintro .big{font-size:42px;line-height:1}
+  .famintro .big{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accentSoft);color:var(--accent);font-size:20px;font-weight:700}
   .famintro h4{margin:6px 0 2px;font-size:20px}
   .famintro .lbl{font-size:13px;font-weight:700;color:var(--accent);margin-top:12px}
   .famintro ul{margin:4px 0 0;padding-inline-start:20px}
@@ -178,23 +181,23 @@
 
   .flashbar{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin-bottom:10px}
   .flashbar i{display:block;height:100%;background:var(--accent);width:100%}
-  .hidden-case{text-align:center;padding:30px 10px;color:var(--muted);background:var(--paper);border:1.5px dashed var(--paperLine);border-radius:18px;margin-bottom:12px}
-  .hidden-case div{font-size:40px}
+  .hidden-case{text-align:center;padding:30px 10px;color:var(--muted);background:#f3f5f9;border:1px dashed #b9c0cf;border-radius:14px;margin-bottom:12px}
+  .hidden-case div{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:2px}
 
-  .pc{background:var(--paper);border:1.5px solid var(--paperLine);border-radius:22px;overflow:hidden;margin-bottom:14px;position:relative}
+  .pc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px;position:relative}
   .pc .hd{background:var(--accent);color:#fff;padding:14px 16px}
   .pc .hd small{opacity:.85}
   .pc .hd b{display:block;font-size:20px}
-  .pc .fr{padding:11px 16px;border-bottom:1px solid var(--paperLine);font-size:15px}
+  .pc .fr{padding:11px 16px;border-bottom:1px solid var(--line);font-size:15px}
   .pc .fr:last-of-type{border-bottom:0}
   .pc .fr b{font-size:16px}
   .pc .fr div{color:var(--muted);font-size:14px}
   .pc .fr span.k{color:var(--accent);font-weight:700}
   .pc .gold{margin:4px 16px 14px;background:var(--warnSoft);border-radius:12px;padding:10px 12px;font-weight:700;color:#5a3608;font-size:15px}
-  .pc .stamp{top:62px}
+  .pc .stamp{top:14px;inset-inline-end:14px;border-color:rgba(255,255,255,.8);color:#fff;background:transparent}
 
   .empty{text-align:center;color:var(--muted);padding:40px 16px}
-  .empty div{font-size:46px}
+  .empty div{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
   .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 64px);background:#1c2233;color:#fff;border-radius:14px;padding:10px 16px;font-size:15px;max-width:min(92vw,480px);z-index:20;animation:pop .2s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
   .toast.ok{background:var(--ok)}
 
@@ -250,31 +253,31 @@ const pick=a=>a[Math.random()*a.length|0];
 
 /* ---------- patterns and their families ---------- */
 const PAT={
-  cmp:{id:'cmp',kind:'math',icon:'⚖️',name:'المقارنات الكمية',short:'من الأكبر؟ القيمة الأولى أم الثانية؟',fams:['var','nums','swap','neg'],big:'v1',
+  cmp:{id:'cmp',kind:'math',icon:'كمي',name:'المقارنات الكمية',short:'من الأكبر؟ القيمة الأولى أم الثانية؟',fams:['var','nums','swap','neg'],big:'v1',
        gold:'البصمة ← الفصيلة ← الطريقة ← الجواب. لا تبدأ الحساب قبل أن تعرف الفصيلة.'},
-  ana:{id:'ana',kind:'verb',icon:'🔗',name:'التناظر اللفظي',short:'كلمتان بينهما علاقة. ما نوعها؟',fams:['part','place','cause','stage','tool','opp'],big:'st1',
+  ana:{id:'ana',kind:'verb',icon:'لفظي',name:'التناظر اللفظي',short:'كلمتان بينهما علاقة. ما نوعها؟',fams:['part','place','cause','stage','tool','opp'],big:'st1',
        gold:'سمِّ العلاقة بجملة قبل أن تنظر إلى الخيارات.'}
 };
 const FAM={
-  var:{p:'cmp',icon:'🎭',name:'المتغيّر المراوغ',print:['يوجد حرف مثل '+m('x')+' أو '+m('y'),'قيمته غير محددة (أو لها شرط فقط)'],
+  var:{p:'cmp',icon:'١',name:'المتغيّر الحر',print:['يوجد حرف مثل '+m('x')+' أو '+m('y'),'قيمته غير محددة (أو لها شرط فقط)'],
        method:'جرّب قيمًا مختلفة: '+m('0')+'، '+m('1')+'، '+m('-1')+'، '+m('½')+'، '+m('10')+'. إذا تغيّر الفائز ← (د).',skel:'قارن: [عبارة فيها حرف] مع [عبارة أخرى]'},
-  nums:{p:'cmp',icon:'🔢',name:'أعداد صريحة',print:['لا يوجد أي حرف','أرقام وعمليات فقط'],
+  nums:{p:'cmp',icon:'٢',name:'أعداد صريحة',print:['لا يوجد أي حرف','أرقام وعمليات فقط'],
        method:'احسب أو قرّب بسرعة. الجواب <b>لا يمكن</b> أن يكون (د).',skel:'قارن: [أرقام وعمليات] مع [رقم]'},
-  swap:{p:'cmp',icon:'🔄',name:'النسب المتبادلة',print:['«٪ من» في الطرفين','نفس العددين تبادلا المكان'],
+  swap:{p:'cmp',icon:'٣',name:'النسب المتبادلة',print:['«٪ من» في الطرفين','نفس العددين تبادلا المكان'],
        method:m('a%')+' من '+m('b')+' = '+m('b%')+' من '+m('a')+' دائمًا ← متساويتان (ج) بدون حساب.',skel:'قارن: [■٪ من ▲] مع [▲٪ من ■]'},
-  neg:{p:'cmp',icon:'➖',name:'قوى السالب',print:['عدد سالب داخل قوس','وعليه أس (قوة)'],
+  neg:{p:'cmp',icon:'٤',name:'قوى السالب',print:['عدد سالب داخل قوس','وعليه أس (قوة)'],
        method:'الأس الزوجي يجعله موجبًا، والأس الفردي يبقيه سالبًا. والموجب أكبر.',skel:'قارن: [(سالب) أس زوجي] مع [(سالب) أس فردي]'},
-  part:{p:'ana',icon:'🧩',name:'جزء وكل',print:['الأول قطعة من الثاني','جملته: «الأول جزء من الثاني»'],
+  part:{p:'ana',icon:'١',name:'جزء وكل',print:['الأول قطعة من الثاني','جملته: «الأول جزء من الثاني»'],
        method:'قل: «… جزء من …» وجرّبها على كل خيار.',skel:'[قطعة] : [الشيء الكامل]'},
-  place:{p:'ana',icon:'🏥',name:'عامل ومكان',print:['الأول شخص له مهنة','الثاني مكان عمله'],
+  place:{p:'ana',icon:'٢',name:'عامل ومكان',print:['الأول شخص له مهنة','الثاني مكان عمله'],
        method:'قل: «… يعمل في …» وجرّبها على كل خيار.',skel:'[شخص يعمل] : [مكان عمله]'},
-  cause:{p:'ana',icon:'💥',name:'سبب ونتيجة',print:['الأول تصرّف أو حدث','الثاني ما ينتج عنه'],
+  cause:{p:'ana',icon:'٣',name:'سبب ونتيجة',print:['الأول تصرّف أو حدث','الثاني ما ينتج عنه'],
        method:'قل: «… يؤدي إلى …» وانتبه للاتجاه.',skel:'[تصرّف أو حدث] : [ما ينتج عنه]'},
-  stage:{p:'ana',icon:'🌱',name:'مرحلة وتطوّر',print:['الأول كائن في بدايته','الثاني نفس الكائن بعد أن يكبر'],
+  stage:{p:'ana',icon:'٤',name:'مرحلة وتطوّر',print:['الأول كائن في بدايته','الثاني نفس الكائن بعد أن يكبر'],
        method:'قل: «… يكبر فيصبح …» وانتبه للاتجاه.',skel:'[كائن صغير] : [نفس الكائن كبيرًا]'},
-  tool:{p:'ana',icon:'✂️',name:'أداة واستخدام',print:['الأول أداة أو شيء','الثاني الفعل الذي يقوم به'],
+  tool:{p:'ana',icon:'٥',name:'أداة واستخدام',print:['الأول أداة أو شيء','الثاني الفعل الذي يقوم به'],
        method:'قل: «… يُستخدم لـ…» وجرّبها على كل خيار.',skel:'[أداة] : [ما تفعله]'},
-  opp:{p:'ana',icon:'☯️',name:'تضاد',print:['كلمتان من نفس النوع','معناهما معاكس'],
+  opp:{p:'ana',icon:'٦',name:'تضاد',print:['كلمتان من نفس النوع','معناهما معاكس'],
        method:'قل: «… عكس …» وتأكد أن الكلمتين من نفس النوع.',skel:'[صفة أو شيء] : [عكسه تمامًا]'}
 };
 
@@ -334,6 +337,7 @@ const CASES=[
 ];
 const CASE=Object.fromEntries(CASES.map(c=>[c.id,c]));
 const patOf=c=>PAT[FAM[c.f].p];
+const badge=f=>`<span class="fi">${FAM[f].icon}</span>`;
 const casesOf=f=>CASES.filter(c=>c.f===f);
 function toks(c){
   if(c._t) return c._t;
@@ -361,9 +365,9 @@ function toast(html,cls=''){
 }
 function rank(){
   const s=S.stars||0;
-  if(s>=40) return {name:'محقق خبير',icon:'🕵️',next:null,from:40};
-  if(s>=15) return {name:'محقق',icon:'🔎',next:40,from:15};
-  return {name:'محقق مبتدئ',icon:'🔍',next:15,from:0};
+  if(s>=40) return {name:'خبير أنماط',lvl:3,next:null,from:40};
+  if(s>=15) return {name:'محلل',lvl:2,next:40,from:15};
+  return {name:'ملاحظ',lvl:1,next:15,from:0};
 }
 function addStars(n){S.stars=(S.stars||0)+n;save();}
 function rec(f,ok,ms){const r=S.fam[f]||(S.fam[f]={n:0,ok:0,ms:0}); r.n++; if(ok)r.ok++; r.ms+=Math.min(ms,60000); save();}
@@ -386,7 +390,7 @@ function caseCard(c,o={}){
   }
   const tag=o.tag?`<span class="ftag">${o.tag}</span>`:'';
   const el=o.button?'button':'div';
-  const html=`<${el} class="file ${o.compact?'compact':''} ${o.button?'pick':''} ${o.cls||''}" data-label="${o.label||'ملف القضية'}" ${o.button?`data-pick="${o.button}"`:''}>${tag}${o.stamp||''}${inner}</${el}>`;
+  const html=`<${el} class="file ${o.compact?'compact':''} ${o.button?'pick':''} ${o.cls||''}" data-label="${o.label||'سؤال'}" ${o.button?`data-pick="${o.button}"`:''}>${tag}${o.stamp||''}${inner}</${el}>`;
   return fx(p,html);
 }
 function famButtons(p){
@@ -403,8 +407,8 @@ function wireFam(root,right,cb){
 }
 function famFeedback(p,ok,picked,right,extra=''){
   const R=FAM[right];
-  if(ok) return `<div class="fb ok"><b>أحسنت، إنها «${R.name}» ✓</b>البصمة: ${fx(p,R.print.join('، '))}.${extra}</div>`;
-  return `<div class="fb bad"><b>ليست «${FAM[picked].name}» ✗</b>هي «${R.name}». البصمة التي تكشفها: ${fx(p,R.print.join('، '))}.${extra}</div>`;
+  if(ok) return `<div class="fb ok"><b>صحيح: «${R.name}»</b>البصمة: ${fx(p,R.print.join('، '))}.${extra}</div>`;
+  return `<div class="fb bad"><b>ليست «${FAM[picked].name}»</b>الصحيح «${R.name}». البصمة التي تكشفها: ${fx(p,R.print.join('، '))}.${extra}</div>`;
 }
 
 function render(){
@@ -420,29 +424,29 @@ function home(){
   const pct=r.next?Math.round(((S.stars||0)-r.from)/(r.next-r.from)*100):100;
   const meter=f=>{const s=S.fam[f]; const acc=s&&s.n?Math.round(s.ok/s.n*100):0;
     const col=!s||!s.n?'var(--line)':acc>=80?'var(--ok)':acc>=50?'var(--warn)':'var(--bad)';
-    return `<div class="fm"><div class="n">${FAM[f].icon} ${FAM[f].name}</div><div class="b"><i style="width:${acc}%;background:${col}"></i></div>
+    return `<div class="fm"><div class="n">${badge(f)}${FAM[f].name}</div><div class="b"><i style="width:${acc}%;background:${col}"></i></div>
       <small>${s&&s.n?`${nAr(acc)}٪ · ${nAr((s.ms/s.n/1000).toFixed(0))} ث`:'لم تُختبر بعد'}</small></div>`;};
   const block=p=>`<div class="pblock">
       <button class="pcard" data-open="${p.id}">
         <div class="ic" style="background:${p.kind==='math'?'var(--mathSoft)':'var(--verbSoft)'}">${p.icon}</div>
         <div><div class="t">${p.name}</div><div class="d">${p.short}</div></div>
-        <span class="st ${S.learned[p.id]?'done':'todo'}">${S.learned[p.id]?'الملف مغلق ✓':'قضية جديدة'}</span>
+        <span class="st ${S.learned[p.id]?'done':'todo'}">${S.learned[p.id]?'مكتمل':'جديد'}</span>
       </button>
-      <div class="mlabel">ذكاء الأنماط: سرعة ودقة التعرّف على كل فصيلة</div>
+      <div class="mlabel">دقة وسرعة التعرّف على كل فصيلة</div>
       <div class="meters">${p.fams.map(meter).join('')}</div></div>`;
   app.innerHTML=`
-    <div class="bar"><h1>محقق القدرات</h1>
-      <div class="rank"><span>${r.icon} ${r.name}</span><small>⭐ ${nAr(S.stars||0)}</small></div>
-      <button class="icon-btn" id="set" aria-label="الإعدادات">⚙️</button></div>
-    <div class="hero"><b>كل سؤال قضية. واللغز الحقيقي: ما النمط؟</b>
-      <p>اجمع الأدلة من السؤال، تعرّف على فصيلته، ودع النمط يحلّ عنك.</p>
+    <div class="bar"><h1>تحليل القدرات</h1>
+      <div class="rank"><span>المستوى ${nAr(r.lvl)} · ${r.name}</span><small><b>★</b> ${nAr(S.stars||0)} نقطة</small></div>
+      <button class="icon-btn" id="set" aria-label="الإعدادات"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="#fff"/><circle cx="15" cy="17" r="2.2" fill="#fff"/></svg></button></div>
+    <div class="hero"><div class="eyebrow">منهج التحليل</div><b>كل سؤال يكشف نوعه قبل أن تحلّه.</b>
+      <p>استخرج الأدلة من نص السؤال، حدّد فصيلته، ثم طبّق طريقتها. الحل يصبح إجراءً لا تخمينًا.</p>
       <div class="meter"><i style="width:${pct}%"></i></div>
-      <small>${r.next?`${nAr(r.next-(S.stars||0))} نجمة حتى رتبة «${r.next===15?'محقق':'محقق خبير'}»`:'وصلت لأعلى رتبة 🎉'}</small></div>
+      <small>${r.next?`${nAr(r.next-(S.stars||0))} نقطة للمستوى ${nAr(r.lvl+1)}`:'أعلى مستوى'}</small></div>
     <h2 class="sec">الكمي</h2>${block(PAT.cmp)}
     <h2 class="sec">اللفظي</h2>${block(PAT.ana)}
     <div class="footer">
-      <button class="wide-btn primary" id="lineup">🚨 الطابور المختلط: تعرّف على النمط بسرعة</button>
-      <button class="wide-btn ghost" id="myfiles">🗂️ ملفاتي المغلقة</button></div>`;
+      <button class="wide-btn primary" id="lineup">اختبار التعرّف المختلط</button>
+      <button class="wide-btn ghost" id="myfiles">الملخصات المحفوظة</button></div>`;
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go({name:'lesson',pid:b.dataset.open,step:0,fi:0}));
   document.getElementById('lineup').onclick=startLineup;
   document.getElementById('myfiles').onclick=()=>go({name:'files'});
@@ -473,7 +477,7 @@ const FLASH_T=[7,6,5];
 function lesson(){
   const p=PAT[view.pid]; setAccent(p.kind);
   const st=view.step, c=CASE[p.big];
-  const top=`<div class="bar"><button class="icon-btn" id="x" aria-label="الرئيسية">✕</button><div class="title">${p.icon} ${p.name}</div></div>
+  const top=`<div class="bar"><button class="icon-btn" id="x" aria-label="الرئيسية">✕</button><div class="title">${p.name}</div></div>
     <div class="steps">${Array.from({length:9},(_,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>`;
   let html='', wire=()=>{};
   const nextBtn=(label,dis)=>`<button class="wide-btn primary" id="next" ${dis?'disabled':''}>${label}</button>`;
@@ -481,15 +485,15 @@ function lesson(){
 
   if(st===0){
     const fi=view.fi, f=p.fams[fi], F=FAM[f], ex=casesOf(f).find(x=>x.id!==p.big)||casesOf(f)[0];
-    html=`<span class="kicker">تعرّف على المشتبه بهم</span><h3>فصائل «${p.name}»</h3>
+    html=`<span class="kicker">الفصائل · ${nAr(view.fi+1)} من ${nAr(p.fams.length)}</span><h3>فصائل «${p.name}»</h3>
       <p class="lead">كل سؤال من هذا النمط ينتمي لواحدة من ${nAr(p.fams.length)} فصائل. لكل فصيلة بصمة تكشفها.</p>
       <div class="pager">${p.fams.map((_,i)=>`<i class="${i===fi?'on':''}"></i>`).join('')}</div>
       <div class="card famintro"><div class="big">${F.icon}</div><h4>${F.name}</h4>
-        <div class="lbl">🔎 البصمة</div><ul>${F.print.map(x=>`<li>${fx(p,x)}</li>`).join('')}</ul>
-        <div class="lbl">🛠️ الطريقة</div><div>${fx(p,F.method)}</div>
-        <div class="lbl">📁 مثال (الأدلة مظلّلة)</div></div>
+        <div class="lbl">البصمة</div><ul>${F.print.map(x=>`<li>${fx(p,x)}</li>`).join('')}</ul>
+        <div class="lbl">الطريقة</div><div>${fx(p,F.method)}</div>
+        <div class="lbl">مثال (الأدلة محدّدة)</div></div>
       ${caseCard(ex,{reveal:'hit',compact:true,label:'مثال'})}
-      <div class="footer">${nextBtn(fi<p.fams.length-1?'الفصيلة التالية':'افتح القضية الكبرى')}
+      <div class="footer">${nextBtn(fi<p.fams.length-1?'الفصيلة التالية':'ابدأ التحليل')}
         ${fi>0?'<button class="wide-btn ghost" id="prev">الفصيلة السابقة</button>':''}</div>`;
     wire=()=>{
       document.getElementById('next').onclick=()=>{if(fi<p.fams.length-1)view.fi++; else Object.assign(view,{step:1,found:[],hint:false}); render();scrollTo(0,0);};
@@ -498,37 +502,37 @@ function lesson(){
   }
   else if(st===1){
     const cl=clueIdx(c), found=view.found;
-    html=`<span class="kicker">القضية الكبرى · ١ جمع الأدلة</span><h3>اقرأ كمحقق</h3>
-      <p class="lead">اضغط على الكلمات التي تعتقد أنها أدلة. احذر: بعض الكلمات تبدو مهمة وليست كذلك.</p>
-      <div class="counter"><b>وجدت ${nAr(found.length)} من ${nAr(cl.length)} أدلة</b>
+    html=`<span class="kicker">التحليل · ١ استخراج الأدلة</span><h3>ما الذي يكشفه نص السؤال؟</h3>
+      <p class="lead">حدّد الكلمات التي تدل على نوع السؤال. بعض الكلمات تبدو مهمة لكنها لا تميّز شيئًا.</p>
+      <div class="counter"><b>الأدلة: ${nAr(found.length)} من ${nAr(cl.length)}</b>
         <div class="dots">${cl.map((_,i)=>`<i class="${i<found.length?'on':''}"></i>`).join('')}</div></div>
-      ${caseCard(c,{tap:true,found,label:'ملف القضية رقم ٠٠١'})}
-      <div class="notes"><div class="h">📝 ملاحظات المحقق</div>
-        ${found.length?found.map(i=>{const t=toks(c)[i];return `<div class="note"><span class="w">${fx(p,t.t)}</span><span>${fx(p,t.n)}</span></div>`;}).join(''):'<div class="note empty">لم تجد أدلة بعد.</div>'}</div>
+      ${caseCard(c,{tap:true,found,label:'السؤال ٠٠١'})}
+      <div class="notes"><div class="h">سجل الأدلة</div>
+        ${found.length?found.map(i=>{const t=toks(c)[i];return `<div class="note"><span class="w">${fx(p,t.t)}</span><span>${fx(p,t.n)}</span></div>`;}).join(''):'<div class="note empty">لم تُحدَّد أدلة بعد.</div>'}</div>
       <div class="footer">
-        <button class="small-btn" id="hint" ${view.hint||found.length===cl.length?'disabled':''} style="align-self:center">🔍 عدسة المساعدة (${view.hint?'استُخدمت':'مرة واحدة'})</button>
-        ${nextBtn(found.length===cl.length?'وجدت كل الأدلة! سمِّ الفصيلة':`تابع إلى تسمية الفصيلة (${nAr(found.length)}/${nAr(cl.length)})`,found.length===0)}</div>`;
+        <button class="small-btn" id="hint" ${view.hint||found.length===cl.length?'disabled':''} style="align-self:center">تلميح (${view.hint?'استُخدم':'مرة واحدة'})</button>
+        ${nextBtn(found.length===cl.length?'اكتملت الأدلة: حدّد الفصيلة':`تابع لتحديد الفصيلة (${nAr(found.length)} من ${nAr(cl.length)})`,found.length===0)}</div>`;
     wire=()=>{
       app.querySelectorAll('.tok.tap').forEach(el=>el.onclick=()=>{
         const i=+el.dataset.t, t=toks(c)[i];
         if(t.k==='c'){ if(!found.includes(i)){found.push(i); render();} }
         else{ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
-          toast(t.k==='d'?`ليس دليلًا: ${t.n}`:'ليس دليلًا. ابحث عن كلمة تكشف نوع السؤال.'); }
+          toast(t.k==='d'?`ليست دليلًا: ${t.n}`:'ليست دليلًا: لا تميّز نوع السؤال.'); }
       });
       document.getElementById('hint').onclick=()=>{
         view.hint=true; const miss=cl.find(i=>!found.includes(i)); render();
         const el=app.querySelector(`[data-t="${miss}"]`); if(el){el.classList.add('pulse');}
-        toast('🔍 انظر إلى الكلمة المضيئة');
+        toast('التلميح: الكلمة المحدّدة دليل لم تلتقطه');
       };
       document.getElementById('next').onclick=()=>{view.step=2;view.nameOk=null;render();scrollTo(0,0);};
     };
   }
   else if(st===2){
-    html=`<span class="kicker">القضية الكبرى · ٢ سمِّ الفصيلة</span><h3>من أي فصيلة هذه القضية؟</h3>
-      <p class="lead">هذه أهم خطوة: استخدم أدلتك. لا تحلّ السؤال بعد.</p>
-      ${caseCard(c,{found:view.found,label:'ملف القضية رقم ٠٠١'})}
+    html=`<span class="kicker">التحليل · ٢ تحديد الفصيلة</span><h3>إلى أي فصيلة ينتمي السؤال؟</h3>
+      <p class="lead">أهم خطوة. اعتمد على الأدلة فقط، ولا تبدأ الحل بعد.</p>
+      ${caseCard(c,{found:view.found,label:'السؤال ٠٠١'})}
       ${famButtons(p)}<div id="fb"></div>
-      <div class="footer">${nextBtn('دع النمط يعمل',true)}</div>`;
+      <div class="footer">${nextBtn('طبّق طريقة الفصيلة',true)}</div>`;
     wire=()=>{
       wireFam(app,c.f,(ok,f,ms)=>{view.nameOk=ok;view.nameMs=ms;rec(c.f,ok,ms);
         document.getElementById('fb').innerHTML=famFeedback(p,ok,f,c.f); enableNext();});
@@ -537,21 +541,21 @@ function lesson(){
   }
   else if(st===3){
     const F=FAM[c.f];
-    html=`<span class="kicker">القضية الكبرى · ٣ النمط يعمل</span><h3>طريقة «${F.name}»</h3>
-      <div class="method"><b>${F.icon} الطريقة:</b> ${fx(p,F.method)}</div>
-      ${caseCard(c,{found:view.found,compact:true,label:'ملف القضية رقم ٠٠١'})}
+    html=`<span class="kicker">التحليل · ٣ تطبيق الطريقة</span><h3>طريقة «${F.name}»</h3>
+      <div class="method"><b>الطريقة:</b> ${fx(p,F.method)}</div>
+      ${caseCard(c,{found:view.found,compact:true,label:'السؤال ٠٠١'})}
       <div class="card">${fx(p,c.work())}<div id="after"></div></div>
-      <div style="font-weight:700">الخطوة الأخيرة لك: ما الحكم؟</div>
+      <div style="font-weight:700">الخطوة الأخيرة: اختر الإجابة</div>
       <div class="choices">${c.choices.map((x,i)=>`<button class="choice" data-c="${i}"><span class="l">${L[i]}</span><span>${x}</span></button>`).join('')}</div>
       <div id="fb"></div>
-      <div class="footer">${nextBtn('أعلن الحكم',true)}</div>`;
+      <div class="footer">${nextBtn('عرض التحليل الكامل',true)}</div>`;
     wire=()=>{
       const btns=[...app.querySelectorAll('.choice')];
       btns.forEach(b=>b.onclick=()=>{
         const k=+b.dataset.c, ok=k===c.ans; view.ansOk=ok;
         btns.forEach((x,i)=>{x.disabled=true; if(i===c.ans)x.classList.add('ok'); else if(i===k)x.classList.add('bad'); else x.classList.add('dim');});
         if(c.after) document.getElementById('after').innerHTML='<div style="margin-top:8px">'+c.after()+'</div>';
-        document.getElementById('fb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'حكم صحيح ✓':'ليس هذا ✗'}</b>${fx(p,c.why[k])}</div>`;
+        document.getElementById('fb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'إجابة صحيحة':'إجابة غير صحيحة'}</b>${fx(p,c.why[k])}</div>`;
         enableNext();
       });
       document.getElementById('next').onclick=()=>{view.step=4;render();scrollTo(0,0);};
@@ -562,43 +566,43 @@ function lesson(){
     const got=[allFound,!!view.nameOk,fast];
     if(!view.scored){view.scored=true; addStars(got.filter(Boolean).length);}
     const T=toks(c);
-    html=`<span class="kicker">القضية الكبرى · ٤ الحكم</span><h3>كيف قادتك الأدلة إلى الحل</h3>
-      ${caseCard(c,{found:view.found,reveal:'missed',label:'ملف القضية رقم ٠٠١',stamp:'<span class="stamp ok">تم حل القضية</span>'})}
+    html=`<span class="kicker">التحليل · ٤ المراجعة</span><h3>من الأدلة إلى الإجابة</h3>
+      ${caseCard(c,{found:view.found,reveal:'missed',label:'السؤال ٠٠١',stamp:'<span class="stamp ok">مكتمل</span>'})}
       <div class="chain">
-        <div class="link"><small>🔎 الأدلة</small>${cl.map(i=>`<span class="cl ${view.found.includes(i)?'':'miss'}">${fx(p,T[i].t)}</span>`).join('')}
-          ${allFound?'':'<div style="font-size:13px;color:var(--bad)">المشطوب = دليل فاتك (مظلّل بالأحمر في الملف)</div>'}</div>
-        <div class="arrow">⬇</div>
-        <div class="link"><small>🧬 الفصيلة</small><b>${FAM[c.f].icon} ${FAM[c.f].name}</b></div>
-        <div class="arrow">⬇</div>
-        <div class="link"><small>🛠️ الطريقة</small>${fx(p,FAM[c.f].method)}</div>
-        <div class="arrow">⬇</div>
-        <div class="link"><small>⚖️ الجواب</small><b>${c.answerLabel}</b></div>
+        <div class="link"><small>الأدلة</small>${cl.map(i=>`<span class="cl ${view.found.includes(i)?'':'miss'}">${fx(p,T[i].t)}</span>`).join('')}
+          ${allFound?'':'<div style="font-size:13px;color:var(--bad)">المشطوب دليل لم تلتقطه (محدّد بالأحمر في السؤال)</div>'}</div>
+        <div class="arrow"></div>
+        <div class="link"><small>الفصيلة</small><b>${badge(c.f)}${FAM[c.f].name}</b></div>
+        <div class="arrow"></div>
+        <div class="link"><small>الطريقة</small>${fx(p,FAM[c.f].method)}</div>
+        <div class="arrow"></div>
+        <div class="link"><small>الإجابة</small><b>${c.answerLabel}</b></div>
       </div>
       <div class="stars">
-        <div class="starbox ${got[0]?'on':''}"><b>⭐</b>كل الأدلة</div>
-        <div class="starbox ${got[1]?'on':''}"><b>⭐</b>الفصيلة من أول مرة</div>
-        <div class="starbox ${got[2]?'on':''}"><b>⭐</b>تسمية سريعة</div></div>
-      <div class="footer">${nextBtn('إلى تدريبات ذكاء الأنماط')}</div>`;
+        <div class="starbox ${got[0]?'on':''}"><b>★</b>كل الأدلة</div>
+        <div class="starbox ${got[1]?'on':''}"><b>★</b>الفصيلة من أول محاولة</div>
+        <div class="starbox ${got[2]?'on':''}"><b>★</b>تحديد سريع</div></div>
+      <div class="footer">${nextBtn('تدريبات التعرّف على الأنماط')}</div>`;
     wire=()=>{document.getElementById('next').onclick=()=>{Object.assign(view,{step:5,r:0,d:null});render();scrollTo(0,0);};};
   }
   else if(st>=5&&st<=7){
     const r=view.r, total=ROUNDS[st];
     const advance=()=>{ if(r<total-1){view.r++;view.d=null;} else {view.step++;view.r=0;view.d=null;} render();scrollTo(0,0); };
-    const kick=`<span class="kicker">تدريب ${['','','','','','التنكّر','الدخيل','الومضة'][st]} · جولة ${nAr(r+1)} من ${nAr(total)}</span>`;
+    const kick=`<span class="kicker">تدريب ${['','','','','','البنية المشتركة','المختلف','التعرّف السريع'][st]} · جولة ${nAr(r+1)} من ${nAr(total)}</span>`;
 
     if(st===5){
       if(!view.d){const ok=p.fams.filter(f=>casesOf(f).length>=3); const f=pick(ok.filter(x=>x!==view.lastF).length?ok.filter(x=>x!==view.lastF):ok); view.lastF=f;
         view.d={f,cs:shuffle(casesOf(f)).slice(0,3).map(x=>x.id),done:false,skel:false};}
       const d=view.d;
-      html=`${kick}<h3>نفس المجرم بثلاثة أقنعة</h3>
-        <p class="lead">هذه القضايا تبدو مختلفة، لكنها من فصيلة واحدة. ما هي؟</p>
-        ${d.cs.map((id,i)=>caseCard(CASE[id],{compact:true,label:'قضية '+nAr(i+1),reveal:d.done?'hit':null,skel:d.skel})).join('')}
-        ${d.done?`<button class="small-btn" id="skel" style="align-self:center;margin-bottom:6px">🦴 ${d.skel?'أظهر القضايا':'اكشف الهيكل المشترك'}</button>`:''}
+      html=`${kick}<h3>ثلاثة أسئلة، بنية واحدة</h3>
+        <p class="lead">تختلف الأرقام والكلمات، لكن الأسئلة الثلاثة من فصيلة واحدة. ما هي؟</p>
+        ${d.cs.map((id,i)=>caseCard(CASE[id],{compact:true,label:'سؤال '+nAr(i+1),reveal:d.done?'hit':null,skel:d.skel})).join('')}
+        ${d.done?`<button class="small-btn" id="skel" style="align-self:center;margin-bottom:6px">${d.skel?'إظهار الأسئلة':'إظهار البنية المشتركة'}</button>`:''}
         ${d.done?'':famButtons(p)}<div id="fb">${d.fbHTML||''}</div>
-        <div class="footer">${nextBtn(r<total-1?'الجولة التالية':'إلى تدريب الدخيل',!d.done)}</div>`;
+        <div class="footer">${nextBtn(r<total-1?'الجولة التالية':'التدريب التالي',!d.done)}</div>`;
       wire=()=>{
         if(!d.done) wireFam(app,d.f,(ok,f,ms)=>{rec(d.f,ok,ms); if(ok)addStars(1);
-          d.fbHTML=famFeedback(p,ok,f,d.f,' اضغط «اكشف الهيكل» لترى أن الثلاثة نفس السؤال تمامًا.'); d.done=true; render();});
+          d.fbHTML=famFeedback(p,ok,f,d.f,' اعرض البنية المشتركة لترى أن الثلاثة سؤال واحد '+(p.kind==='math'?'بأرقام مختلفة.':'بكلمات مختلفة.')); d.done=true; render();});
         const sk=document.getElementById('skel'); if(sk) sk.onclick=()=>{d.skel=!d.skel;render();};
         document.getElementById('next').onclick=advance;
       };
@@ -608,14 +612,14 @@ function lesson(){
         const cs=shuffle([...shuffle(casesOf(A)).slice(0,2).map(x=>x.id),pick(casesOf(B)).id]);
         view.d={A,B,cs,odd:cs.findIndex(id=>CASE[id].f===B),pick:null};}
       const d=view.d;
-      html=`${kick}<h3>من الدخيل؟</h3>
-        <p class="lead">قضيتان من نفس الفصيلة، وواحدة من فصيلة مختلفة. اضغط على الدخيلة.</p>
-        ${d.cs.map((id,i)=>caseCard(CASE[id],{compact:true,label:'قضية '+nAr(i+1),button:d.pick===null?String(i):'',
-          tag:d.pick!==null?FAM[CASE[id].f].icon+' '+FAM[CASE[id].f].name:'',reveal:d.pick!==null?'hit':null,
+      html=`${kick}<h3>أيّها لا ينتمي؟</h3>
+        <p class="lead">سؤالان من فصيلة واحدة، والثالث من فصيلة أخرى. اختر المختلف.</p>
+        ${d.cs.map((id,i)=>caseCard(CASE[id],{compact:true,label:'سؤال '+nAr(i+1),button:d.pick===null?String(i):'',
+          tag:d.pick!==null?FAM[CASE[id].f].name:'',reveal:d.pick!==null?'hit':null,
           cls:d.pick!==null&&i===d.odd?'right':d.pick===i&&i!==d.odd?'wrong':''})).join('')}
-        <div id="fb">${d.pick!==null?`<div class="fb ${d.pick===d.odd?'ok':'bad'}"><b>${d.pick===d.odd?'أمسكت بالدخيل ✓':'ليست هذه ✗'}</b>
-          قضيتان من «${FAM[d.A].name}» (${fx(p,FAM[d.A].print[0])})، والدخيلة من «${FAM[d.B].name}» (${fx(p,FAM[d.B].print[0])}).</div>`:''}</div>
-        <div class="footer">${nextBtn(r<total-1?'الجولة التالية':'إلى تدريب الومضة',d.pick===null)}</div>`;
+        <div id="fb">${d.pick!==null?`<div class="fb ${d.pick===d.odd?'ok':'bad'}"><b>${d.pick===d.odd?'صحيح':'غير صحيح'}</b>
+          سؤالان من «${FAM[d.A].name}» (${fx(p,FAM[d.A].print[0])})، والمختلف من «${FAM[d.B].name}» (${fx(p,FAM[d.B].print[0])}).</div>`:''}</div>
+        <div class="footer">${nextBtn(r<total-1?'الجولة التالية':'التدريب التالي',d.pick===null)}</div>`;
       wire=()=>{
         app.querySelectorAll('[data-pick]').forEach(b=>{ if(b.dataset.pick==='')return; b.onclick=()=>{d.pick=+b.dataset.pick; if(d.pick===d.odd)addStars(1); render();};});
         document.getElementById('next').onclick=advance;
@@ -625,21 +629,21 @@ function lesson(){
       if(!view.d){view.d={id:pick(CASES.filter(x=>FAM[x.f].p===p.id&&x.id!==view.lastFlash)).id,phase:'show'}; view.lastFlash=view.d.id;}
       const d=view.d, cc=CASE[d.id], T=FLASH_T[r];
       if(d.phase==='show'){
-        html=`${kick}<h3>ومضة: ${nAr(T)} ثوانٍ فقط</h3>
-          <p class="lead">لا تحلّ. فقط التقط البصمة قبل أن تختفي القضية.</p>
+        html=`${kick}<h3>تعرّف سريع: ${nAr(T)} ثوانٍ</h3>
+          <p class="lead">لا تحلّ. التقط البصمة قبل أن يختفي السؤال.</p>
           <div class="flashbar"><i id="fbar"></i></div>
-          ${caseCard(cc,{label:'قضية سريعة'})}
-          <div class="footer"><button class="wide-btn ghost" id="ready">عرفتها، أخفِها الآن</button></div>`;
+          ${caseCard(cc,{label:'تعرّف سريع'})}
+          <div class="footer"><button class="wide-btn ghost" id="ready">حدّدتها، أخفِ السؤال</button></div>`;
         wire=()=>{
           const bar=document.getElementById('fbar'); requestAnimationFrame(()=>{bar.style.transition=`width ${T}s linear`;bar.style.width='0%';});
           const hide=()=>{clearTimeout(timer);d.phase='ask';render();};
           timer=setTimeout(hide,T*1000); document.getElementById('ready').onclick=hide;
         };
       } else {
-        html=`${kick}<h3>اختفت القضية! ما فصيلتها؟</h3>
-          ${d.done?caseCard(cc,{label:'قضية سريعة',reveal:'hit',compact:true}):`<div class="hidden-case"><div>🙈</div>تذكّر البصمة التي رأيتها</div>`}
+        html=`${kick}<h3>حدّد الفصيلة من الذاكرة</h3>
+          ${d.done?caseCard(cc,{label:'تعرّف سريع',reveal:'hit',compact:true}):`<div class="hidden-case"><div>السؤال مخفي</div>اعتمد على البصمة التي التقطتها</div>`}
           ${d.done?'':famButtons(p)}<div id="fb">${d.fbHTML||''}</div>
-          <div class="footer">${nextBtn(r<total-1?'الومضة التالية':'أغلق ملف النمط',!d.done)}</div>`;
+          <div class="footer">${nextBtn(r<total-1?'السؤال التالي':'عرض الملخص',!d.done)}</div>`;
         wire=()=>{
           if(!d.done) wireFam(app,cc.f,(ok,f,ms)=>{rec(cc.f,ok,ms); if(ok)addStars(1); d.fbHTML=famFeedback(p,ok,f,cc.f); d.done=true; render();});
           document.getElementById('next').onclick=advance;
@@ -648,10 +652,10 @@ function lesson(){
     }
   }
   else if(st===8){
-    html=`<span class="kicker">الملف المغلق</span><h3>ملف «${p.name}»</h3>
-      <p class="lead">كل ما تحتاجه قبل الاختبار: البصمة والطريقة لكل فصيلة.</p>
+    html=`<span class="kicker">الملخص</span><h3>ملخص «${p.name}»</h3>
+      <p class="lead">للمراجعة قبل الاختبار: بصمة كل فصيلة وطريقتها.</p>
       ${fileHTML(p,true)}
-      <div class="footer">${nextBtn('احفظ الملف في ملفاتي')}<button class="wide-btn ghost" id="again">أعد القضية من البداية</button></div>`;
+      <div class="footer">${nextBtn('حفظ الملخص')}<button class="wide-btn ghost" id="again">إعادة الدرس</button></div>`;
     wire=()=>{
       document.getElementById('next').onclick=()=>{S.learned[p.id]=true;save();go({name:'files',flash:true});};
       document.getElementById('again').onclick=()=>go({name:'lesson',pid:p.id,step:0,fi:0});
@@ -666,12 +670,12 @@ function lesson(){
 function fileHTML(p,stamp){
   const col=p.kind==='verb'?'var(--verb)':'var(--math)';
   return `<div class="pc" style="--accent:${col}">
-    <div class="hd"><small>${p.kind==='math'?'الكمي':'اللفظي'} · ملف نمط</small><b>${p.icon} ${p.name}</b></div>
-    ${stamp?'<span class="stamp">مغلق</span>':''}
-    ${p.fams.map(f=>{const F=FAM[f];return `<div class="fr"><b>${F.icon} ${F.name}</b>
+    <div class="hd"><small>${p.kind==='math'?'القسم الكمي':'القسم اللفظي'} · ملخص النمط</small><b>${p.name}</b></div>
+    ${stamp?'<span class="stamp">مكتمل</span>':''}
+    ${p.fams.map(f=>{const F=FAM[f];return `<div class="fr"><b>${badge(f)}${F.name}</b>
       <div><span class="k">البصمة:</span> ${fx(p,F.print.join('، '))}</div>
       <div><span class="k">الطريقة:</span> ${fx(p,F.method)}</div></div>`;}).join('')}
-    <div class="gold">⭐ ${p.gold}</div></div>`;
+    <div class="gold">القاعدة: ${p.gold}</div></div>`;
 }
 
 /* ---------- mixed line-up ---------- */
@@ -683,25 +687,25 @@ function lineup(){
   const v=view;
   if(v.i>=v.list.length){
     setAccent('math');
-    app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">✕</button><div class="title">🚨 الطابور المختلط</div></div>
-      <div class="stage"><h3>انتهى الطابور</h3>
-      <div class="stars"><div class="starbox on"><b>🎯</b>${nAr(v.right)} من ${nAr(v.list.length)} صحيحة</div>
-        <div class="starbox on"><b>⏱️</b>${nAr((v.ms/v.list.length/1000).toFixed(1).replace('.','٫'))} ث لكل قضية</div>
-        <div class="starbox on"><b>⭐</b>+${nAr(v.right)} نجوم</div></div>
-      <p class="lead" style="text-align:center">عدّادات ذكاء الأنماط في الصفحة الرئيسية تحدّثت.</p>
-      <div class="footer"><button class="wide-btn primary" id="again">طابور جديد</button><button class="wide-btn ghost" id="h">الرئيسية</button></div></div>`;
+    app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">✕</button><div class="title">اختبار التعرّف المختلط</div></div>
+      <div class="stage"><h3>النتيجة</h3>
+      <div class="stars"><div class="starbox num"><b>${nAr(v.right)} / ${nAr(v.list.length)}</b>إجابات صحيحة</div>
+        <div class="starbox num"><b>${nAr((v.ms/v.list.length/1000).toFixed(1)).replace('.','٫')} ث</b>متوسط لكل سؤال</div>
+        <div class="starbox on"><b>★ ${nAr(v.right)}</b>نقاط مكتسبة</div></div>
+      <p class="lead" style="text-align:center">تم تحديث مؤشرات التعرّف في الصفحة الرئيسية.</p>
+      <div class="footer"><button class="wide-btn primary" id="again">اختبار جديد</button><button class="wide-btn ghost" id="h">الرئيسية</button></div></div>`;
     document.getElementById('x').onclick=document.getElementById('h').onclick=()=>go({name:'home'});
     document.getElementById('again').onclick=startLineup;
     return;
   }
   const c=CASE[v.list[v.i]], p=patOf(c); setAccent(p.kind);
-  app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">✕</button><div class="title">🚨 الطابور المختلط</div></div>
+  app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">✕</button><div class="title">اختبار التعرّف المختلط</div></div>
     <div class="steps">${v.list.map((_,i)=>`<i class="${i<=v.i?'on':''}"></i>`).join('')}</div>
-    <div class="stage"><span class="kicker">${p.icon} ${p.name} · قضية ${nAr(v.i+1)} من ${nAr(v.list.length)}</span>
-      <h3>ما فصيلة هذه القضية؟</h3><p class="lead">بأسرع ما يمكن. لا تحلّ السؤال.</p>
-      ${caseCard(c,{label:'مشتبه به',reveal:v.done?'hit':null})}
+    <div class="stage"><span class="kicker">${p.name} · ${nAr(v.i+1)} من ${nAr(v.list.length)}</span>
+      <h3>ما فصيلة هذا السؤال؟</h3><p class="lead">بأسرع ما يمكن، دون حل.</p>
+      ${caseCard(c,{label:'سؤال '+nAr(v.i+1),reveal:v.done?'hit':null})}
       ${v.done?'':famButtons(p)}<div id="fb">${v.fbHTML||''}</div>
-      <div class="footer"><button class="wide-btn primary" id="next" ${v.done?'':'disabled'}>${v.i<v.list.length-1?'القضية التالية':'النتيجة'}</button></div></div>`;
+      <div class="footer"><button class="wide-btn primary" id="next" ${v.done?'':'disabled'}>${v.i<v.list.length-1?'السؤال التالي':'النتيجة'}</button></div></div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   if(!v.done) wireFam(app,c.f,(ok,f,ms)=>{rec(c.f,ok,ms); if(ok){v.right++;addStars(1);} v.ms+=ms; v.fbHTML=famFeedback(p,ok,f,c.f); v.done=true; render();});
   document.getElementById('next').onclick=()=>{v.i++;v.done=false;v.fbHTML='';render();scrollTo(0,0);};
@@ -711,10 +715,10 @@ function lineup(){
 function files(){
   setAccent('math');
   const mine=Object.values(PAT).filter(p=>S.learned[p.id]);
-  app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">→</button><div class="title">🗂️ ملفاتي المغلقة</div></div>
-    ${view.flash?`<div class="fb ok" style="margin:0 0 12px"><b>تم حفظ الملف ✓</b>راجع ملفاتك قبل الاختبار بدقائق.</div>`:''}
-    ${mine.length?mine.map(p=>fileHTML(p,true)+`<div style="text-align:center;margin:-6px 0 14px"><button class="small-btn" data-redo="${p.id}">أعد القضية</button></div>`).join('')
-      :`<div class="empty"><div>🗂️</div>لا توجد ملفات مغلقة بعد.<br>حلّ قضية نمط لتحصل على ملفه.</div>`}
+  app.innerHTML=`<div class="bar"><button class="icon-btn" id="x">→</button><div class="title">الملخصات المحفوظة</div></div>
+    ${view.flash?`<div class="fb ok" style="margin:0 0 12px"><b>تم الحفظ</b>راجع الملخصات قبل الاختبار بدقائق.</div>`:''}
+    ${mine.length?mine.map(p=>fileHTML(p,true)+`<div style="text-align:center;margin:-6px 0 14px"><button class="small-btn" data-redo="${p.id}">إعادة الدرس</button></div>`).join('')
+      :`<div class="empty"><div>لا توجد ملخصات بعد</div>أكمل درس نمط ليُحفظ ملخصه هنا.</div>`}
     <div class="footer"><button class="wide-btn ghost" id="h">الرئيسية</button></div>`;
   document.getElementById('x').onclick=document.getElementById('h').onclick=()=>go({name:'home'});
   app.querySelectorAll('[data-redo]').forEach(b=>b.onclick=()=>go({name:'lesson',pid:b.dataset.redo,step:0,fi:0}));
