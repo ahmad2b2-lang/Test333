@@ -247,6 +247,7 @@ const PATTERNS=[
       <tr><td>${m('x = ½')}</td><td>${m('¼')}</td><td>${m('½')}</td><td>الثانية</td></tr>
       <tr><td>${m('x = 1')}</td><td>${m('1')}</td><td>${m('1')}</td><td>تعادل</td></tr></table>`,
   demoNote:'الفائز تغيّر، إذن الجواب (د).',
+  rule:'جرّب قيمًا مختلفة: '+m('0')+'، '+m('1')+'، '+m('-1')+'، '+m('½')+'، '+m('10')+'. إذا تغيّر الفائز، فالجواب (د).',
   traps:[
     {l:0,t:'القيمة الأولى أكبر',w:'جرّبت عددًا كبيرًا فقط (مثل 2 أو 10). المربع يكبر، لكن ليس دائمًا.'},
     {l:1,t:'القيمة الثانية أكبر',w:'جرّبت كسرًا فقط (مثل ½). الكسر يصغر عند تربيعه، لكنها حالة واحدة.'},
@@ -264,7 +265,7 @@ const PATTERNS=[
   card:{
     spot:'«القيمة الأولى» و«القيمة الثانية» مع أربعة خيارات ثابتة.',
     steps:['لا متغيّر: احسب أو بسّط، و(د) مستحيل.','يوجد متغيّر: جرّب 0، 1، -1، ½، 10.','الفائز تغيّر: (د). ثابت: اختره.'],
-    traps:'تجربة عدد واحد فقط، ونسيان الكسور والسالب والصفر.',
+    traps:'تجربة عدد واحد فقط، ونسيان الكسور والأعداد السالبة والصفر.',
     gold:'متغيّر مع نتائج مختلفة = (د). أعداد فقط = (د) مستحيل.'
   }
 },
@@ -290,6 +291,7 @@ const PATTERNS=[
     <div class="sent"><span class="mk n">✗</span><span>التربة تكبر فتصبح زرعًا؟ لا، التربة تساعد فقط.</span></div>
     <div class="sent"><span class="mk n">✗</span><span>الفراشة تكبر فتصبح يرقة؟ لا، الاتجاه معكوس.</span></div>`,
   demoNote:'خيار واحد فقط يصلح في الجملة.',
+  rule:'كوّن جملة تربط الكلمتين، ثم ضع فيها كل خيار.',
   relations:['جزء : كل','أداة : وظيفة','مرحلة : تطوّر','سبب : نتيجة','عامل : مكان','ضد','ترادف'],
   traps:[
     {l:0,t:'غصن : شجرة',w:'فخ الكلمة المشتركة: فيه «شجرة» نفسها، لكن العلاقة جزء من كل.'},
@@ -308,7 +310,7 @@ const PATTERNS=[
   card:{
     spot:'كلمتان بينهما «:» مع أربعة أزواج. المطلوب العلاقة لا المعنى.',
     steps:['كوّن جملة تربط الكلمتين قبل رؤية الخيارات.','ضع كل خيار في نفس الجملة.','إذا صلح أكثر من خيار، اجعل الجملة أدق، وانتبه للاتجاه.'],
-    traps:'الكلمة المشتركة، الارتباط العام، الاتجاه المعكوس.',
+    traps:'خيار يشترك مع السؤال في كلمة، أو من نفس الموضوع بعلاقة مختلفة، أو بنفس العلاقة لكن مقلوبة.',
     gold:'الجملة أولًا، ثم الخيارات.'
   }
 }];
@@ -339,27 +341,16 @@ function wireChoices(q,cb){
     cb(ok,k);
   });
 }
-/* the summary as recall cards: question on the front, answer on the back */
-function sumCards(p){
-  return [
-    {q:'كيف تعرف هذا النمط؟',a:`<div class="mid">${fx(p,p.card.spot)}</div>`},
-    {q:'ما الطريقة؟',a:p.card.steps.map((s,i)=>`<div class="mid" style="font-weight:500">${nAr(i+1)}. ${fx(p,s)}</div>`).join('')},
-    {q:'ما الفخاخ؟',a:`<div class="mid">${fx(p,p.card.traps)}</div>`},
-    {q:'ما القاعدة الذهبية؟',a:`<div class="mid">${fx(p,p.card.gold)}</div>`}
-  ].map(c=>Object.assign(c,{p}));
-}
-
 function render(){
   document.body.classList.toggle('ar',S.digits==='ar');
-  ({home,lesson,cards})[view.name]();
+  ({home,lesson})[view.name]();
 }
 
 /* ---------- home: one clear next step ---------- */
+S.resume=S.resume||{};
+if(S.rv!==4){S.resume={};S.rv=4;save();}
 function seqOf(p){
-  return [{t:'try'},{t:'reveal'},...p.spot.map((_,i)=>({t:'spot',i})),{t:'spotTip'},
-    ...p.trick.map((_,i)=>({t:'trick',i})),{t:'demo'},...(p.relations?[{t:'relations'}]:[]),
-    ...p.traps.map((_,i)=>({t:'trap',i})),{t:'trapTip'},
-    ...p.practice.map((_,i)=>({t:'prac',i})),{t:'score'},{t:'deck'}];
+  return [{t:'try'},{t:'pattern'},{t:'method'},{t:'trap'},...p.practice.map((_,i)=>({t:'prac',i})),{t:'done'}];
 }
 function openPattern(pid){
   const r=S.resume[pid];
@@ -368,26 +359,23 @@ function openPattern(pid){
 function home(){
   const nextP=PATTERNS.find(p=>!S.learned[p.id]);
   const pct=p=>Math.round(S.resume[p.id].k/seqOf(p).length*100);
-  let card;
+  let card=null;
   if(nextP){
     const res=S.resume[nextP.id];
-    card=res&&res.k>0?{small:`أكملت ${nAr(pct(nextP))}٪`,title:nextP.name,btn:'تابع',act:()=>openPattern(nextP.id)}
-                     :{small:'خطوتك التالية',title:nextP.name,btn:'ابدأ',act:()=>openPattern(nextP.id)};
-  } else card={small:'أكملت كل الأنماط',title:'بطاقات المراجعة',btn:'راجع',act:()=>go({name:'cards',di:0,flip:false})};
+    card=res&&res.k>0?{small:`أكملت ${nAr(pct(nextP))}٪`,title:nextP.name,btn:'تابع'}:{small:'خطوتك التالية',title:nextP.name,btn:'ابدأ'};
+  }
   const status=p=>{ if(S.learned[p.id]) return `مكتمل، أفضل نتيجة ${nAr(S.best[p.id]||0)} من ${nAr(p.practice.length)}`;
     const r=S.resume[p.id]; return r&&r.k>0?`أكملت ${nAr(pct(p))}٪`:'لم يبدأ'; };
   app.innerHTML=`
     <div class="homehead"><h1>أنماط القدرات</h1><span class="lv"></span>
       <button class="icon-btn" id="set" aria-label="الإعدادات">${gear}</button></div>
-    <div class="next-card"><small>${card.small}</small><h2>${card.title}</h2><button class="btn" id="go">${card.btn}</button></div>
+    ${card?`<div class="next-card"><small>${card.small}</small><h2>${card.title}</h2><button class="btn" id="go">${card.btn}</button></div>`
+          :`<div class="next-card"><small>أحسنت</small><h2>أكملت كل الأنماط المتاحة</h2><div class="sub" style="margin:0">يمكنك إعادة أي نمط من القائمة.</div></div>`}
     <div class="seclabel">الأنماط</div>
     <div class="plist">${PATTERNS.map(p=>`<button class="prow" data-open="${p.id}">
-      <div><div class="t">${p.name}</div><div class="s">${status(p)}</div></div><span class="chev">‹</span></button>`).join('')}</div>
-    <div class="seclabel" style="margin-top:22px">المزيد</div>
-    <div class="plist"><button class="prow" id="cd"><div><div class="t">بطاقات المراجعة</div><div class="s">ملخص كل نمط أكملته، للمراجعة قبل الاختبار</div></div><span class="chev">‹</span></button></div>`;
-  document.getElementById('go').onclick=card.act;
+      <div><div class="t">${p.name}</div><div class="s">${status(p)}</div></div><span class="chev">‹</span></button>`).join('')}</div>`;
+  const g=document.getElementById('go'); if(g) g.onclick=()=>openPattern(nextP.id);
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPattern(b.dataset.open));
-  document.getElementById('cd').onclick=()=>go({name:'cards',di:0,flip:false});
   document.getElementById('set').onclick=settings;
 }
 
@@ -407,21 +395,18 @@ function settings(){
   sc.onclick=()=>sc.remove(); draw(); document.body.appendChild(sc);
 }
 
-/* ---------- lesson: quiz flow, one idea per card ---------- */
-const PASSIVE=new Set(['reveal','spot','spotTip','trick','demo','relations','trap','trapTip','score']);
-const SECTION=t=>({try:'جرّب أولًا',reveal:'النمط',spot:'النمط',spotTip:'النمط',trick:'الطريقة',demo:'الطريقة',relations:'الطريقة',
-  trap:'الفخاخ',trapTip:'الفخاخ',prac:'تدريب',score:'تدريب',deck:'بطاقة النمط'})[t];
+/* ---------- lesson: 1 question, 3 cards, 3 practice questions ---------- */
+const SECTION=t=>({try:'جرّب أولًا',pattern:'بطاقة ١ من ٣',method:'بطاقة ٢ من ٣',trap:'بطاقة ٣ من ٣',prac:'تدريب',done:'النتيجة'})[t];
 function lesson(){
   const p=PAT[view.pid], seq=seqOf(p), sc=seq[view.k];
   S.resume[p.id]=Object.assign({},view); save();
   let html='', wire=()=>{};
   const next=()=>{view.k++; view.done=false; render(); scrollTo(0,0);};
   const back=()=>{view.k--; render(); scrollTo(0,0);};
-  const canBack=view.k>0&&PASSIVE.has(sc.t)&&PASSIVE.has(seq[view.k-1].t);
   const btn=(label,dis)=>`<button class="btn" id="next" ${dis?'disabled':''}>${label}</button>`;
-  const card=(inner,label='التالي')=>{
+  const card=(inner,canBack)=>{
     html=`<div class="fc" id="fc">${inner}<div class="tap-hint">اضغط على البطاقة للمتابعة</div></div>
-      <div class="bottom">${btn(label)}${canBack?'<button class="link" id="back">رجوع</button>':''}</div>`;
+      <div class="bottom">${btn('التالي')}${canBack?'<button class="link" id="back">رجوع</button>':''}</div>`;
     wire=()=>{document.getElementById('next').onclick=next; document.getElementById('fc').onclick=next;
       const b=document.getElementById('back'); if(b) b.onclick=back;};
   };
@@ -433,58 +418,29 @@ function lesson(){
   };
 
   if(sc.t==='try') quiz(p.tryQ,'جرّب بدون مساعدة',ok=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b><div class="why">${p.tryFb[ok?'ok':'bad']}</div></div>`);
-  else if(sc.t==='reveal') card(`${qRef(p)}<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div><div class="sm">${p.short}</div>`);
-  else if(sc.t==='spot') card(`<div class="lab">كيف تعرفه (${nAr(sc.i+1)} من ${nAr(p.spot.length)})</div><div class="mid" style="font-weight:500">${fx(p,p.spot[sc.i])}</div>`);
-  else if(sc.t==='spotTip') card(`<div class="lab">نصيحة</div><div class="mid">${fx(p,p.spotTip)}</div>`);
-  else if(sc.t==='trick') card(`<div class="lab">الطريقة: خطوة ${nAr(sc.i+1)} من ${nAr(p.trick.length)}</div><div class="mid" style="font-weight:500">${fx(p,p.trick[sc.i])}</div>`);
-  else if(sc.t==='demo') card(`${qRef(p,'نطبّق الطريقة على هذا السؤال')}<div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`);
-  else if(sc.t==='relations') card(`<div class="lab">علاقات تتكرر في الاختبار</div><div class="mid" style="font-weight:500;line-height:2.1">${p.relations.join('<br>')}</div>`);
-  else if(sc.t==='trap'){const t=p.traps[sc.i];
-    card(`${qRef(p)}<div class="lab">خيار خاطئ (${L[t.l]})</div><div class="chosen">${t.t}</div><div class="sm" style="font-size:17px;color:var(--ink);margin-top:4px">${fx(p,t.w)}</div>`);}
-  else if(sc.t==='trapTip') card(`<div class="lab">القاعدة</div><div class="mid">${fx(p,p.trapTip)}</div>`);
+  else if(sc.t==='pattern') card(`${qRef(p)}<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div>
+      <div class="sm" style="color:var(--ink);font-size:17px">تعرفه من: ${fx(p,p.card.spot)}</div>`);
+  else if(sc.t==='method') card(`<div class="lab">الطريقة</div><div class="mid" style="margin-bottom:14px">${fx(p,p.rule)}</div>
+      <div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`,true);
+  else if(sc.t==='trap') card(`<div class="lab">الفخ الشائع</div><div class="mid">${fx(p,p.card.traps)}</div>
+      <div class="sm" style="color:var(--ink);font-size:17px;margin-top:20px"><b>القاعدة:</b> ${fx(p,p.card.gold)}</div>`,true);
   else if(sc.t==='prac'){const q=p.practice[sc.i];
     quiz(q,`سؤال مشابه (${nAr(sc.i+1)} من ${nAr(p.practice.length)})`,(ok)=>{ if(ok&&!view.done) view.right=(view.right||0)+1; view.done=true; S.resume[p.id]=Object.assign({},view); save();
       return `<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b>${why(fx(p,q.why))}</div>`;});}
-  else if(sc.t==='score'){const r=view.right||0, n=p.practice.length;
-    if(!view.scored){view.scored=true; S.best[p.id]=Math.max(S.best[p.id]||0,r); save();}
-    card(`<div class="lab">نتيجتك</div><div class="big">${nAr(r)} من ${nAr(n)}</div><div class="sm">${r===n?'ممتاز، النمط واضح لك.':r>=n-1?'جيد جدًا.':'راجع الطريقة مرة أخرى في بطاقة النمط.'}</div>`,'بطاقة النمط');}
-  else if(sc.t==='deck'){
-    const r=deck(sumCards(p),view,()=>{S.learned[p.id]=true; delete S.resume[p.id]; save(); go({name:'home'});},'حفظ والعودة');
-    html=r.html; wire=r.wire;
+  else if(sc.t==='done'){const r=view.right||0, n=p.practice.length;
+    if(!view.scored){view.scored=true; S.best[p.id]=Math.max(S.best[p.id]||0,r); S.learned[p.id]=true; save();}
+    html=`<div class="fc" style="cursor:default"><div class="lab">نتيجتك</div><div class="big">${nAr(r)} من ${nAr(n)}</div>
+        <div class="sm">${r===n?'ممتاز، النمط واضح لك.':r>=n-1?'جيد جدًا.':'أعد الدرس لترسيخ النمط.'}</div></div>
+      <div class="bottom"><button class="btn" id="home">العودة</button><button class="link" id="again">إعادة الدرس</button></div>`;
+    wire=()=>{
+      document.getElementById('home').onclick=()=>{delete S.resume[p.id]; save(); go({name:'home'});};
+      document.getElementById('again').onclick=()=>{delete S.resume[p.id]; save(); go({name:'lesson',pid:p.id,k:0,right:0});};
+    };
   }
 
   app.innerHTML=topbar((view.k+1)/seq.length,SECTION(sc.t))+`<div class="screen">${html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   wire();
-}
-
-/* recall deck: tap to flip, then next */
-function deck(list,st,onDone,doneLabel){
-  st.di=st.di||0; const c=list[st.di], last=st.di===list.length-1;
-  const html=`<div class="fc ${st.flip?'back':''}" id="fc">
-      ${st.flip?`<div class="lab">${c.q}</div>${c.a}`
-               :`<div class="lab">${c.p.name}، بطاقة ${nAr(st.di+1)} من ${nAr(list.length)}</div><div class="big" style="font-size:26px">${c.q}</div><div class="tap-hint">فكّر في الإجابة، ثم اقلب البطاقة</div>`}
-    </div>
-    <div class="bottom"><button class="btn" id="dk">${!st.flip?'اقلب البطاقة':last?doneLabel:'البطاقة التالية'}</button>
-      ${st.di>0?'<button class="link" id="dprev">البطاقة السابقة</button>':''}</div>`;
-  const act=()=>{ if(!st.flip){st.flip=true;render();} else if(last){onDone();} else {st.di++;st.flip=false;render();} };
-  const wire=()=>{document.getElementById('dk').onclick=act; document.getElementById('fc').onclick=act;
-    const pv=document.getElementById('dprev'); if(pv) pv.onclick=()=>{st.di--;st.flip=false;render();};};
-  return {html,wire};
-}
-
-/* ---------- revision cards ---------- */
-function cards(){
-  const list=PATTERNS.filter(p=>S.learned[p.id]).flatMap(sumCards);
-  if(!list.length){
-    app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div style="font-weight:700">بطاقات المراجعة</div></div>
-      <div class="screen"><div class="empty">لا توجد بطاقات بعد.<br>أكمل درس نمط لتُضاف بطاقاته هنا.</div></div>`;
-    document.getElementById('x').onclick=()=>go({name:'home'}); return;
-  }
-  const r=deck(list,view,()=>go({name:'home'}),'انتهت المراجعة');
-  app.innerHTML=topbar((view.di+1)/list.length,'مراجعة')+`<div class="screen">${r.html}</div>`;
-  document.getElementById('x').onclick=()=>go({name:'home'});
-  r.wire();
 }
 
 render();
