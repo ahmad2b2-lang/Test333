@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="light only">
 <meta name="theme-color" content="#f7f7f5">
-<title>تحليل القدرات</title>
+<title>أنماط القدرات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -197,16 +197,16 @@
 document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
 
 /* ---------- saved state (this phone only) ---------- */
-const KEY='qudurat-detective-v2';
-let S={learned:{},stars:0,fam:{},digits:'ar'};
+const KEY='qudurat-quiz-v3';
+let S={learned:{},best:{},digits:'ar',resume:{}};
 try{
   const raw=localStorage.getItem(KEY);
   if(raw) S=Object.assign(S,JSON.parse(raw));
-  else{const old=JSON.parse(localStorage.getItem('qudurat-patterns-v1')||'null'); if(old&&old.digits) S.digits=old.digits;}
+  else for(const k of ['qudurat-detective-v2','qudurat-patterns-v1']){const o=JSON.parse(localStorage.getItem(k)||'null'); if(o&&o.digits){S.digits=o.digits;break;}}
 }catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
-/* ---------- math digits ---------- */
+/* ---------- math digits: written in Western form, shown per setting ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
 function conv(t){return t.replace(/(\d)\.(\d)/g,'$1٫$2').replace(/[0-9]/g,d=>AR[d]).replace(/x/g,'س').replace(/y/g,'ص').replace(/%/g,'٪').replace(/a/g,'أ').replace(/b/g,'ب');}
 function M(html){
@@ -215,211 +215,174 @@ function M(html){
     conv(txt.replace(/-(\d+)/g,'\u0001$1\u0002')).replace(/\u0001([^\u0002]*)\u0002/g,'<span class="neg">$1-</span>'));
 }
 const m=s=>`<span class="m">${s}</span>`;
-const num=n=>S.digits==='ar'?String(n).replace(/[0-9]/g,d=>AR[d]):String(n);
-const nAr=n=>String(n).replace(/[0-9]/g,d=>AR[d]); // UI counters always Arabic
+const nAr=n=>String(n).replace(/[0-9]/g,d=>AR[d]);
 const L=['أ','ب','ج','د'];
 const CMP=['القيمة الأولى أكبر','القيمة الثانية أكبر','القيمتان متساويتان','المعطيات غير كافية'];
-const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;};
-const pick=a=>a[Math.random()*a.length|0];
 
-/* ---------- patterns and their families ---------- */
-const PAT={
-  cmp:{id:'cmp',kind:'math',icon:'كمي',name:'المقارنات الكمية',short:'من الأكبر؟ القيمة الأولى أم الثانية؟',fams:['var','nums','swap','neg'],big:'v1',
-       gold:'البصمة ← الفصيلة ← الطريقة ← الجواب. لا تبدأ الحساب قبل أن تعرف الفصيلة.'},
-  ana:{id:'ana',kind:'verb',icon:'لفظي',name:'التناظر اللفظي',short:'كلمتان بينهما علاقة. ما نوعها؟',fams:['part','place','cause','stage','tool','opp'],big:'st1',
-       gold:'سمِّ العلاقة بجملة قبل أن تنظر إلى الخيارات.'}
-};
-const FAM={
-  var:{p:'cmp',icon:'١',name:'المتغيّر الحر',print:['يوجد حرف مثل '+m('x')+' أو '+m('y'),'قيمته غير محددة (أو لها شرط فقط)'],
-       method:'جرّب قيمًا مختلفة: '+m('0')+'، '+m('1')+'، '+m('-1')+'، '+m('½')+'، '+m('10')+'. إذا تغيّر الفائز ← (د).',skel:'قارن: [عبارة فيها حرف] مع [عبارة أخرى]'},
-  nums:{p:'cmp',icon:'٢',name:'أعداد صريحة',print:['لا يوجد أي حرف','أرقام وعمليات فقط'],
-       method:'احسب أو قرّب بسرعة. الجواب <b>لا يمكن</b> أن يكون (د).',skel:'قارن: [أرقام وعمليات] مع [رقم]'},
-  swap:{p:'cmp',icon:'٣',name:'النسب المتبادلة',print:['«٪ من» في الطرفين','نفس العددين تبادلا المكان'],
-       method:m('a%')+' من '+m('b')+' = '+m('b%')+' من '+m('a')+' دائمًا ← متساويتان (ج) بدون حساب.',skel:'قارن: [■٪ من ▲] مع [▲٪ من ■]'},
-  neg:{p:'cmp',icon:'٤',name:'قوى السالب',print:['عدد سالب داخل قوس','وعليه أس (قوة)'],
-       method:'الأس الزوجي يجعله موجبًا، والأس الفردي يبقيه سالبًا. والموجب أكبر.',skel:'قارن: [(سالب) أس زوجي] مع [(سالب) أس فردي]'},
-  part:{p:'ana',icon:'١',name:'جزء وكل',print:['الأول قطعة من الثاني','جملته: «الأول جزء من الثاني»'],
-       method:'قل: «… جزء من …» وجرّبها على كل خيار.',skel:'[قطعة] : [الشيء الكامل]'},
-  place:{p:'ana',icon:'٢',name:'عامل ومكان',print:['الأول شخص له مهنة','الثاني مكان عمله'],
-       method:'قل: «… يعمل في …» وجرّبها على كل خيار.',skel:'[شخص يعمل] : [مكان عمله]'},
-  cause:{p:'ana',icon:'٣',name:'سبب ونتيجة',print:['الأول تصرّف أو حدث','الثاني ما ينتج عنه'],
-       method:'قل: «… يؤدي إلى …» وانتبه للاتجاه.',skel:'[تصرّف أو حدث] : [ما ينتج عنه]'},
-  stage:{p:'ana',icon:'٤',name:'مرحلة وتطوّر',print:['الأول كائن في بدايته','الثاني نفس الكائن بعد أن يكبر'],
-       method:'قل: «… يكبر فيصبح …» وانتبه للاتجاه.',skel:'[كائن صغير] : [نفس الكائن كبيرًا]'},
-  tool:{p:'ana',icon:'٥',name:'أداة واستخدام',print:['الأول أداة أو شيء','الثاني الفعل الذي يقوم به'],
-       method:'قل: «… يُستخدم لـ…» وجرّبها على كل خيار.',skel:'[أداة] : [ما تفعله]'},
-  opp:{p:'ana',icon:'٦',name:'تضاد',print:['كلمتان من نفس النوع','معناهما معاكس'],
-       method:'قل: «… عكس …» وتأكد أن الكلمتين من نفس النوع.',skel:'[صفة أو شيء] : [عكسه تمامًا]'}
-};
-
-/* ---------- cases (few on purpose: the pattern is what matters) ---------- */
-const DEC_CMP=['قارن بين:','d','موجودة في كل أسئلة المقارنة، فلا تكشف الفصيلة'];
-const DEC_ANA=['اختر الزوج الذي له نفس العلاقة:','d','جملة ثابتة في كل أسئلة التناظر، فلا تكشف نوع العلاقة'];
-const C=(id,f,a,b,stem)=>({id,f,a,b,stem:stem||[DEC_CMP]});
-const V=(id,f,w1,n1,w2,n2)=>({id,f,pair:[[w1,'c',n1],[':'],[w2,'c',n2]],stem:[DEC_ANA]});
-const CASES=[
-  Object.assign(C('v1','var',[m('x<sup>2</sup>'),'c','تربيع: يكبر مع الأعداد الكبيرة لكنه يصغر مع الكسور'],[m('x')],
-    [['إذا كان'],[m('x'),'c','حرف، أي قيمة غير معروفة'],['عددًا حقيقيًا','c','«حقيقي» يشمل الكسور والسالب والصفر، فلا قيود'],['، قارن بين:']]),{
-    choices:CMP,ans:3,
-    work:()=>`<table class="try">
+/* ---------- content: 2 patterns, learned by quiz ---------- */
+const PATTERNS=[
+{
+  id:'cmp', kind:'math', name:'المقارنات الكمية', short:'من الأكبر؟ القيمة الأولى أم الثانية؟',
+  tryQ:{stem:`إذا كان ${m('x')} عددًا حقيقيًا، قارن بين:`, a:m('x<sup>2</sup>'), b:m('x'), choices:CMP, ans:3},
+  tryFb:{ok:'صحيح. الآن لنعرف النمط الذي يجعلك تجيب بثقة في كل مرة.', bad:'هذا أشهر خطأ في هذا النوع من الأسئلة. لنعرف النمط.'},
+  spot:[
+    'يعطيك السؤال <b>«القيمة الأولى»</b> و<b>«القيمة الثانية»</b> بدل أن يطلب حساب ناتج.',
+    'الخيارات <b>دائمًا نفس الأربعة</b>: الأولى أكبر، الثانية أكبر، متساويتان، المعطيات غير كافية.',
+    'السؤال الحقيقي: <b>من الأكبر؟</b> وليس: كم الناتج؟ لذلك نادرًا ما تحتاج حسابًا كاملًا.'
+  ],
+  spotTip:'احفظ ترتيب الخيارات الأربعة مرة واحدة، فتوفّر وقت قراءتها في كل سؤال.',
+  trick:[
+    'هل في السؤال متغيّر مثل '+m('x')+'؟ إذا <b>لا</b>: بسّط أو احسب، والجواب <b>لا يمكن</b> أن يكون (د).',
+    'إذا <b>نعم</b>: جرّب قيمًا مختلفة: '+m('0')+'، '+m('1')+'، '+m('-1')+'، '+m('½')+'، '+m('10')+'.',
+    'إذا <b>تغيّر الفائز</b> بين تجربة وأخرى، فالجواب (د) المعطيات غير كافية.',
+    'إذا <b>بقي نفس الفائز</b> في كل التجارب، اختره بثقة.'
+  ],
+  demo:()=>`<table class="try">
       <tr><th>نجرّب</th><th>الأولى ${m('x<sup>2</sup>')}</th><th>الثانية ${m('x')}</th><th>الفائز</th></tr>
-      <tr><td>${m('x = 2')}</td><td>${m('4')}</td><td>${m('2')}</td><td class="win1">الأولى</td></tr>
-      <tr><td>${m('x = ½')}</td><td>${m('¼')}</td><td>${m('½')}</td><td class="win2">الثانية</td></tr>
-      <tr><td>${m('x = 1')}</td><td>${m('1')}</td><td>${m('1')}</td><td class="eq">تعادل</td></tr></table>`,
-    why:['جرّبت عددًا كبيرًا فقط. مع '+m('½')+' تفوز الثانية.','جرّبت كسرًا فقط. مع '+m('2')+' تفوز الأولى.','جرّبت '+m('0')+' أو '+m('1')+' فقط، وهذا فخ مقصود.','الفائز تغيّر بين التجارب، فالمعطيات غير كافية.'],
-    answerLabel:'(د) المعطيات غير كافية'}),
-  C('v2','var',[m('x + 3')],[m('3x'),'c','حرف مضروب في عدد، يتغيّر بسرعة'],
-    [['إذا كان'],[m('x > 0'),'c','حرف له شرط: جرّب فقط أعدادًا موجبة، كسرًا وعددًا كبيرًا'],['، قارن بين:']]),
-  C('v3','var',[m('2y')],[m('y')],
-    [['إذا كان'],[m('y'),'c','حرف، أي قيمة غير معروفة'],['عددًا صحيحًا','c','«صحيح» يشمل الصفر والسالب'],['، قارن بين:']]),
-  C('n1','nums',[m('3 × 17'),'c','أرقام وعمليات فقط، لا حروف'],[m('50'),'c','عدد صريح']),
-  C('n2','nums',[m('100 − 37'),'c','أرقام وعمليات فقط، لا حروف'],[m('64'),'c','عدد صريح']),
-  C('n3','nums',[m('½ + ¼'),'c','كسور صريحة، لا حروف'],[m('0.75'),'c','عدد صريح']),
-  C('s1','swap',[m('25%')+' من '+m('80'),'c','«٪ من»: نسبة من عدد'],[m('80%')+' من '+m('25'),'c','نفس العددين، لكن تبادلا المكان']),
-  C('s2','swap',[m('15%')+' من '+m('60'),'c','«٪ من»: نسبة من عدد'],[m('60%')+' من '+m('15'),'c','نفس العددين، لكن تبادلا المكان']),
-  C('s3','swap',[m('40%')+' من '+m('35'),'c','«٪ من»: نسبة من عدد'],[m('35%')+' من '+m('40'),'c','نفس العددين، لكن تبادلا المكان']),
-  C('g1','neg',[m('(-2)<sup>6</sup>'),'c','سالب داخل قوس، والأس زوجي'],[m('(-2)<sup>7</sup>'),'c','نفس السالب، والأس فردي']),
-  C('g2','neg',[m('(-1)<sup>9</sup>'),'c','سالب داخل قوس، والأس فردي'],[m('(-1)<sup>10</sup>'),'c','نفس السالب، والأس زوجي']),
-  C('g3','neg',[m('(-5)<sup>2</sup>'),'c','سالب داخل قوس، والأس زوجي'],[m('(-5)<sup>3</sup>'),'c','نفس السالب، والأس فردي']),
-
-  Object.assign({id:'st1',f:'stage',stem:[DEC_ANA],pair:[['بذرة','c','كائن حي في بدايته'],[':','c','الاتجاه: من الأول إلى الثاني. الترتيب مهم'],['شجرة','c','نفس الكائن بعد أن يكبر']]},{
-    choices:['غصن : شجرة','طفل : رجل','تربة : زرع','فراشة : يرقة'],ans:1,
-    work:()=>`<div style="font-weight:700">جملة الفصيلة: «بذرة <u>تكبر فتصبح</u> شجرة»</div><div style="color:var(--muted);font-size:15px">ضع كل خيار في نفس الجملة، واختر الذي يصلح.</div>`,
-    after:()=>`<div class="sent"><span class="mk n">✗</span><span>غصن يكبر فيصبح شجرة؟ لا، الغصن <b>جزء</b> منها.</span></div>
-      <div class="sent"><span class="mk y">✓</span><span>طفل يكبر فيصبح رجلًا. نعم!</span></div>
-      <div class="sent"><span class="mk n">✗</span><span>تربة تكبر فتصبح زرعًا؟ لا، التربة <b>تساعد</b> فقط.</span></div>
-      <div class="sent"><span class="mk n">✗</span><span>فراشة تكبر فتصبح يرقة؟ لا، <b>الاتجاه معكوس</b>.</span></div>`,
-    why:['فخ «الكلمة المشتركة»: فيه «شجرة» نفسها، لكن العلاقة جزء من كل.','مرحلة أولى تكبر فتصبح مرحلة لاحقة.','فخ «الارتباط العام»: نفس الموضوع، لكن التربة لا تصبح زرعًا.','فخ «الاتجاه المعكوس»: اليرقة هي التي تصبح فراشة.'],
-    answerLabel:'(ب) طفل : رجل'}),
-  V('st2','stage','يرقة','كائن في بدايته','فراشة','نفس الكائن بعد أن يكبر'),
-  V('st3','stage','شبل','صغير الحيوان','أسد','نفس الحيوان بعد أن يكبر'),
-  V('p1','part','إصبع','قطعة صغيرة','يد','الشيء الكامل الذي تنتمي له'),
-  V('p2','part','عجلة','قطعة','سيارة','الشيء الكامل الذي تنتمي له'),
-  V('p3','part','صفحة','قطعة','كتاب','الشيء الكامل الذي تنتمي له'),
-  V('pl1','place','طبيب','شخص له مهنة','مستشفى','مكان'),
-  V('pl2','place','معلّم','شخص له مهنة','مدرسة','مكان'),
-  V('pl3','place','فلّاح','شخص له مهنة','مزرعة','مكان'),
-  V('c1','cause','إهمال','تصرّف','فشل','ما ينتج عنه'),
-  V('c2','cause','اجتهاد','تصرّف','تفوّق','ما ينتج عنه'),
-  V('t1','tool','مقص','أداة','قص','الفعل الذي تقوم به'),
-  V('t2','tool','مفتاح','أداة','فتح','الفعل الذي تقوم به'),
-  V('o1','opp','طويل','صفة','قصير','صفة من نفس النوع، معناها معاكس'),
-  V('o2','opp','نور','شيء','ظلام','من نفس النوع، معناه معاكس')
-];
-const CASE=Object.fromEntries(CASES.map(c=>[c.id,c]));
-const patOf=c=>PAT[FAM[c.f].p];
-const badge=f=>`<span class="fi">${FAM[f].icon}</span>`;
-const casesOf=f=>CASES.filter(c=>c.f===f);
-function toks(c){
-  if(c._t) return c._t;
-  const out=[]; const add=(t,pl)=>out.push({t:t[0],k:t[1],n:t[2],pl});
-  c.stem.forEach(t=>add(t,'stem'));
-  if(c.a){add(c.a,'a');add(c.b,'b');} else c.pair.forEach(t=>add(t,'pair'));
-  return c._t=out;
-}
-const clueIdx=c=>toks(c).map((t,i)=>t.k==='c'?i:-1).filter(i=>i>=0);
+      <tr><td>${m('x = 2')}</td><td>${m('4')}</td><td>${m('2')}</td><td>الأولى</td></tr>
+      <tr><td>${m('x = ½')}</td><td>${m('¼')}</td><td>${m('½')}</td><td>الثانية</td></tr>
+      <tr><td>${m('x = 1')}</td><td>${m('1')}</td><td>${m('1')}</td><td>تعادل</td></tr></table>`,
+  demoNote:'الفائز تغيّر، إذن الجواب (د).',
+  traps:[
+    {l:0,t:'القيمة الأولى أكبر',w:'جرّبت عددًا كبيرًا فقط (مثل 2 أو 10). المربع يكبر، لكن ليس دائمًا.'},
+    {l:1,t:'القيمة الثانية أكبر',w:'جرّبت كسرًا فقط (مثل ½). الكسر يصغر عند تربيعه، لكنها حالة واحدة.'},
+    {l:2,t:'القيمتان متساويتان',w:'جرّبت 0 أو 1 فقط. مربع كل منهما يساويه، وهذا فخ مقصود.'}
+  ],
+  trapTip:'لا تكتفِ بتجربة واحدة. جرّب على الأقل عددًا كبيرًا وكسرًا.',
+  practice:[
+    {stem:'قارن بين:', a:m('(-2)<sup>6</sup>'), b:m('(-2)<sup>7</sup>'), choices:CMP, ans:0,
+     why:'لا يوجد متغيّر، فالجواب ليس (د). السالب بأس زوجي موجب، وبأس فردي سالب. والموجب أكبر.'},
+    {stem:'إذا كان '+m('x > 0')+'، قارن بين:', a:m('x + 3'), b:m('3x'), choices:CMP, ans:3,
+     why:'مع '+m('x = 1')+': '+m('4')+' مقابل '+m('3')+' (الأولى). مع '+m('x = 2')+': '+m('5')+' مقابل '+m('6')+' (الثانية). الفائز تغيّر، إذن (د).'},
+    {stem:'قارن بين:', a:m('25%')+' من '+m('80'), b:m('80%')+' من '+m('25'), choices:CMP, ans:2,
+     why:m('a%')+' من '+m('b')+' = '+m('b%')+' من '+m('a')+' دائمًا. كلاهما '+m('20')+' بدون حساب طويل.'}
+  ],
+  card:{
+    spot:'«القيمة الأولى» و«القيمة الثانية» مع أربعة خيارات ثابتة.',
+    steps:['لا متغيّر: احسب أو بسّط، و(د) مستحيل.','يوجد متغيّر: جرّب 0، 1، -1، ½، 10.','الفائز تغيّر: (د). ثابت: اختره.'],
+    traps:'تجربة عدد واحد فقط، ونسيان الكسور والسالب والصفر.',
+    gold:'متغيّر مع نتائج مختلفة = (د). أعداد فقط = (د) مستحيل.'
+  }
+},
+{
+  id:'ana', kind:'verb', name:'التناظر اللفظي', short:'كلمتان بينهما علاقة. ابحث عن زوج بنفس العلاقة.',
+  tryQ:{stem:'اختر الزوج الذي له نفس العلاقة:', pair:'بذرة : شجرة', choices:['غصن : شجرة','طفل : رجل','تربة : زرع','فراشة : يرقة'], ans:1},
+  tryFb:{ok:'صحيح. الآن لنعرف الطريقة التي تضمن الإجابة في كل مرة.', bad:'الخيارات مصمّمة لتبدو قريبة. لنتعلّم الطريقة التي تكشفها.'},
+  spot:[
+    '<b>كلمتان بينهما «:»</b> ثم أربعة أزواج من الكلمات.',
+    'المطلوب <b>ليس معنى الكلمات</b>، بل <b>نوع العلاقة</b> بينهما.',
+    'الخيارات الخاطئة غالبًا تشترك مع السؤال في <b>الموضوع</b> أو في <b>كلمة</b>، لكن العلاقة مختلفة.'
+  ],
+  spotTip:'لا تنظر إلى الخيارات قبل أن تحدّد العلاقة.',
+  trick:[
+    'كوّن <b>جملة قصيرة</b> تربط الكلمتين، قبل النظر إلى الخيارات.',
+    'ضع <b>كل خيار</b> في نفس الجملة، واحذف ما لا يصلح.',
+    'إذا صلحت الجملة لأكثر من خيار، اجعلها <b>أدق</b>.',
+    'تأكد من <b>الاتجاه</b>: الكلمة الأولى في السؤال تقابل الأولى في الخيار.'
+  ],
+  demo:()=>`<div style="font-weight:700;margin-bottom:6px;text-align:center">«البذرة <u>تكبر فتصبح</u> شجرة»</div>
+    <div class="sent"><span class="mk n">✗</span><span>الغصن يكبر فيصبح شجرة؟ لا، الغصن جزء منها.</span></div>
+    <div class="sent"><span class="mk y">✓</span><span>الطفل يكبر فيصبح رجلًا.</span></div>
+    <div class="sent"><span class="mk n">✗</span><span>التربة تكبر فتصبح زرعًا؟ لا، التربة تساعد فقط.</span></div>
+    <div class="sent"><span class="mk n">✗</span><span>الفراشة تكبر فتصبح يرقة؟ لا، الاتجاه معكوس.</span></div>`,
+  demoNote:'خيار واحد فقط يصلح في الجملة.',
+  relations:['جزء : كل','أداة : وظيفة','مرحلة : تطوّر','سبب : نتيجة','عامل : مكان','ضد','ترادف'],
+  traps:[
+    {l:0,t:'غصن : شجرة',w:'فخ الكلمة المشتركة: فيه «شجرة» نفسها، لكن العلاقة جزء من كل.'},
+    {l:2,t:'تربة : زرع',w:'فخ الارتباط العام: نفس الموضوع، لكن التربة لا تصبح زرعًا.'},
+    {l:3,t:'فراشة : يرقة',w:'فخ الاتجاه المعكوس: العلاقة صحيحة لكنها مقلوبة.'}
+  ],
+  trapTip:'ثلاثة فخاخ تتكرر: الكلمة المشتركة، الارتباط العام، والاتجاه المعكوس.',
+  practice:[
+    {stem:'اختر الزوج الذي له نفس العلاقة:', pair:'طبيب : مستشفى', choices:['مريض : دواء','معلّم : مدرسة','قاضٍ : عدالة','طالب : كتاب'], ans:1,
+     why:'«الطبيب يعمل في المستشفى»، والمعلّم يعمل في المدرسة.'},
+    {stem:'اختر الزوج الذي له نفس العلاقة:', pair:'إصبع : يد', choices:['قدم : حذاء','عين : نظر','صفحة : كتاب','رأس : قبعة'], ans:2,
+     why:'«الإصبع جزء من اليد»، والصفحة جزء من الكتاب.'},
+    {stem:'اختر الزوج الذي له نفس العلاقة:', pair:'إهمال : فشل', choices:['نجاح : جهد','اجتهاد : تفوّق','تعب : راحة','صبر : تحمّل'], ans:1,
+     why:'«الإهمال يؤدي إلى الفشل»، والاجتهاد يؤدي إلى التفوّق. (نجاح : جهد) اتجاهه معكوس.'}
+  ],
+  card:{
+    spot:'كلمتان بينهما «:» مع أربعة أزواج. المطلوب العلاقة لا المعنى.',
+    steps:['كوّن جملة تربط الكلمتين قبل رؤية الخيارات.','ضع كل خيار في نفس الجملة.','إذا صلح أكثر من خيار، اجعل الجملة أدق، وانتبه للاتجاه.'],
+    traps:'الكلمة المشتركة، الارتباط العام، الاتجاه المعكوس.',
+    gold:'الجملة أولًا، ثم الخيارات.'
+  }
+}];
+const PAT=Object.fromEntries(PATTERNS.map(p=>[p.id,p]));
 
 /* ---------- shared ---------- */
-S.resume=S.resume||{};
-if(S.rv!==3){S.resume={};S.rv=3;save();}
 const app=document.getElementById('app');
-let view={name:'home'}, timer=null;
-function go(v){clearTimeout(timer);view=v;render();window.scrollTo(0,0);}
+let view={name:'home'};
+function go(v){view=v;render();window.scrollTo(0,0);}
 const fx=(p,html)=>p.kind==='math'?M(html):html;
-const famLine=f=>FAM[f].print.join('، ');
-function rank(){
-  const s=S.stars||0;
-  if(s>=40) return {name:'خبير أنماط',lvl:3};
-  if(s>=15) return {name:'محلل',lvl:2};
-  return {name:'ملاحظ',lvl:1};
-}
-function addStars(n){S.stars=(S.stars||0)+n;save();}
-function rec(f,ok,ms){const r=S.fam[f]||(S.fam[f]={n:0,ok:0,ms:0}); r.n++; if(ok)r.ok++; r.ms+=Math.min(ms,60000); save();}
-function famAcc(f){const s=S.fam[f]; return s&&s.n?Math.round(s.ok/s.n*100):null;}
-function patAcc(p){const a=p.fams.map(famAcc).filter(x=>x!==null); return a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;}
-
-/* "why?" links reveal one short explanation on demand */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-why]'); if(b){b.nextElementSibling.hidden=false;b.remove();}});
 const why=html=>`<button class="why-btn" data-why>لماذا؟</button><div class="why" hidden>${html}</div>`;
+const gear=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="#f7f7f5"/><circle cx="15" cy="17" r="2.2" fill="#f7f7f5"/></svg>`;
+const topbar=(frac,label)=>`<div class="top"><button class="x" id="x" aria-label="خروج">✕</button>
+  <div class="prog"><i style="width:${frac*100}%"></i></div><div class="pnum">${label}</div></div>`;
 
-/* the question, shown as one quiet card */
-function qView(c,o={}){
-  const p=patOf(c), T=toks(c);
-  const tk=i=>{const t=T[i]; let cls='tok';
-    if(o.tap) cls+=' tap';
-    if(o.found&&o.found.includes(i)) cls+=' hit';
-    else if(o.reveal&&t.k==='c') cls+=o.reveal==='missed'?' missed':' hit';
-    return `<span class="${cls}" data-t="${i}">${t.t}</span>`;};
-  const idx=pl=>T.map((t,i)=>t.pl===pl?i:-1).filter(i=>i>=0);
-  let inner;
-  if(o.skel) inner=`<div class="skel">${FAM[c.f].skel}</div>`;
-  else{
-    let si=idx('stem'); if(o.small) si=si.filter(i=>T[i].k!=='d'&&!/قارن/.test(T[i].t));
-    const stem=si.map(i=>(/^[،,]/.test(T[i].t)?'':' ')+tk(i)).join('').trim();
-    inner=stem?`<div class="stem">${stem}</div>`:'';
-    if(c.a) inner+=`<div class="vs">${tk(idx('a')[0])}<span class="or">مقابل</span>${tk(idx('b')[0])}</div>`;
-    else inner+=`<div class="pair">${idx('pair').map(tk).join(' ')}</div>`;
-  }
-  return fx(p,`<div class="q ${o.small?'small':''}">${inner}</div>`);
+function qView(p,q,small){
+  const inner=`<div class="stem">${q.stem}</div>`+(q.pair?`<div class="pair">${q.pair}</div>`:`<div class="vs">${q.a}<span class="or">مقابل</span>${q.b}</div>`);
+  return fx(p,`<div class="q ${small?'small':''}">${inner}</div>`);
 }
-const famList=p=>`<div class="list">${p.fams.map((f,i)=>`<button class="opt" data-f="${f}"><span class="n">${nAr(i+1)}</span><span>${FAM[f].name}</span></button>`).join('')}</div>`;
-function wireFam(right,cb){
-  const t0=performance.now(), btns=[...app.querySelectorAll('.opt[data-f]')];
-  btns.forEach(b=>b.onclick=()=>{
-    const f=b.dataset.f, ok=f===right;
-    btns.forEach(x=>{x.disabled=true; if(x.dataset.f===right)x.classList.add('ok'); else if(x===b)x.classList.add('bad'); else x.classList.add('dim');});
-    cb(ok,f,performance.now()-t0);
+function choicesHTML(q){return `<div class="list">${q.choices.map((x,i)=>`<button class="opt" data-c="${i}"><span class="n">${L[i]}</span><span>${x}</span></button>`).join('')}</div>`;}
+function wireChoices(q,cb){
+  const bs=[...app.querySelectorAll('.opt[data-c]')];
+  bs.forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.c, ok=k===q.ans;
+    bs.forEach((x,i)=>{x.disabled=true; if(i===q.ans)x.classList.add('ok'); else if(i===k)x.classList.add('bad'); else x.classList.add('dim');});
+    cb(ok,k);
   });
 }
-const famFb=(p,ok,right)=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'الإجابة: '+FAM[right].name}</b>${why('البصمة: '+fx(p,famLine(right)))}</div>`;
-const topbar=(cur,total,label)=>`<div class="top"><button class="x" id="x" aria-label="خروج">✕</button>
-  <div class="prog"><i style="width:${cur/total*100}%"></i></div><div class="pnum">${label||nAr(cur)+' من '+nAr(total)}</div></div>`;
-const gear=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="#f7f7f5"/><circle cx="15" cy="17" r="2.2" fill="#f7f7f5"/></svg>`;
+/* the summary as recall cards: question on the front, answer on the back */
+function sumCards(p){
+  return [
+    {q:'كيف تعرف هذا النمط؟',a:`<div class="mid">${fx(p,p.card.spot)}</div>`},
+    {q:'ما الطريقة؟',a:p.card.steps.map((s,i)=>`<div class="mid" style="font-weight:500">${nAr(i+1)}. ${fx(p,s)}</div>`).join('')},
+    {q:'ما الفخاخ؟',a:`<div class="mid">${fx(p,p.card.traps)}</div>`},
+    {q:'ما القاعدة الذهبية؟',a:`<div class="mid">${fx(p,p.card.gold)}</div>`}
+  ].map(c=>Object.assign(c,{p}));
+}
 
 function render(){
   document.body.classList.toggle('ar',S.digits==='ar');
-  ({home,lesson,lineup,files})[view.name]();
+  ({home,lesson,cards})[view.name]();
 }
 
 /* ---------- home: one clear next step ---------- */
 function seqOf(p){
-  return [{t:'intro'},...p.fams.flatMap((f,i)=>[{t:'famName',i},{t:'famPrint',i},{t:'famEx',i}]),
-          {t:'clues'},{t:'name'},{t:'method'},{t:'apply'},{t:'answer'},{t:'rvClues'},{t:'rvFam'},{t:'rvScore'},
-          {t:'disguise'},{t:'odd'},{t:'flash',T:7},{t:'flash',T:5},{t:'deck'}];
+  return [{t:'try'},{t:'reveal'},...p.spot.map((_,i)=>({t:'spot',i})),{t:'spotTip'},
+    ...p.trick.map((_,i)=>({t:'trick',i})),{t:'demo'},...(p.relations?[{t:'relations'}]:[]),
+    ...p.traps.map((_,i)=>({t:'trap',i})),{t:'trapTip'},
+    ...p.practice.map((_,i)=>({t:'prac',i})),{t:'score'},{t:'deck'}];
 }
 function openPattern(pid){
   const r=S.resume[pid];
-  go(r&&r.k>0?Object.assign({},r,{name:'lesson'}):{name:'lesson',pid,k:0,found:[]});
+  go(r&&r.k>0?Object.assign({},r,{name:'lesson'}):{name:'lesson',pid,k:0,right:0});
 }
 function home(){
-  const r=rank(), pats=Object.values(PAT);
-  const nextP=pats.find(p=>!S.learned[p.id]);
+  const nextP=PATTERNS.find(p=>!S.learned[p.id]);
+  const pct=p=>Math.round(S.resume[p.id].k/seqOf(p).length*100);
   let card;
   if(nextP){
-    const res=S.resume[nextP.id], len=seqOf(nextP).length;
-    card=res&&res.k>0
-      ?{small:`أكملت ${nAr(Math.round(res.k/len*100))}٪`,title:nextP.name,btn:'تابع',act:()=>openPattern(nextP.id)}
-      :{small:'خطوتك التالية',title:nextP.name,btn:'ابدأ',act:()=>openPattern(nextP.id)};
-  } else card={small:'أكملت كل الأنماط',title:'اختبار التعرّف المختلط',btn:'ابدأ',act:startLineup};
-  const status=p=>{const res=S.resume[p.id]; if(S.learned[p.id]) return 'مكتمل';
-    if(res&&res.k>0) return `أكملت ${nAr(Math.round(res.k/seqOf(p).length*100))}٪`; return 'لم يبدأ';};
+    const res=S.resume[nextP.id];
+    card=res&&res.k>0?{small:`أكملت ${nAr(pct(nextP))}٪`,title:nextP.name,btn:'تابع',act:()=>openPattern(nextP.id)}
+                     :{small:'خطوتك التالية',title:nextP.name,btn:'ابدأ',act:()=>openPattern(nextP.id)};
+  } else card={small:'أكملت كل الأنماط',title:'بطاقات المراجعة',btn:'راجع',act:()=>go({name:'cards',di:0,flip:false})};
+  const status=p=>{ if(S.learned[p.id]) return `مكتمل، أفضل نتيجة ${nAr(S.best[p.id]||0)} من ${nAr(p.practice.length)}`;
+    const r=S.resume[p.id]; return r&&r.k>0?`أكملت ${nAr(pct(p))}٪`:'لم يبدأ'; };
   app.innerHTML=`
-    <div class="homehead"><h1>تحليل القدرات</h1><span class="lv"><bdi>المستوى ${nAr(r.lvl)}</bdi>، <bdi>النقاط ${nAr(S.stars||0)}</bdi></span>
+    <div class="homehead"><h1>أنماط القدرات</h1><span class="lv"></span>
       <button class="icon-btn" id="set" aria-label="الإعدادات">${gear}</button></div>
     <div class="next-card"><small>${card.small}</small><h2>${card.title}</h2><button class="btn" id="go">${card.btn}</button></div>
     <div class="seclabel">الأنماط</div>
-    <div class="plist">${pats.map(p=>{const a=patAcc(p); return `<button class="prow" data-open="${p.id}">
-      <div><div class="t">${p.name}</div><div class="s">${status(p)}</div>
-        ${a!==null?`<div class="mini"><i style="width:${a}%"></i></div>`:''}</div><span class="chev">‹</span></button>`;}).join('')}</div>
+    <div class="plist">${PATTERNS.map(p=>`<button class="prow" data-open="${p.id}">
+      <div><div class="t">${p.name}</div><div class="s">${status(p)}</div></div><span class="chev">‹</span></button>`).join('')}</div>
     <div class="seclabel" style="margin-top:22px">المزيد</div>
-    <div class="plist">
-      <button class="prow" id="lu"><div><div class="t">اختبار التعرّف المختلط</div><div class="s">٨ أسئلة سريعة من كل الأنماط</div></div><span class="chev">‹</span></button>
-      <button class="prow" id="fl"><div><div class="t">بطاقات المراجعة</div><div class="s">بطاقة لكل فصيلة، للمراجعة قبل الاختبار</div></div><span class="chev">‹</span></button>
-    </div>`;
+    <div class="plist"><button class="prow" id="cd"><div><div class="t">بطاقات المراجعة</div><div class="s">ملخص كل نمط أكملته، للمراجعة قبل الاختبار</div></div><span class="chev">‹</span></button></div>`;
   document.getElementById('go').onclick=card.act;
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPattern(b.dataset.open));
-  document.getElementById('lu').onclick=startLineup;
-  document.getElementById('fl').onclick=()=>go({name:'files',di:0,flip:false});
+  document.getElementById('cd').onclick=()=>go({name:'cards',di:0,flip:false});
   document.getElementById('set').onclick=settings;
 }
 
@@ -439,168 +402,63 @@ function settings(){
   sc.onclick=()=>sc.remove(); draw(); document.body.appendChild(sc);
 }
 
-/* ---------- lesson: flash cards, one idea at a time ---------- */
-const PASSIVE=new Set(['intro','famName','famPrint','famEx','method','apply','rvClues','rvFam','rvScore']);
-const SECTION=t=>({intro:'الفصائل',famName:'الفصائل',famPrint:'الفصائل',famEx:'الفصائل',
-  clues:'سؤال كامل',name:'سؤال كامل',method:'سؤال كامل',apply:'سؤال كامل',answer:'سؤال كامل',rvClues:'سؤال كامل',rvFam:'سؤال كامل',rvScore:'سؤال كامل',
-  disguise:'تدريب',odd:'تدريب',flash:'تدريب',deck:'الملخص'})[t];
+/* ---------- lesson: quiz flow, one idea per card ---------- */
+const PASSIVE=new Set(['reveal','spot','spotTip','trick','demo','relations','trap','trapTip','score']);
+const SECTION=t=>({try:'جرّب أولًا',reveal:'النمط',spot:'النمط',spotTip:'النمط',trick:'الطريقة',demo:'الطريقة',relations:'الطريقة',
+  trap:'الفخاخ',trapTip:'الفخاخ',prac:'تدريب',score:'تدريب',deck:'بطاقة النمط'})[t];
 function lesson(){
-  const p=PAT[view.pid], seq=seqOf(p), sc=seq[view.k], c=CASE[p.big];
+  const p=PAT[view.pid], seq=seqOf(p), sc=seq[view.k];
   S.resume[p.id]=Object.assign({},view); save();
   let html='', wire=()=>{};
-  const next=()=>{clearTimeout(timer); view.k++; view.d=null; view.msg=''; render(); scrollTo(0,0);};
-  const back=()=>{view.k--; view.d=null; render(); scrollTo(0,0);};
+  const next=()=>{view.k++; view.done=false; render(); scrollTo(0,0);};
+  const back=()=>{view.k--; render(); scrollTo(0,0);};
   const canBack=view.k>0&&PASSIVE.has(sc.t)&&PASSIVE.has(seq[view.k-1].t);
   const btn=(label,dis)=>`<button class="btn" id="next" ${dis?'disabled':''}>${label}</button>`;
-  const enable=()=>{const n=document.getElementById('next'); if(n)n.disabled=false;};
-  const bindNext=()=>{const n=document.getElementById('next'); if(n) n.onclick=next;};
-  /* a flash card: tap it or press "next" */
   const card=(inner,label='التالي')=>{
     html=`<div class="fc" id="fc">${inner}<div class="tap-hint">اضغط على البطاقة للمتابعة</div></div>
       <div class="bottom">${btn(label)}${canBack?'<button class="link" id="back">رجوع</button>':''}</div>`;
-    wire=()=>{bindNext(); document.getElementById('fc').onclick=next; const b=document.getElementById('back'); if(b) b.onclick=back;};
+    wire=()=>{document.getElementById('next').onclick=next; document.getElementById('fc').onclick=next;
+      const b=document.getElementById('back'); if(b) b.onclick=back;};
   };
-  const F=FAM[c.f];
-
-  if(sc.t==='intro') card(`<div class="lab">${p.name}</div><div class="big">${nAr(p.fams.length)} فصائل</div><div class="sm">كل سؤال ينتمي لواحدة منها، ولكل فصيلة بصمة تكشفها.</div>`,'ابدأ');
-  else if(sc.t==='famName') card(`<div class="lab">الفصيلة ${nAr(sc.i+1)} من ${nAr(p.fams.length)}</div><div class="big">${FAM[p.fams[sc.i]].name}</div>`);
-  else if(sc.t==='famPrint'){const f=p.fams[sc.i]; card(`<div class="lab">بصمة «${FAM[f].name}»</div>${FAM[f].print.map(x=>`<div class="mid">${fx(p,x)}</div>`).join('')}`);}
-  else if(sc.t==='famEx'){const f=p.fams[sc.i], ex=casesOf(f).find(x=>x.id!==p.big)||casesOf(f)[0];
-    card(`<div class="lab">مثال على «${FAM[f].name}»</div>${qView(ex,{reveal:'hit'})}<div class="sm">المحدّد هو البصمة.</div>`);}
-
-  else if(sc.t==='clues'){
-    const cl=clueIdx(c), found=view.found||(view.found=[]);
-    html=`<h2>ما الذي يكشف نوع السؤال؟</h2><p class="sub">اضغط على الكلمات التي تعتبرها أدلة.</p>
-      ${qView(c,{tap:true,found})}
-      <div class="status"><span class="dots">${cl.map((_,i)=>`<i class="${i<found.length?'on':''}"></i>`).join('')}</span>${nAr(found.length)} من ${nAr(cl.length)}</div>
-      <div class="msg ${view.msg?'':'soft'}" id="msg">${view.msg||''}</div>
-      <div class="bottom">${btn('التالي',found.length===0)}
-        <button class="link" id="hint" ${view.hint||found.length===cl.length?'disabled':''}>تلميح</button></div>`;
-    wire=()=>{
-      const msg=document.getElementById('msg');
-      app.querySelectorAll('.tok.tap').forEach(el=>el.onclick=()=>{
-        const i=+el.dataset.t, t=toks(c)[i];
-        if(t.k==='c'){ if(!found.includes(i)){found.push(i); view.msg=fx(p,`<b>${t.t}</b>: ${t.n}`); render();} }
-        else{ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
-          msg.className='msg soft'; msg.innerHTML='ليست دليلًا'+(t.k==='d'?`: ${t.n}`:''); }
-      });
-      document.getElementById('hint').onclick=()=>{
-        view.hint=true; view.msg='الكلمة المضيئة دليل.'; const miss=cl.find(i=>!found.includes(i)); render();
-        const el=app.querySelector(`[data-t="${miss}"]`); if(el) el.classList.add('pulse');
-      };
-      document.getElementById('next').onclick=()=>{view.nameOk=null;next();};
-    };
-  }
-  else if(sc.t==='name'){
-    html=`<h2>ما فصيلة هذا السؤال؟</h2>
-      ${qView(c,{found:view.found,small:true})}${famList(p)}<div id="fb"></div>
+  const quiz=(q,title,onAns)=>{
+    html=`<h2>${title}</h2>${qView(p,q)}${choicesHTML(q)}<div id="fb"></div>
       <div class="bottom">${btn('التالي',true)}</div>`;
-    wire=()=>{
-      wireFam(c.f,(ok,f,ms)=>{view.nameOk=ok;view.nameMs=ms;rec(c.f,ok,ms);document.getElementById('fb').innerHTML=famFb(p,ok,c.f);enable();});
-      bindNext();
-    };
-  }
-  else if(sc.t==='method') card(`<div class="lab">طريقة «${F.name}»</div><div class="mid">${fx(p,F.method)}</div>`);
-  else if(sc.t==='apply') card(`<div class="lab">نطبّقها على السؤال</div><div style="width:100%">${fx(p,c.work())}</div>`);
-  else if(sc.t==='answer'){
-    html=`<h2>اختر الإجابة</h2>
-      <div class="list">${c.choices.map((x,i)=>`<button class="opt" data-c="${i}"><span class="n">${L[i]}</span><span>${x}</span></button>`).join('')}</div>
-      <div id="fb"></div>
-      <div class="bottom">${btn('التالي',true)}</div>`;
-    wire=()=>{
-      const bs=[...app.querySelectorAll('.opt[data-c]')];
-      bs.forEach(b=>b.onclick=()=>{
-        const k=+b.dataset.c, ok=k===c.ans;
-        bs.forEach((x,i)=>{x.disabled=true; if(i===c.ans)x.classList.add('ok'); else if(i===k)x.classList.add('bad'); else x.classList.add('dim');});
-        document.getElementById('fb').innerHTML=`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b>${why(fx(p,c.why[k]))}</div>`;
-        enable();
-      });
-      bindNext();
-    };
-  }
-  else if(sc.t==='rvClues'){
-    const cl=clueIdx(c), T=toks(c), found=view.found||[], all=cl.every(i=>found.includes(i));
-    card(`<div class="lab">الأدلة في هذا السؤال</div><div class="mid">${cl.map(i=>`<span style="${found.includes(i)?'':'color:var(--bad)'}">${fx(p,T[i].t)}</span>`).join('، ')}</div>
-      <div class="sm">${all?'وجدتها كلها.':'باللون الأحمر: دليل فاتك.'}</div>`);
-  }
-  else if(sc.t==='rvFam') card(`<div class="lab">قادتك الأدلة إلى</div><div class="big">${F.name}</div><div class="sm">ومنها إلى الإجابة: ${c.answerLabel}</div>`);
-  else if(sc.t==='rvScore'){
-    const cl=clueIdx(c), found=view.found||[];
-    const got=[cl.every(i=>found.includes(i)),!!view.nameOk,!!view.nameOk&&view.nameMs<20000];
-    if(!view.scored){view.scored=true; addStars(got.filter(Boolean).length); S.resume[p.id]=Object.assign({},view); save();}
-    card(`<div class="lab">نقاطك</div><div class="stars" style="margin:0">${got.map(g=>g?'<b>★</b>':'★').join('')}</div>
-      <div class="sm">كل الأدلة، الفصيلة من أول محاولة، السرعة</div>`,'التالي: تدريب سريع');
-  }
-  else if(sc.t==='disguise'){
-    if(!view.d){const ok=p.fams.filter(f=>casesOf(f).length>=3), f=pick(ok);
-      view.d={f,cs:shuffle(casesOf(f)).slice(0,3).map(x=>x.id),done:false,skel:false};}
-    const d=view.d;
-    html=`<h2>ما الفصيلة المشتركة؟</h2><p class="sub">ثلاثة أسئلة بشكل مختلف، من فصيلة واحدة.</p>
-      <div style="display:flex;flex-direction:column;gap:8px">${d.cs.map(id=>qView(CASE[id],{small:true,skel:d.skel,reveal:d.done?'hit':null})).join('')}</div>
-      ${d.done?`${d.fb}<button class="link" id="skel">${d.skel?'إظهار الأسئلة':'إظهار البنية المشتركة'}</button>`:famList(p)}
-      <div class="bottom">${btn('التالي',!d.done)}</div>`;
-    wire=()=>{
-      if(!d.done) wireFam(d.f,(ok,f,ms)=>{rec(d.f,ok,ms); if(ok)addStars(1); d.fb=famFb(p,ok,d.f); d.done=true; render();});
-      const s=document.getElementById('skel'); if(s) s.onclick=()=>{d.skel=!d.skel;render();};
-      bindNext();
-    };
-  }
-  else if(sc.t==='odd'){
-    if(!view.d){const A=pick(p.fams), B=pick(p.fams.filter(f=>f!==A));
-      const cs=shuffle([...shuffle(casesOf(A)).slice(0,2).map(x=>x.id),pick(casesOf(B)).id]);
-      view.d={A,B,cs,odd:cs.findIndex(id=>CASE[id].f===B),pick:null};}
-    const d=view.d, done=d.pick!==null;
-    html=`<h2>أيّها مختلف؟</h2><p class="sub">سؤالان من فصيلة واحدة، والثالث من غيرها.</p>
-      <div class="list" style="margin-top:0">${d.cs.map((id,i)=>`<button class="opt q-opt ${done?(i===d.odd?'ok':i===d.pick?'bad':'dim'):''}" data-pick="${i}" ${done?'disabled':''}>${qView(CASE[id],{small:true})}</button>`).join('')}</div>
-      ${done?`<div class="fb ${d.pick===d.odd?'ok':'bad'} pop"><b>${d.pick===d.odd?'صحيح':'المختلف هو المحدّد بالأخضر'}</b>${why(`المختلف من «${FAM[d.B].name}»، والآخران من «${FAM[d.A].name}».`)}</div>`:''}
-      <div class="bottom">${btn('التالي',!done)}</div>`;
-    wire=()=>{
-      if(!done) app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{d.pick=+b.dataset.pick; if(d.pick===d.odd)addStars(1); render();});
-      bindNext();
-    };
-  }
-  else if(sc.t==='flash'){
-    if(!view.d){view.d={id:pick(CASES.filter(x=>FAM[x.f].p===p.id&&x.id!==view.lastFlash)).id,phase:'show'}; view.lastFlash=view.d.id;}
-    const d=view.d, cc=CASE[d.id];
-    if(d.phase==='show'){
-      html=`<h2>تعرّف سريع</h2><p class="sub">${nAr(sc.T)} ثوانٍ. التقط الفصيلة فقط.</p>
-        <div class="timer"><i id="tb"></i></div>${qView(cc)}
-        <div class="bottom"><button class="link" id="hide">أخفِ الآن</button></div>`;
-      wire=()=>{
-        const bar=document.getElementById('tb'); requestAnimationFrame(()=>{bar.style.transition=`width ${sc.T}s linear`;bar.style.width='0%';});
-        const hide=()=>{clearTimeout(timer);d.phase='ask';render();};
-        timer=setTimeout(hide,sc.T*1000); document.getElementById('hide').onclick=hide;
-      };
-    } else {
-      html=`<h2>ما فصيلته؟</h2><p class="sub">من الذاكرة.</p>
-        ${d.done?qView(cc,{small:true,reveal:'hit'}):'<div class="hidden-q">السؤال مخفي</div>'}
-        ${d.done?d.fb:famList(p)}
-        <div class="bottom">${btn('التالي',!d.done)}</div>`;
-      wire=()=>{
-        if(!d.done) wireFam(cc.f,(ok,f,ms)=>{rec(cc.f,ok,ms); if(ok)addStars(1); d.fb=famFb(p,ok,cc.f); d.done=true; render();});
-        bindNext();
-      };
-    }
-  }
+    wire=()=>{wireChoices(q,(ok,k)=>{document.getElementById('fb').innerHTML=onAns(ok,k); document.getElementById('next').disabled=false;});
+      document.getElementById('next').onclick=next;};
+  };
+
+  if(sc.t==='try') quiz(p.tryQ,'جرّب بدون مساعدة',ok=>`<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b><div class="why">${p.tryFb[ok?'ok':'bad']}</div></div>`);
+  else if(sc.t==='reveal') card(`<div class="lab">هذا السؤال من نمط</div><div class="big">${p.name}</div><div class="sm">${p.short}</div>`);
+  else if(sc.t==='spot') card(`<div class="lab">كيف تعرفه (${nAr(sc.i+1)} من ${nAr(p.spot.length)})</div><div class="mid" style="font-weight:500">${fx(p,p.spot[sc.i])}</div>`);
+  else if(sc.t==='spotTip') card(`<div class="lab">نصيحة</div><div class="mid">${fx(p,p.spotTip)}</div>`);
+  else if(sc.t==='trick') card(`<div class="lab">الطريقة: خطوة ${nAr(sc.i+1)} من ${nAr(p.trick.length)}</div><div class="mid" style="font-weight:500">${fx(p,p.trick[sc.i])}</div>`);
+  else if(sc.t==='demo') card(`<div class="lab">نطبّقها على سؤالك</div><div style="width:100%">${fx(p,p.demo())}</div><div class="sm">${fx(p,p.demoNote)}</div>`);
+  else if(sc.t==='relations') card(`<div class="lab">علاقات تتكرر في الاختبار</div><div class="mid" style="font-weight:500;line-height:2.1">${p.relations.join('<br>')}</div>`);
+  else if(sc.t==='trap'){const t=p.traps[sc.i];
+    card(`<div class="lab">لماذا يخدعك الخيار (${L[t.l]})؟</div><div class="big" style="font-size:24px">${t.t}</div><div class="sm" style="font-size:17px;color:var(--ink)">${fx(p,t.w)}</div>`);}
+  else if(sc.t==='trapTip') card(`<div class="lab">القاعدة</div><div class="mid">${fx(p,p.trapTip)}</div>`);
+  else if(sc.t==='prac'){const q=p.practice[sc.i];
+    quiz(q,`سؤال مشابه (${nAr(sc.i+1)} من ${nAr(p.practice.length)})`,(ok)=>{ if(ok&&!view.done) view.right=(view.right||0)+1; view.done=true; S.resume[p.id]=Object.assign({},view); save();
+      return `<div class="fb ${ok?'ok':'bad'} pop"><b>${ok?'صحيح':'غير صحيح'}</b>${why(fx(p,q.why))}</div>`;});}
+  else if(sc.t==='score'){const r=view.right||0, n=p.practice.length;
+    if(!view.scored){view.scored=true; S.best[p.id]=Math.max(S.best[p.id]||0,r); save();}
+    card(`<div class="lab">نتيجتك</div><div class="big">${nAr(r)} من ${nAr(n)}</div><div class="sm">${r===n?'ممتاز، النمط واضح لك.':r>=n-1?'جيد جدًا.':'راجع الطريقة مرة أخرى في بطاقة النمط.'}</div>`,'بطاقة النمط');}
   else if(sc.t==='deck'){
-    const r=deck(p.fams,view,()=>{S.learned[p.id]=true; delete S.resume[p.id]; save(); go({name:'home'});},'حفظ والعودة');
+    const r=deck(sumCards(p),view,()=>{S.learned[p.id]=true; delete S.resume[p.id]; save(); go({name:'home'});},'حفظ والعودة');
     html=r.html; wire=r.wire;
   }
 
-  app.innerHTML=topbar(view.k+1,seq.length,SECTION(sc.t))+`<div class="screen">${html}</div>`;
+  app.innerHTML=topbar((view.k+1)/seq.length,SECTION(sc.t))+`<div class="screen">${html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   wire();
 }
 
-/* flip-card deck: front = family name, back = fingerprint + method */
-function deck(fams,st,onDone,doneLabel){
-  st.di=st.di||0; const f=fams[st.di], F=FAM[f], p=PAT[F.p], last=st.di===fams.length-1, a=famAcc(f);
+/* recall deck: tap to flip, then next */
+function deck(list,st,onDone,doneLabel){
+  st.di=st.di||0; const c=list[st.di], last=st.di===list.length-1;
   const html=`<div class="fc ${st.flip?'back':''}" id="fc">
-      ${st.flip
-        ?`<div class="lab">${F.name}</div><div class="sm" style="margin:0 0 4px">البصمة</div><div class="mid">${fx(p,famLine(f))}</div>
-           <div class="sm" style="margin:16px 0 4px">الطريقة</div><div class="mid" style="font-weight:500">${fx(p,F.method)}</div>`
-        :`<div class="lab">${p.name}، بطاقة ${nAr(st.di+1)} من ${nAr(fams.length)}</div><div class="big">${F.name}</div>
-           ${a!==null?`<div class="sm">دقتك في التعرّف عليها ${nAr(a)}٪</div>`:''}<div class="tap-hint">تذكّر بصمتها، ثم اقلب البطاقة</div>`}
+      ${st.flip?`<div class="lab">${c.q}</div>${c.a}`
+               :`<div class="lab">${c.p.name}، بطاقة ${nAr(st.di+1)} من ${nAr(list.length)}</div><div class="big" style="font-size:26px">${c.q}</div><div class="tap-hint">فكّر في الإجابة، ثم اقلب البطاقة</div>`}
     </div>
     <div class="bottom"><button class="btn" id="dk">${!st.flip?'اقلب البطاقة':last?doneLabel:'البطاقة التالية'}</button>
       ${st.di>0?'<button class="link" id="dprev">البطاقة السابقة</button>':''}</div>`;
@@ -610,49 +468,16 @@ function deck(fams,st,onDone,doneLabel){
   return {html,wire};
 }
 
-/* ---------- mixed line-up ---------- */
-function startLineup(){
-  const list=shuffle([...shuffle(CASES.filter(c=>FAM[c.f].p==='cmp')).slice(0,4),...shuffle(CASES.filter(c=>FAM[c.f].p==='ana')).slice(0,4)]).map(c=>c.id);
-  go({name:'lineup',list,i:0,right:0,ms:0,done:false});
-}
-function lineup(){
-  const v=view;
-  if(v.i>=v.list.length){
-    app.innerHTML=`<div class="top"><button class="x" id="x">✕</button></div>
-      <div class="screen"><h2>النتيجة</h2>
-      <div class="rows">
-        <div class="row"><span class="k">صحيحة</span><span>${nAr(v.right)} من ${nAr(v.list.length)}</span></div>
-        <div class="row"><span class="k">المتوسط</span><span>${nAr((v.ms/v.list.length/1000).toFixed(1)).replace('.','٫')} ثانية لكل سؤال</span></div>
-        <div class="row"><span class="k">النقاط</span><span>+${nAr(v.right)}</span></div>
-      </div>
-      <div class="bottom"><button class="btn" id="again">اختبار جديد</button><button class="link" id="h">الرئيسية</button></div></div>`;
-    document.getElementById('x').onclick=document.getElementById('h').onclick=()=>go({name:'home'});
-    document.getElementById('again').onclick=startLineup;
-    return;
-  }
-  const c=CASE[v.list[v.i]], p=patOf(c);
-  app.innerHTML=topbar(v.i+1,v.list.length)+`<div class="screen">
-      <h2>ما الفصيلة؟</h2><p class="sub">${p.name}، بسرعة، دون حل.</p>
-      ${qView(c,{small:v.done,reveal:v.done?'hit':null})}
-      ${v.done?v.fb:famList(p)}
-      <div class="bottom"><button class="btn" id="next" ${v.done?'':'disabled'}>${v.i<v.list.length-1?'التالي':'النتيجة'}</button></div></div>`;
-  document.getElementById('x').onclick=()=>go({name:'home'});
-  if(!v.done) wireFam(c.f,(ok,f,ms)=>{rec(c.f,ok,ms); if(ok){v.right++;addStars(1);} v.ms+=ms; v.fb=famFb(p,ok,c.f); v.done=true; render();});
-  document.getElementById('next').onclick=()=>{v.i++;v.done=false;v.fb='';render();scrollTo(0,0);};
-}
-
-/* ---------- summaries: revision deck ---------- */
-function files(){
-  const fams=Object.values(PAT).filter(p=>S.learned[p.id]).flatMap(p=>p.fams);
-  let body;
-  if(!fams.length){
-    body='<div class="empty">لا توجد بطاقات بعد.<br>أكمل درس نمط لتُضاف بطاقاته هنا.</div>';
-    app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div style="font-weight:700">بطاقات المراجعة</div></div><div class="screen">${body}</div>`;
+/* ---------- revision cards ---------- */
+function cards(){
+  const list=PATTERNS.filter(p=>S.learned[p.id]).flatMap(sumCards);
+  if(!list.length){
+    app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div style="font-weight:700">بطاقات المراجعة</div></div>
+      <div class="screen"><div class="empty">لا توجد بطاقات بعد.<br>أكمل درس نمط لتُضاف بطاقاته هنا.</div></div>`;
     document.getElementById('x').onclick=()=>go({name:'home'}); return;
   }
-  const r=deck(fams,view,()=>go({name:'home'}),'انتهت المراجعة');
-  app.innerHTML=`<div class="top"><button class="x" id="x">✕</button><div class="prog"><i style="width:${(view.di+1)/fams.length*100}%"></i></div><div class="pnum">مراجعة</div></div>
-    <div class="screen">${r.html}</div>`;
+  const r=deck(list,view,()=>go({name:'home'}),'انتهت المراجعة');
+  app.innerHTML=topbar((view.di+1)/list.length,'مراجعة')+`<div class="screen">${r.html}</div>`;
   document.getElementById('x').onclick=()=>go({name:'home'});
   r.wire();
 }
